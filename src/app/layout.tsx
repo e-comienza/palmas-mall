@@ -5,6 +5,8 @@ import { getSiteSettings } from "@/lib/settings";
 import { siteUrl } from "@/lib/utils";
 import "./globals.css";
 
+export const dynamic = "force-dynamic";
+
 const figtree = Figtree({
   variable: "--font-figtree",
   subsets: ["latin"],
