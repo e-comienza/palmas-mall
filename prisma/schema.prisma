@@ -1,0 +1,478 @@
+// Palmas Mall — modelo de datos
+// Todos los contenidos administrables usan ContentStatus + soft delete (deletedAt/deletedBy).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────── Enums ───────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  HIDDEN
+  ARCHIVED
+}
+
+enum EventPrice {
+  FREE
+  PAID
+}
+
+enum PopupFrequency {
+  ONCE_PER_SESSION
+  ONCE_PER_DAYS
+  ALWAYS
+}
+
+enum PopupAudience {
+  ALL
+  DESKTOP
+  MOBILE
+}
+
+enum PopupPlacement {
+  ALL
+  HOME
+  LOCALES
+  EVENTOS
+  BLOG
+  CUSTOM
+}
+
+enum FaqScope {
+  GLOBAL
+  PAGE
+  LOCAL
+  EVENT
+}
+
+enum BlockType {
+  HERO
+  RICH_TEXT
+  IMAGE
+  GALLERY
+  CTA
+  FAQ
+  FEATURED_LOCALES
+  FEATURED_EVENTS
+  FEATURED_POSTS
+  MAP
+  FORM
+  AWARDS
+  SERVICE_CARDS
+  TESTIMONIALS
+  VIDEO
+}
+
+// ─────────────────────────── Auth ───────────────────────────
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  name         String
+  passwordHash String
+  role         Role       @default(EDITOR)
+  active       Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  auditLogs    AuditLog[]
+}
+
+// ────────────────────── Configuración global ──────────────────────
+
+model SiteSettings {
+  id                 Int      @id @default(1)
+  mallName           String   @default("Palmas Mall")
+  tagline            String   @default("Tus mejores momentos")
+  logoUrl            String   @default("/brand/logo-header.png")
+  logoAltUrl         String   @default("/brand/palmas-logo.webp")
+  sloganImageUrl     String   @default("/brand/slogan.webp")
+  faviconUrl         String   @default("/brand/favicon.png")
+  primaryColor       String   @default("#066939")
+  accentColor        String   @default("#73B52C")
+  phone              String   @default("+57 315 284 2989")
+  whatsapp           String   @default("573152842989")
+  email              String   @default("palmasmall@palmasmall.com")
+  address            String   @default("Carrera 105 No. 15-09, Cali")
+  openingHours       String   @default("Lunes a domingo · 10:00 a.m. – 10:00 p.m.")
+  instagramUrl       String   @default("https://www.instagram.com/palmasmallcali")
+  facebookUrl        String   @default("https://www.facebook.com/share/j4MGU5uatqoQ8VzC/")
+  tiktokUrl          String   @default("https://www.tiktok.com/@palmasmallcali")
+  twitterUrl         String   @default("https://x.com/palmasmallcali")
+  wazeUrl            String   @default("https://www.waze.com/en/live-map/directions/palmas-mall-carrera-105-15-09-cali?place=w.185794594.1857749328.556689")
+  googleMapsUrl      String   @default("https://maps.google.com/?q=Palmas+Mall+Carrera+105+15-09+Cali")
+  seoTitleTemplate   String   @default("%s | Palmas Mall")
+  seoDefaultTitle    String   @default("Palmas Mall · Lifestyle Mall en Cali | Tus mejores momentos")
+  seoDefaultDesc     String   @default("Palmas Mall es un Lifestyle Mall en Cali con el mejor Food Hall de la ciudad, tiendas exclusivas, eventos, coworking y espacios petfriendly.")
+  ogImageUrl         String   @default("/images/galeria/shopping-cali2.webp")
+  externalScripts    String   @default("")
+  globalBannerText   String   @default("")
+  globalBannerActive Boolean  @default(false)
+  // Molly, la mascota de Palmas Mall
+  mollyEnabled       Boolean  @default(true)
+  mollyImageUrl      String   @default("/brand/molly.gif")
+  mollyMessage       String   @default("¡Hola! Soy Molly. ¿Ya sabes qué plan vas a hacer hoy en Palmas Mall?")
+  mollyCtaLabel      String   @default("Descubre qué hacer")
+  mollyCtaUrl        String   @default("/locales")
+  mollyShowMobile    Boolean  @default(true)
+  mollyShowDesktop   Boolean  @default(true)
+  updatedAt          DateTime @updatedAt
+}
+
+model Sede {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  city         String
+  address      String
+  phone        String   @default("")
+  whatsapp     String   @default("")
+  email        String   @default("")
+  openingHours String   @default("")
+  wazeUrl      String   @default("")
+  mapsUrl      String   @default("")
+  isMain       Boolean  @default(false)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  locales      Local[]
+  events       Event[]
+}
+
+// ─────────────────────────── Páginas ───────────────────────────
+
+model Page {
+  id             String        @id @default(cuid())
+  slug           String        @unique
+  title          String
+  description    String        @default("")
+  status         ContentStatus @default(DRAFT)
+  system         Boolean       @default(false) // páginas con ruta propia (home, contacto…) — el slug no se puede cambiar
+  seoTitle       String        @default("")
+  seoDescription String        @default("")
+  canonicalUrl   String        @default("")
+  ogImageUrl     String        @default("")
+  noIndex        Boolean       @default(false)
+  blocks         PageBlock[]
+  faqs           Faq[]
+  createdById    String?
+  updatedById    String?
+  deletedAt      DateTime?
+  deletedBy      String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model PageBlock {
+  id        String    @id @default(cuid())
+  pageId    String
+  page      Page      @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  type      BlockType
+  order     Int       @default(0)
+  // Contenido flexible del bloque (título, texto, imágenes, CTA…), validado con Zod según type
+  data      Json      @default("{}")
+  visible   Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([pageId, order])
+}
+
+// ─────────────────────────── Locales ───────────────────────────
+
+model LocalCategory {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  group     String   @default("shop-more") // food-drinks | shop-more
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  locales   Local[]
+}
+
+model Local {
+  id               String        @id @default(cuid())
+  slug             String        @unique
+  name             String
+  categoryId       String?
+  category         LocalCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  sedeId           String?
+  sede             Sede?         @relation(fields: [sedeId], references: [id], onDelete: SetNull)
+  logoUrl          String        @default("")
+  coverUrl         String        @default("")
+  gallery          Json          @default("[]") // string[] de URLs
+  shortDescription String        @default("")
+  longDescription  String        @default("")
+  floor            String        @default("")
+  unitNumber       String        @default("")
+  openingHours     Json          @default("[]") // [{days, hours}]
+  phone            String        @default("")
+  whatsapp         String        @default("")
+  email            String        @default("")
+  websiteUrl       String        @default("")
+  instagramUrl     String        @default("")
+  facebookUrl      String        @default("")
+  tiktokUrl        String        @default("")
+  menuUrl          String        @default("")
+  reservationUrl   String        @default("")
+  deliveryUrl      String        @default("")
+  tags             Json          @default("[]") // string[]
+  isRestaurant     Boolean       @default(false)
+  featured         Boolean       @default(false)
+  comingSoon       Boolean       @default(false)
+  order            Int           @default(0)
+  status           ContentStatus @default(DRAFT)
+  isPlaceholder    Boolean       @default(false) // contenido demo/mock pendiente de reemplazar
+  seoTitle         String        @default("")
+  seoDescription   String        @default("")
+  faqs             Faq[]
+  createdById      String?
+  updatedById      String?
+  deletedAt        DateTime?
+  deletedBy        String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([status, deletedAt])
+  @@index([categoryId])
+}
+
+// ─────────────────────────── Eventos ───────────────────────────
+
+model Event {
+  id               String        @id @default(cuid())
+  slug             String        @unique
+  title            String
+  shortDescription String        @default("")
+  longDescription  String        @default("")
+  startsAt         DateTime
+  endsAt           DateTime?
+  timeLabel        String        @default("")
+  location         String        @default("")
+  coverUrl         String        @default("")
+  gallery          Json          @default("[]")
+  organizer        String        @default("")
+  price            EventPrice    @default(FREE)
+  priceDetail      String        @default("")
+  registrationUrl  String        @default("")
+  featured         Boolean       @default(false)
+  status           ContentStatus @default(DRAFT)
+  isPlaceholder    Boolean       @default(false)
+  sedeId           String?
+  sede             Sede?         @relation(fields: [sedeId], references: [id], onDelete: SetNull)
+  seoTitle         String        @default("")
+  seoDescription   String        @default("")
+  faqs             Faq[]
+  createdById      String?
+  updatedById      String?
+  deletedAt        DateTime?
+  deletedBy        String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([status, startsAt, deletedAt])
+}
+
+// ─────────────────────────── Blog ───────────────────────────
+
+model BlogPost {
+  id             String        @id @default(cuid())
+  slug           String        @unique
+  title          String
+  author         String        @default("Palmas Mall")
+  category       String        @default("Noticias")
+  coverUrl       String        @default("")
+  excerpt        String        @default("")
+  content        String        @default("") // HTML del editor rich text
+  tags           Json          @default("[]")
+  featured       Boolean       @default(false)
+  status         ContentStatus @default(DRAFT)
+  isPlaceholder  Boolean       @default(false)
+  publishedAt    DateTime      @default(now())
+  seoTitle       String        @default("")
+  seoDescription String        @default("")
+  createdById    String?
+  updatedById    String?
+  deletedAt      DateTime?
+  deletedBy      String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([status, publishedAt, deletedAt])
+}
+
+// ─────────────────────────── Galería ───────────────────────────
+
+model GalleryAlbum {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  title       String
+  description String         @default("")
+  order       Int            @default(0)
+  status      ContentStatus  @default(PUBLISHED)
+  deletedAt   DateTime?
+  deletedBy   String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  images      GalleryImage[]
+}
+
+model GalleryImage {
+  id         String        @id @default(cuid())
+  albumId    String?
+  album      GalleryAlbum? @relation(fields: [albumId], references: [id], onDelete: SetNull)
+  url        String
+  alt        String        @default("")
+  caption    String        @default("")
+  showOnHome Boolean       @default(false)
+  order      Int           @default(0)
+  status     ContentStatus @default(PUBLISHED)
+  deletedAt  DateTime?
+  deletedBy  String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@index([albumId, order])
+}
+
+// ─────────────────────────── Popups ───────────────────────────
+
+model Popup {
+  id            String         @id @default(cuid())
+  internalName  String
+  title         String         @default("")
+  body          String         @default("")
+  imageUrl      String         @default("")
+  ctaLabel      String         @default("")
+  ctaUrl        String         @default("")
+  placement     PopupPlacement @default(ALL)
+  customPath    String         @default("")
+  active        Boolean        @default(false)
+  startsAt      DateTime?
+  endsAt        DateTime?
+  frequency     PopupFrequency @default(ONCE_PER_SESSION)
+  frequencyDays Int            @default(7)
+  delaySeconds  Int            @default(4)
+  exitIntent    Boolean        @default(false)
+  audience      PopupAudience  @default(ALL)
+  deletedAt     DateTime?
+  deletedBy     String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+// ─────────────────────────── FAQs (AEO) ───────────────────────────
+
+model Faq {
+  id        String    @id @default(cuid())
+  scope     FaqScope  @default(GLOBAL)
+  pageId    String?
+  page      Page?     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  localId   String?
+  local     Local?    @relation(fields: [localId], references: [id], onDelete: Cascade)
+  eventId   String?
+  event     Event?    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  question  String
+  answer    String
+  order     Int       @default(0)
+  visible   Boolean   @default(true)
+  deletedAt DateTime?
+  deletedBy String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([scope, pageId, localId, eventId])
+}
+
+// ─────────────────────── Navegación editable ───────────────────────
+
+model NavigationMenu {
+  id    String           @id @default(cuid())
+  key   String           @unique // "main" | "footer" | "quick-links"
+  name  String
+  items NavigationItem[]
+}
+
+model NavigationItem {
+  id       String           @id @default(cuid())
+  menuId   String
+  menu     NavigationMenu   @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  parentId String?
+  parent   NavigationItem?  @relation("NavChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children NavigationItem[] @relation("NavChildren")
+  label    String
+  url      String
+  order    Int              @default(0)
+  visible  Boolean          @default(true)
+
+  @@index([menuId, order])
+}
+
+// ─────────────────────────── Media ───────────────────────────
+
+model MediaAsset {
+  id        String    @id @default(cuid())
+  url       String
+  publicId  String    @default("") // id en Cloudinary (para borrado remoto)
+  filename  String    @default("")
+  mimeType  String    @default("")
+  sizeBytes Int       @default(0)
+  width     Int       @default(0)
+  height    Int       @default(0)
+  alt       String    @default("")
+  createdBy String?
+  deletedAt DateTime?
+  deletedBy String?
+  createdAt DateTime  @default(now())
+}
+
+// ─────────────────────── Mensajes de contacto (PQRS) ───────────────────────
+
+model ContactMessage {
+  id        String    @id @default(cuid())
+  name      String
+  lastName  String    @default("")
+  city      String    @default("")
+  email     String
+  phone     String    @default("")
+  subject   String    @default("")
+  kind      String    @default("sugerencia") // queja | reclamo | sugerencia | comercial
+  message   String
+  read      Boolean   @default(false)
+  deletedAt DateTime?
+  deletedBy String?
+  createdAt DateTime  @default(now())
+
+  @@index([createdAt])
+}
+
+// ─────────────────────────── Auditoría ───────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userEmail  String   @default("")
+  action     String // create | update | delete | restore | destroy | publish | login
+  entity     String // Local | Event | BlogPost | Page | Popup | …
+  entityId   String   @default("")
+  entityName String   @default("")
+  changes    Json     @default("{}")
+  createdAt  DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
