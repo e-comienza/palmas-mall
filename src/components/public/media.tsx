@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { BackgroundVideo } from "./background-video";
 import {
   cloudinaryLoader,
   cloudinaryPoster,
@@ -84,18 +85,25 @@ export function Media({
       );
     }
 
-    const background = mode === "background";
+    if (mode === "background") {
+      return (
+        <BackgroundVideo
+          src={cloudinaryVideoSrc(src, 1600)}
+          poster={poster}
+          className={cn(fill && "absolute inset-0 size-full", className)}
+          ariaLabel={alt}
+        />
+      );
+    }
+
     return (
       <video
-        src={cloudinaryVideoSrc(src, background ? 1600 : 1280)}
+        src={cloudinaryVideoSrc(src, 1280)}
         poster={poster}
         className={cn(fill && "absolute inset-0 size-full", className)}
-        controls={!background}
-        autoPlay={background}
-        muted={background}
-        loop={background}
+        controls
         playsInline
-        preload={background ? "auto" : "metadata"}
+        preload="metadata"
         aria-label={alt}
       />
     );
