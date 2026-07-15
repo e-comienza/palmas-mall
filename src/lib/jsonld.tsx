@@ -165,10 +165,98 @@ export function faqJsonLd(faqs: Pick<Faq, "question" | "answer">[]): JsonLd | nu
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
+    speakable: SPEAKABLE,
     mainEntity: faqs.map((f) => ({
       "@type": "Question",
       name: f.question,
       acceptedAnswer: { "@type": "Answer", text: f.answer },
+    })),
+  };
+}
+
+/**
+ * Marca qué partes de la página puede leer un asistente de voz.
+ * Los elementos se marcan en el HTML con `data-speakable`.
+ */
+const SPEAKABLE = {
+  "@type": "SpeakableSpecification",
+  cssSelector: ["[data-speakable]"],
+};
+
+/** WebSite + SearchAction: habilita el sitelinks searchbox de Google. */
+export function websiteJsonLd(settings: SiteSettings): JsonLd {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": siteUrl("/#website"),
+    name: settings.mallName,
+    alternateName: settings.tagline,
+    url: siteUrl(),
+    inLanguage: "es-CO",
+    publisher: { "@id": siteUrl("/#organization") },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: siteUrl("/locales?q={search_term_string}"),
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
+/**
+ * Página con contenido leíble por voz. Úsalo en páginas de sistema con
+ * un H1 y un intro marcados con `data-speakable`.
+ */
+export function webPageJsonLd({
+  path,
+  name,
+  description,
+}: {
+  path: string;
+  name: string;
+  description?: string;
+}): JsonLd {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": siteUrl(`${path}#webpage`),
+    url: siteUrl(path),
+    name,
+    description: description || undefined,
+    inLanguage: "es-CO",
+    isPartOf: { "@id": siteUrl("/#website") },
+    about: { "@id": siteUrl("/#shoppingcenter") },
+    speakable: SPEAKABLE,
+  };
+}
+
+/** ItemList para páginas de listado (directorio, eventos, blog). */
+export function itemListJsonLd({
+  path,
+  name,
+  items,
+}: {
+  path: string;
+  name: string;
+  items: { name: string; path: string; image?: string; description?: string }[];
+}): JsonLd | null {
+  if (!items.length) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "@id": siteUrl(`${path}#itemlist`),
+    name,
+    numberOfItems: items.length,
+    itemListOrder: "https://schema.org/ItemListOrderAscending",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      url: siteUrl(item.path),
+      image: item.image ? absoluteUrl(item.image) : undefined,
+      description: item.description || undefined,
     })),
   };
 }

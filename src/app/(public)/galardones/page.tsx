@@ -6,6 +6,11 @@ import { Container } from "@/components/public/container";
 import { Breadcrumbs } from "@/components/public/breadcrumbs";
 import { Reveal } from "@/components/public/reveal";
 import { pageMetadata } from "@/lib/page-metadata";
+import { getPage } from "@/lib/queries";
+import { heroData } from "@/lib/blocks";
+import { ExtraBlocks } from "@/components/public/block-renderer";
+import { PageFaqs } from "@/components/public/page-faqs";
+import { webPageJsonLd, JsonLdScript } from "@/lib/jsonld";
 
 export const dynamic = "force-dynamic";
 
@@ -30,19 +35,34 @@ const AWARDS = [
   },
 ];
 
-export default function GalardonesPage() {
+export default async function GalardonesPage() {
+  const page = await getPage("galardones");
+  const hero = heroData(page);
+
   return (
     <>
+      <JsonLdScript
+        data={webPageJsonLd({
+          path: "/galardones",
+          name: hero.heading || "Un diseño reconocido en el mundo",
+          description: page?.seoDescription,
+        })}
+      />
       <div className="bg-palm-950 pb-14 pt-12 text-white sm:pb-20 sm:pt-16">
         <Container>
           <Breadcrumbs items={[{ name: "Galardones", path: "/galardones" }]} />
-          <h1 className="mt-4 max-w-2xl font-display text-[2.1rem] font-bold leading-[1.08] tracking-[-0.02em] sm:text-5xl">
-            Un diseño reconocido en el mundo
+          <h1
+            data-speakable
+            className="mt-4 max-w-2xl font-display text-[2.1rem] font-bold leading-[1.08] tracking-[-0.02em] sm:text-5xl"
+          >
+            {hero.heading || "Un diseño reconocido en el mundo"}
           </h1>
-          <p className="mt-4 max-w-[58ch] text-[15px] leading-relaxed text-mist-300 sm:text-lg">
-            La arquitectura y el concepto de Palmas Mall han sido premiados por
-            las organizaciones más importantes del sector inmobiliario y de
-            centros comerciales a nivel internacional.
+          <p
+            data-speakable
+            className="mt-4 max-w-[58ch] text-[15px] leading-relaxed text-mist-300 sm:text-lg"
+          >
+            {hero.subheading ||
+              "La arquitectura y el concepto de Palmas Mall han sido premiados por las organizaciones más importantes del sector inmobiliario y de centros comerciales a nivel internacional."}
           </p>
         </Container>
       </div>
@@ -85,6 +105,8 @@ export default function GalardonesPage() {
           </Link>
         </div>
       </Container>
+      <PageFaqs faqs={page?.faqs} className="bg-white py-14 sm:py-20" />
+      <ExtraBlocks page={page} />
     </>
   );
 }

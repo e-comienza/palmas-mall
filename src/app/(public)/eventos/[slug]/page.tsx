@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -10,6 +9,7 @@ import {
   ArrowRight,
 } from "@phosphor-icons/react/dist/ssr";
 import { Container } from "@/components/public/container";
+import { Media } from "@/components/public/media";
 import { Breadcrumbs } from "@/components/public/breadcrumbs";
 import { FaqAccordion } from "@/components/public/faq-section";
 import { Badge } from "@/components/ui/badge";
@@ -83,10 +83,11 @@ export default async function EventoPage({ params }: Props) {
           <div>
             {event.coverUrl ? (
               <div className="relative aspect-[16/9] overflow-hidden rounded-2xl">
-                <Image
+                <Media
                   src={event.coverUrl}
                   alt={event.title}
                   fill
+                  mode="inline"
                   priority
                   sizes="(max-width: 1024px) 100vw, 760px"
                   className="object-cover"

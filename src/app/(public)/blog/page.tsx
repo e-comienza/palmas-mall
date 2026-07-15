@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/public/page-header";
 import { Container } from "@/components/public/container";
 import { PostCard } from "@/components/public/cards";
-import { getPublishedPosts } from "@/lib/queries";
+import { getPublishedPosts, getPage } from "@/lib/queries";
+import { heroData } from "@/lib/blocks";
+import { ExtraBlocks } from "@/components/public/block-renderer";
+import { PageFaqs } from "@/components/public/page-faqs";
+import { itemListJsonLd, webPageJsonLd, JsonLdScript } from "@/lib/jsonld";
 import { pageMetadata } from "@/lib/page-metadata";
 
 export const dynamic = "force-dynamic";
@@ -12,13 +16,33 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function BlogPage() {
-  const posts = await getPublishedPosts();
+  const [posts, page] = await Promise.all([getPublishedPosts(), getPage("blog")]);
+  const hero = heroData(page);
 
   return (
     <>
+      <JsonLdScript
+        data={[
+          webPageJsonLd({
+            path: "/blog",
+            name: hero.heading || "Blog y noticias",
+            description: page?.seoDescription,
+          }),
+          itemListJsonLd({
+            path: "/blog",
+            name: "Artículos del blog de Palmas Mall",
+            items: posts.map((p) => ({
+              name: p.title,
+              path: `/blog/${p.slug}`,
+              image: p.coverUrl || undefined,
+              description: p.excerpt || undefined,
+            })),
+          }),
+        ]}
+      />
       <PageHeader
-        title="Blog y noticias"
-        intro="Guías, novedades y todo lo que está pasando en Palmas Mall."
+        title={hero.heading || "Blog y noticias"}
+        intro={hero.subheading || "Guías, novedades y todo lo que está pasando en Palmas Mall."}
         crumbs={[{ name: "Blog", path: "/blog" }]}
       />
       <Container className="py-10 sm:py-14">
@@ -39,6 +63,8 @@ export default async function BlogPage() {
           </div>
         )}
       </Container>
+      <PageFaqs faqs={page?.faqs} className="bg-white py-14 sm:py-20" />
+      <ExtraBlocks page={page} />
     </>
   );
 }

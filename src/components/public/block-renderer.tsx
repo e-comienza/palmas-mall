@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { PageBlock, Faq } from "@prisma/client";
+import type { Page, PageBlock, Faq, BlockType } from "@prisma/client";
+import { Media } from "./media";
 import { Container, SectionTitle } from "./container";
 import { FaqAccordion } from "./faq-section";
 import { LocalCard, EventCard, PostCard } from "./cards";
@@ -13,6 +14,32 @@ import {
 import { getSiteSettings } from "@/lib/settings";
 
 type BlockData = Record<string, unknown>;
+
+/**
+ * Bloques extra agregados desde el admin a una página de sistema.
+ * Excluye la PRIMERA ocurrencia de cada tipo en `consumed` (los que la
+ * página ya lee vía heroData/richTextData) y renderiza el resto al final.
+ */
+export function ExtraBlocks({
+  page,
+  consumed = ["HERO"],
+}: {
+  page: (Page & { blocks: PageBlock[]; faqs?: Faq[] }) | null | undefined;
+  consumed?: BlockType[];
+}) {
+  if (!page) return null;
+  const remaining = [...consumed];
+  const blocks = page.blocks.filter((b) => {
+    const i = remaining.indexOf(b.type);
+    if (i !== -1) {
+      remaining.splice(i, 1);
+      return false;
+    }
+    return true;
+  });
+  if (!blocks.length) return null;
+  return <BlockRenderer blocks={blocks} pageFaqs={page.faqs} />;
+}
 
 const str = (data: BlockData, key: string): string =>
   typeof data[key] === "string" ? (data[key] as string) : "";
@@ -41,7 +68,7 @@ export async function BlockRenderer({
           return (
             <section key={block.id} className="relative flex min-h-[52vh] flex-col justify-end overflow-hidden bg-palm-950">
               {str(data, "imageUrl") ? (
-                <Image src={str(data, "imageUrl")} alt={str(data, "heading")} fill sizes="100vw" className="object-cover opacity-80" priority />
+                <Media src={str(data, "imageUrl")} alt={str(data, "heading")} fill mode="background" sizes="100vw" className="object-cover opacity-80" priority />
               ) : null}
               <div className="absolute inset-0 bg-gradient-to-t from-palm-950/90 via-palm-950/30 to-palm-950/20" />
               <Container className="relative pb-12 pt-36">
@@ -83,7 +110,7 @@ export async function BlockRenderer({
               <figure>
                 <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-mist-100">
                   {str(data, "url") ? (
-                    <Image src={str(data, "url")} alt={str(data, "alt")} fill sizes="(max-width: 1152px) 100vw, 1152px" className="object-cover" />
+                    <Media src={str(data, "url")} alt={str(data, "alt")} fill mode="inline" sizes="(max-width: 1152px) 100vw, 1152px" className="object-cover" />
                   ) : null}
                 </div>
                 {str(data, "caption") ? (
@@ -102,7 +129,7 @@ export async function BlockRenderer({
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {urls.map((url, i) => (
                   <div key={`${url}-${i}`} className="relative aspect-square overflow-hidden rounded-2xl bg-mist-100">
-                    <Image src={url} alt={str(data, "alt") || "Galería Palmas Mall"} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" />
+                    <Media src={url} alt={str(data, "alt") || "Galería Palmas Mall"} fill mode="inline" sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" />
                   </div>
                 ))}
               </div>
@@ -281,7 +308,7 @@ export async function BlockRenderer({
           if (!url) return null;
           return (
             <Container key={block.id} className="py-10">
-              <div className="aspect-video overflow-hidden rounded-2xl bg-palm-950">
+              <div className="relative aspect-video overflow-hidden rounded-2xl bg-palm-950">
                 {url.includes("youtube") || url.includes("youtu.be") || url.includes("vimeo") ? (
                   <iframe
                     src={url}
@@ -291,7 +318,7 @@ export async function BlockRenderer({
                     allowFullScreen
                   />
                 ) : (
-                  <video src={url} controls playsInline className="size-full object-cover" />
+                  <Media src={url} alt={str(data, "heading") || "Video"} fill mode="inline" className="object-cover" />
                 )}
               </div>
             </Container>

@@ -3,8 +3,10 @@ import { auth } from "@/lib/auth";
 import { uploadImage } from "@/lib/storage";
 import { prisma } from "@/lib/prisma";
 
-const MAX_SIZE = 8 * 1024 * 1024; // 8 MB
-const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif", "image/svg+xml"];
+const MAX_IMAGE = 8 * 1024 * 1024; // 8 MB
+const MAX_VIDEO = 100 * 1024 * 1024; // 100 MB (Cloudinary free tier)
+const ALLOWED_IMAGE = ["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif", "image/svg+xml"];
+const ALLOWED_VIDEO = ["video/mp4", "video/webm", "video/quicktime", "video/ogg"];
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -20,11 +22,15 @@ export async function POST(request: Request) {
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "Falta el archivo" }, { status: 400 });
   }
-  if (!ALLOWED.includes(file.type)) {
-    return NextResponse.json({ error: "Formato no soportado (usa JPG, PNG, WebP o AVIF)" }, { status: 400 });
+  const isVideo = ALLOWED_VIDEO.includes(file.type);
+  if (!ALLOWED_IMAGE.includes(file.type) && !isVideo) {
+    return NextResponse.json({ error: "Formato no soportado (imagen: JPG, PNG, WebP, AVIF · video: MP4, WebM)" }, { status: 400 });
   }
-  if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: "La imagen supera 8 MB" }, { status: 400 });
+  if (file.size > (isVideo ? MAX_VIDEO : MAX_IMAGE)) {
+    return NextResponse.json(
+      { error: isVideo ? "El video supera 100 MB" : "La imagen supera 8 MB" },
+      { status: 400 },
+    );
   }
 
   try {

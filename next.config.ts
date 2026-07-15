@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.giphy.com" },
     ],
     formats: ["image/avif", "image/webp"],
+    // Cache largo para las imágenes que aún pasan por el optimizador de Next
+    // (locales /images, /brand, unsplash). Las de Cloudinary lo saltan vía
+    // loader propio (ver src/lib/media.ts) y se sirven desde el CDN de Cloudinary.
+    minimumCacheTTL: 31536000,
   },
   poweredByHeader: false,
 };

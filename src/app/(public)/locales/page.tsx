@@ -5,7 +5,10 @@ import { LocalCard } from "@/components/public/cards";
 import { LocalesFilter } from "@/components/public/locales-filter";
 import { getPublishedLocales, getCategories, getPage } from "@/lib/queries";
 import { pageMetadata } from "@/lib/page-metadata";
-import { faqJsonLd, JsonLdScript } from "@/lib/jsonld";
+import { itemListJsonLd, webPageJsonLd, JsonLdScript } from "@/lib/jsonld";
+import { heroData } from "@/lib/blocks";
+import { ExtraBlocks } from "@/components/public/block-renderer";
+import { PageFaqs } from "@/components/public/page-faqs";
 
 export const dynamic = "force-dynamic";
 
@@ -25,12 +28,37 @@ export default async function LocalesPage({
     getPage("locales"),
   ]);
 
+  const hero = heroData(page);
+  // El ItemList solo describe el directorio completo; con filtros activos la
+  // lista no representa la URL canónica.
+  const isUnfiltered = !categoria && !q && !grupo;
+
   return (
     <>
-      {page?.faqs.length ? <JsonLdScript data={faqJsonLd(page.faqs)} /> : null}
+      <JsonLdScript
+        data={[
+          webPageJsonLd({
+            path: "/locales",
+            name: hero.heading || "Directorio de locales",
+            description: page?.seoDescription,
+          }),
+          isUnfiltered
+            ? itemListJsonLd({
+                path: "/locales",
+                name: "Directorio de locales de Palmas Mall",
+                items: locales.map((l) => ({
+                  name: l.name,
+                  path: `/locales/${l.slug}`,
+                  image: l.coverUrl || undefined,
+                  description: l.shortDescription || undefined,
+                })),
+              })
+            : null,
+        ]}
+      />
       <PageHeader
-        title="Directorio de locales"
-        intro="Restaurantes, tiendas y servicios: todo lo que puedes encontrar en Palmas Mall."
+        title={hero.heading || "Directorio de locales"}
+        intro={hero.subheading || "Restaurantes, tiendas y servicios: todo lo que puedes encontrar en Palmas Mall."}
         crumbs={[{ name: "Locales", path: "/locales" }]}
       />
       <Container className="py-8 sm:py-12">
@@ -57,6 +85,8 @@ export default async function LocalesPage({
           </div>
         )}
       </Container>
+      <PageFaqs faqs={page?.faqs} className="bg-white py-14 sm:py-20" />
+      <ExtraBlocks page={page} />
     </>
   );
 }

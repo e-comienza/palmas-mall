@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { X, CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { Media } from "@/components/public/media";
+import { cloudinaryPoster, cloudinaryVideoSrc, isVideoUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 export type LightboxImage = { url: string; alt: string; caption?: string };
@@ -77,14 +78,17 @@ export function LightboxGallery({
             aria-label={`Ver en grande: ${img.alt}`}
             className="group mb-3 block w-full break-inside-avoid overflow-hidden rounded-2xl bg-mist-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-palm-600"
           >
-            <Image
-              src={img.url}
-              alt={img.alt}
-              width={600}
-              height={800}
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="h-auto w-full cursor-zoom-in object-cover transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03]"
-            />
+            <div className="relative">
+              <Media
+                src={img.url}
+                alt={img.alt}
+                width={600}
+                height={800}
+                mode="poster"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                className="h-auto w-full cursor-zoom-in object-cover transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03]"
+              />
+            </div>
             {img.caption ? (
               <span className="block px-3 py-2 text-left text-[13px] text-mist-600">
                 {img.caption}
@@ -144,14 +148,28 @@ export function LightboxGallery({
                 transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
                 className="relative size-full"
               >
-                <Image
-                  src={active.url}
-                  alt={active.alt}
-                  fill
-                  sizes="100vw"
-                  className="object-contain"
-                  priority
-                />
+                {isVideoUrl(active.url) ? (
+                  <video
+                    src={cloudinaryVideoSrc(active.url, 1600)}
+                    poster={cloudinaryPoster(active.url)}
+                    controls
+                    autoPlay
+                    playsInline
+                    preload="metadata"
+                    aria-label={active.alt}
+                    className="absolute inset-0 size-full object-contain"
+                  />
+                ) : (
+                  <Media
+                    src={active.url}
+                    alt={active.alt}
+                    fill
+                    mode="inline"
+                    sizes="100vw"
+                    className="object-contain"
+                    priority
+                  />
+                )}
               </motion.div>
 
               {images.length > 1 ? (

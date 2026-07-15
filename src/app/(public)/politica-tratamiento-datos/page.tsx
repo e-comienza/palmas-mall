@@ -4,6 +4,8 @@ import { Container } from "@/components/public/container";
 import { getPage } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/settings";
 import { pageMetadata } from "@/lib/page-metadata";
+import { heroData, richTextData } from "@/lib/blocks";
+import { ExtraBlocks } from "@/components/public/block-renderer";
 
 export const dynamic = "force-dynamic";
 
@@ -17,13 +19,13 @@ export default async function PoliticaPage() {
     getSiteSettings(),
   ]);
 
-  const richText = page?.blocks.find((b) => b.type === "RICH_TEXT");
-  const customBody = (richText?.data as { body?: string } | undefined)?.body;
+  const customBody = richTextData(page).body;
+  const hero = heroData(page);
 
   return (
     <>
       <PageHeader
-        title="Política de tratamiento de datos"
+        title={hero.heading || "Política de tratamiento de datos"}
         crumbs={[{ name: "Política de datos", path: "/politica-tratamiento-datos" }]}
       />
       <Container className="max-w-3xl py-10 sm:py-14">
@@ -70,6 +72,7 @@ export default async function PoliticaPage() {
           </div>
         )}
       </Container>
+      <ExtraBlocks page={page} consumed={["HERO", "RICH_TEXT"]} />
     </>
   );
 }

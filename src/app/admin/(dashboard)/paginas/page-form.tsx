@@ -64,8 +64,9 @@ export function PageForm({
           <AdminCard title="Bloques de contenido">
             {page?.system && page.slug !== "home" ? (
               <p className="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-[13px] leading-relaxed text-amber-900">
-                Esta es una página de sistema con diseño propio: los bloques que agregues
-                aquí complementan el contenido, y sus FAQs se editan en la sección FAQs.
+                Esta es una página de sistema con diseño propio: el bloque HERO controla el
+                título, subtítulo e imagen de cabecera; el resto del diseño es fijo. Sus FAQs
+                se editan en la sección FAQs.
               </p>
             ) : null}
             <BlockEditor name="blocks" defaultBlocks={defaultBlocks} />

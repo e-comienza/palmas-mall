@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import { Media } from "@/components/public/media";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/public/container";
 import { Breadcrumbs } from "@/components/public/breadcrumbs";
@@ -73,10 +73,11 @@ export default async function BlogPostPage({ params }: Props) {
       <Container className="max-w-3xl py-10">
         {post.coverUrl ? (
           <div className="relative mb-10 aspect-[16/9] overflow-hidden rounded-2xl">
-            <Image
+            <Media
               src={post.coverUrl}
               alt={post.title}
               fill
+              mode="inline"
               priority
               sizes="(max-width: 768px) 100vw, 720px"
               className="object-cover"

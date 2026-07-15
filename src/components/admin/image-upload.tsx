@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { UploadSimple, X, Spinner, LinkSimple } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { normalizeMollyUrl } from "@/lib/molly-image";
+import { isVideoUrl, cloudinaryPoster } from "@/lib/media";
 
 /**
  * Upload de imagen drag-and-drop. Sube a /api/upload (Cloudinary o local en dev)
@@ -63,14 +64,26 @@ export function ImageUpload({
       <input type="hidden" name={name} value={url} />
       {url ? (
         <div className={cn("group relative overflow-hidden rounded-xl border border-mist-200 bg-mist-100", aspect)}>
-          <Image
-            src={url}
-            alt=""
-            fill
-            sizes="480px"
-            className="object-contain"
-            unoptimized={url.startsWith("/uploads") || /\.gif(\?|$)/i.test(url) || url.includes("giphy.com")}
-          />
+          {isVideoUrl(url) ? (
+            <video
+              src={url}
+              poster={cloudinaryPoster(url)}
+              controls
+              muted
+              playsInline
+              preload="metadata"
+              className="size-full object-contain"
+            />
+          ) : (
+            <Image
+              src={url}
+              alt=""
+              fill
+              sizes="480px"
+              className="object-contain"
+              unoptimized={url.startsWith("/uploads") || /\.gif(\?|$)/i.test(url) || url.includes("giphy.com")}
+            />
+          )}
           <button
             type="button"
             onClick={() => setUrl("")}
@@ -111,8 +124,8 @@ export function ImageUpload({
           ) : (
             <>
               <UploadSimple size={24} />
-              <span className="font-medium">Arrastra una imagen o haz clic</span>
-              <span className="text-[12px]">JPG, PNG o WebP · máx. 8 MB</span>
+              <span className="font-medium">Arrastra una imagen o video, o haz clic</span>
+              <span className="text-[12px]">Imagen (máx. 8 MB) · Video MP4/WebM (máx. 100 MB)</span>
             </>
           )}
         </button>
@@ -120,7 +133,7 @@ export function ImageUpload({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,video/mp4,video/webm,video/quicktime"
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
@@ -213,7 +226,18 @@ export function GalleryUpload({
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
         {urls.map((url, i) => (
           <div key={`${url}-${i}`} className="group relative aspect-square overflow-hidden rounded-xl border border-mist-200 bg-mist-100">
-            <Image src={url} alt="" fill sizes="160px" className="object-cover" unoptimized={url.startsWith("/uploads")} />
+            {isVideoUrl(url) ? (
+              cloudinaryPoster(url) ? (
+                <Image src={cloudinaryPoster(url)!} alt="" fill sizes="160px" className="object-cover" />
+              ) : (
+                <video src={url} muted playsInline preload="metadata" className="size-full object-cover" />
+              )
+            ) : (
+              <Image src={url} alt="" fill sizes="160px" className="object-cover" unoptimized={url.startsWith("/uploads")} />
+            )}
+            {isVideoUrl(url) ? (
+              <span className="pointer-events-none absolute bottom-1 left-1 rounded bg-palm-950/70 px-1.5 py-0.5 text-[10px] font-semibold text-white">VIDEO</span>
+            ) : null}
             <button
               type="button"
               onClick={() => setUrls((prev) => prev.filter((_, j) => j !== i))}
@@ -236,7 +260,7 @@ export function GalleryUpload({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,video/mp4,video/webm,video/quicktime"
         multiple
         className="hidden"
         onChange={(e) => {

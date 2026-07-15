@@ -1020,29 +1020,216 @@ async function main() {
     });
   }
 
-  // FAQs específicas de "Cómo llegar"
-  const comoLlegarFaqs = await prisma.faq.count({ where: { pageId: pageId["como-llegar"] } });
-  if (comoLlegarFaqs === 0) {
-    await prisma.faq.createMany({
-      data: [
-        {
-          scope: FaqScope.PAGE,
-          pageId: pageId["como-llegar"],
-          question: "¿Palmas Mall tiene parqueadero?",
-          answer: "Sí, contamos con parqueadero para carros y motos dentro del mall.",
-          order: 0,
-        },
-        {
-          scope: FaqScope.PAGE,
-          pageId: pageId["como-llegar"],
-          question: "¿Puedo llegar en transporte público?",
-          answer:
-            "Sí. Palmas Mall está en Ciudad Jardín, al sur de Cali, con acceso por la Carrera 105. También puedes llegar fácil en taxi o apps de transporte.",
-          order: 1,
-        },
-      ],
+  // Bloques HERO editables de páginas de sistema (título/subtítulo/imagen de cabecera).
+  // Los textos replican el diseño actual; el admin puede cambiarlos desde Páginas.
+  const heroDefaults: Record<string, { heading: string; subheading: string; imageUrl?: string }> = {
+    "conoce-palmas-mall": {
+      heading: "Conoce Palmas Mall",
+      subheading:
+        "El primer Lifestyle Mall de Colombia: un lugar diseñado para vivir la ciudad de otra manera.",
+    },
+    "food-drinks": {
+      heading: "El mejor Food Hall de Cali",
+      subheading:
+        "Restaurantes seleccionados, servicio a la mesa y una arquitectura a cielo abierto hecha para el slow food.",
+      imageUrl: "/images/galeria/20241229_020127780_ios-scaled.webp",
+    },
+    "shop-more": {
+      heading: "Donde la moda cobra vida",
+      subheading:
+        "Boutiques exclusivas, concept stores y servicios seleccionados para una experiencia de compra única.",
+      imageUrl: "/images/galeria/dsc1837-scaled.webp",
+    },
+    galardones: {
+      heading: "Un diseño reconocido en el mundo",
+      subheading:
+        "La arquitectura y el concepto de Palmas Mall han sido premiados por las organizaciones más importantes del sector inmobiliario y de centros comerciales a nivel internacional.",
+    },
+    patrocinios: {
+      heading: "Be Our Sponsors",
+      subheading: "La mejor ubicación para tu marca: haz parte del Lifestyle Mall de Cali.",
+    },
+    "plano-del-mall": {
+      heading: "Plano del Mall",
+      subheading: "Ubica restaurantes, tiendas y servicios dentro de Palmas Mall.",
+    },
+    "como-llegar": {
+      heading: "Cómo llegar",
+      subheading: "Elige tu sede, abre la navegación y ven a vivir tus mejores momentos.",
+    },
+    contacto: {
+      heading: "Contáctanos",
+      subheading:
+        "En Palmas Mall estamos siempre dispuestos a escucharte: escríbenos si tienes dudas o inquietudes sobre nuestros locales y servicios.",
+    },
+    "momentos-palmas-mall": {
+      heading: "Momentos Palmas Mall",
+      subheading:
+        "Ferias, gastronomía, moda, familia y noches inolvidables: toca cualquier foto para verla en grande.",
+    },
+    "politica-tratamiento-datos": {
+      heading: "Política de tratamiento de datos",
+      subheading: "",
+    },
+    eventos: {
+      heading: "Eventos",
+      subheading:
+        "Ferias, música, deporte y planes para toda la familia: esto es lo que viene en Palmas Mall.",
+    },
+    locales: {
+      heading: "Directorio de locales",
+      subheading: "Restaurantes, tiendas y servicios: todo lo que puedes encontrar en Palmas Mall.",
+    },
+    blog: {
+      heading: "Blog y noticias",
+      subheading: "Guías, novedades y todo lo que está pasando en Palmas Mall.",
+    },
+  };
+  for (const [slug, data] of Object.entries(heroDefaults)) {
+    const existing = await prisma.pageBlock.count({
+      where: { pageId: pageId[slug], type: BlockType.HERO },
     });
+    if (existing === 0) {
+      await prisma.pageBlock.create({
+        data: { pageId: pageId[slug], type: BlockType.HERO, order: 0, data },
+      });
+    }
   }
+  console.log(`  ✓ bloques HERO de páginas de sistema`);
+
+  // ── FAQs por página (AEO) ───────────────────────────────────
+  // Estas son las respuestas que citan Google AI Overviews, ChatGPT y
+  // Perplexity. Cada una alimenta el JSON-LD FAQPage de su página.
+  const pageFaqs: Record<string, { question: string; answer: string }[]> = {
+    "como-llegar": [
+      {
+        question: "¿Palmas Mall tiene parqueadero?",
+        answer: "Sí, contamos con parqueadero para carros y motos dentro del mall.",
+      },
+      {
+        question: "¿Puedo llegar en transporte público?",
+        answer:
+          "Sí. Palmas Mall está en Ciudad Jardín, al sur de Cali, con acceso por la Carrera 105. También puedes llegar fácil en taxi o apps de transporte.",
+      },
+      {
+        question: "¿Dónde queda Palmas Mall en Cali?",
+        answer:
+          "Palmas Mall está en la Carrera 105 No. 15-09, barrio Ciudad Jardín, al sur de Cali, Colombia.",
+      },
+    ],
+    "food-drinks": [
+      {
+        question: "¿Qué restaurantes hay en Palmas Mall?",
+        answer:
+          "El Food Hall de Palmas Mall reúne restaurantes de parrilla, hamburguesas, cocina internacional, postres, cafés y cervecería. Puedes ver el listado completo en el directorio de locales.",
+      },
+      {
+        question: "¿Cómo funciona el Food Hall de Palmas Mall?",
+        answer:
+          "Es un Food Hall único en Colombia: distintas plazas gastronómicas se articulan en un solo espacio y el servicio es a la mesa. A tu mesa pueden llegar platos de uno o de varios restaurantes, atendidos por sus propios meseros.",
+      },
+      {
+        question: "¿Necesito reservar para comer en Palmas Mall?",
+        answer:
+          "No es obligatorio. Algunos restaurantes aceptan reservas por WhatsApp o por su página web; encuentras sus datos de contacto en la ficha de cada local.",
+      },
+    ],
+    "shop-more": [
+      {
+        question: "¿Qué tiendas hay en Palmas Mall?",
+        answer:
+          "Palmas Mall tiene boutiques de moda, concept stores, deporte, joyería, salud y belleza, entretenimiento y servicios. Consulta el directorio de locales para ver todas las marcas.",
+      },
+      {
+        question: "¿Palmas Mall tiene servicios además de tiendas?",
+        answer:
+          "Sí. Además de moda y retail, encuentras servicios que te simplifican el día, coworking y zonas para trabajar o reunirte rodeado de vegetación.",
+      },
+    ],
+    eventos: [
+      {
+        question: "¿Qué eventos hay en Palmas Mall?",
+        answer:
+          "Palmas Mall programa ferias, música en vivo, planes familiares, transmisiones deportivas y activaciones de marca durante todo el año. La agenda actualizada está en la página de Eventos.",
+      },
+      {
+        question: "¿Los eventos de Palmas Mall son gratuitos?",
+        answer:
+          "La mayoría de los eventos son de entrada libre. Cuando un evento tiene costo o requiere registro, se indica en su ficha.",
+      },
+    ],
+    "plano-del-mall": [
+      {
+        question: "¿Cómo encuentro un local dentro de Palmas Mall?",
+        answer:
+          "Puedes consultar el plano del mall para ubicar restaurantes, tiendas y servicios, o buscar el local por nombre o categoría en el directorio.",
+      },
+    ],
+    contacto: [
+      {
+        question: "¿Cómo contacto a Palmas Mall?",
+        answer:
+          "Puedes escribirnos por WhatsApp, enviarnos un correo o usar el formulario de peticiones, quejas y sugerencias (PQRS) en la página de Contacto.",
+      },
+      {
+        question: "¿Cuál es el horario de Palmas Mall?",
+        answer:
+          "Consulta el horario vigente en la página de Cómo llegar. Los horarios de cada restaurante o tienda pueden variar y se indican en la ficha del local.",
+      },
+    ],
+    patrocinios: [
+      {
+        question: "¿Cómo puedo poner un local o marca en Palmas Mall?",
+        answer:
+          "Ofrecemos locales comerciales, patrocinios, activaciones de marca, eventos y publicidad dentro del mall. Escríbenos desde la página Be Our Sponsors y te contactamos.",
+      },
+    ],
+    "momentos-palmas-mall": [
+      {
+        question: "¿Palmas Mall es petfriendly?",
+        answer:
+          "Sí. Tu mascota es bienvenida en los corredores, jardines y terrazas a cielo abierto del mall.",
+      },
+    ],
+    galardones: [
+      {
+        question: "¿Qué premios ha ganado Palmas Mall?",
+        answer:
+          "Palmas Mall recibió el premio nacional de FIABCI a la excelencia inmobiliaria en la categoría comercio, y el Silver Award 2009 del ICSC (International Council of Shopping Centers) en la categoría Innovative Design and Development of a New Project.",
+      },
+    ],
+    blog: [
+      {
+        question: "¿Dónde encuentro novedades de Palmas Mall?",
+        answer:
+          "En el blog publicamos guías gastronómicas, novedades de locales, eventos y todo lo que está pasando en el mall.",
+      },
+    ],
+    locales: [
+      {
+        question: "¿Cuántos locales tiene Palmas Mall?",
+        answer:
+          "El directorio reúne todos los restaurantes, tiendas y servicios del mall. Puedes filtrarlos por categoría o buscarlos por nombre.",
+      },
+    ],
+  };
+
+  let pageFaqCount = 0;
+  for (const [slug, faqList] of Object.entries(pageFaqs)) {
+    const existing = await prisma.faq.count({ where: { pageId: pageId[slug] } });
+    if (existing > 0) continue;
+    await prisma.faq.createMany({
+      data: faqList.map((f, i) => ({
+        scope: FaqScope.PAGE,
+        pageId: pageId[slug],
+        question: f.question,
+        answer: f.answer,
+        order: i,
+      })),
+    });
+    pageFaqCount += faqList.length;
+  }
+  console.log(`  ✓ ${pageFaqCount} FAQs por página (AEO)`);
 
   // ── Navegación ──────────────────────────────────────────────
   const mainMenu = await prisma.navigationMenu.upsert({

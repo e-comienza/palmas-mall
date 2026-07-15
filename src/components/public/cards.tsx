@@ -1,6 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { Local, LocalCategory, Event, BlogPost } from "@prisma/client";
+import { Media } from "@/components/public/media";
 import { Badge } from "@/components/ui/badge";
 import { formatDateShortEs } from "@/lib/utils";
 import { CalendarBlank, MapPin } from "@phosphor-icons/react/dist/ssr";
@@ -18,7 +18,7 @@ export function LocalCard({
       className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-card transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1 hover:shadow-card-hover"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-mist-100">
-        <Image
+        <Media
           src={local.coverUrl || FALLBACK_COVER}
           alt={`${local.name} en Palmas Mall`}
           fill
@@ -55,7 +55,7 @@ export function EventCard({ event }: { event: Event }) {
       className="group flex gap-4 overflow-hidden rounded-2xl bg-white p-3 shadow-card transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:shadow-card-hover sm:p-4"
     >
       <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-xl bg-mist-100 sm:w-28">
-        <Image
+        <Media
           src={event.coverUrl || FALLBACK_COVER}
           alt={event.title}
           fill
@@ -89,7 +89,7 @@ export function PostCard({ post }: { post: BlogPost }) {
       className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-card transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1 hover:shadow-card-hover"
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-mist-100">
-        <Image
+        <Media
           src={post.coverUrl || FALLBACK_COVER}
           alt={post.title}
           fill

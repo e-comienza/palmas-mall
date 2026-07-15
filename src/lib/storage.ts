@@ -34,7 +34,9 @@ export async function uploadImage(
         .upload_stream(
           {
             folder: `${baseFolder}/${folder}`,
-            resource_type: "image",
+            // "auto": detecta imagen o video. Los videos se sirven luego con
+            // f_auto,q_auto (ver src/lib/media.ts) para cargar rápido.
+            resource_type: "auto",
             transformation: [{ quality: "auto", fetch_format: "auto" }],
           },
           (error, uploaded) => {
@@ -81,9 +83,13 @@ export async function uploadImage(
 export async function deleteImage(publicId: string): Promise<void> {
   if (!publicId || !cloudinaryConfigured()) return;
   const { v2: cloudinary } = await import("cloudinary");
-  try {
-    await cloudinary.uploader.destroy(publicId);
-  } catch (error) {
-    console.error("[storage] no se pudo eliminar la imagen remota", error);
+  // No guardamos el tipo, así que intentamos como imagen y como video:
+  // destroy no lanza si el recurso no existe (devuelve "not found").
+  for (const resource_type of ["image", "video"] as const) {
+    try {
+      await cloudinary.uploader.destroy(publicId, { resource_type });
+    } catch (error) {
+      console.error("[storage] no se pudo eliminar el recurso remoto", error);
+    }
   }
 }

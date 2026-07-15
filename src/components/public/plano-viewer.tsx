@@ -93,7 +93,8 @@ export function PlanoViewer({ src, alt }: { src: string; alt: string }) {
             cursor: scale > 1 ? "grab" : "default",
           }}
         >
-          <Image src={src} alt={alt} fill sizes="100vw" className="object-contain" priority />
+          {/* unoptimized: se sirve el WebP full-res para que el zoom (hasta 4x) no se pixele. */}
+          <Image src={src} alt={alt} fill sizes="100vw" className="object-contain" priority unoptimized />
         </div>
       </div>
       <div className="absolute bottom-3 right-3 flex gap-2">

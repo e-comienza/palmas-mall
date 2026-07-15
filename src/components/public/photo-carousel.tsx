@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import Image from "next/image";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { Media } from "@/components/public/media";
 import { cn } from "@/lib/utils";
 
 export type CarouselImage = { url: string; alt: string };
@@ -47,10 +47,11 @@ export function PhotoCarousel({
   if (images.length === 1) {
     return (
       <div className={cn("relative overflow-hidden rounded-2xl bg-mist-100", aspect, className)}>
-        <Image
+        <Media
           src={images[0].url}
           alt={images[0].alt}
           fill
+          mode="inline"
           priority={priorityFirst}
           sizes="(max-width: 768px) 100vw, 800px"
           className="object-cover"
@@ -76,10 +77,11 @@ export function PhotoCarousel({
             aria-label={`Foto ${i + 1} de ${images.length}`}
             className={cn("relative w-full shrink-0 snap-center", aspect)}
           >
-            <Image
+            <Media
               src={img.url}
               alt={img.alt}
               fill
+              mode="inline"
               priority={priorityFirst && i === 0}
               loading={i === 0 ? undefined : "lazy"}
               sizes="(max-width: 768px) 100vw, 800px"

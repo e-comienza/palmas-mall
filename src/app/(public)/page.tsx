@@ -13,6 +13,7 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { Container, SectionTitle } from "@/components/public/container";
 import { Reveal, RevealStagger } from "@/components/public/reveal";
+import { Media } from "@/components/public/media";
 import { LocalCard, EventCard, PostCard } from "@/components/public/cards";
 import { FaqAccordion } from "@/components/public/faq-section";
 import {
@@ -26,9 +27,13 @@ import {
   getSedes,
 } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/settings";
+import { heroData, richTextData } from "@/lib/blocks";
+import { ExtraBlocks } from "@/components/public/block-renderer";
 import {
   organizationJsonLd,
   shoppingCenterJsonLd,
+  websiteJsonLd,
+  itemListJsonLd,
   faqJsonLd,
   JsonLdScript,
 } from "@/lib/jsonld";
@@ -51,16 +56,6 @@ export async function generateMetadata(): Promise<Metadata> {
     },
   };
 }
-
-type HeroData = {
-  heading?: string;
-  subheading?: string;
-  imageUrl?: string;
-  ctaPrimaryLabel?: string;
-  ctaPrimaryUrl?: string;
-  ctaSecondaryLabel?: string;
-  ctaSecondaryUrl?: string;
-};
 
 const PILLARS = [
   { icon: ForkKnife, label: "Food Hall & gastronomía", href: "/food-drinks" },
@@ -131,27 +126,37 @@ export default async function HomePage() {
       getSedes(),
     ]);
 
-  const heroBlock = page?.blocks.find((b) => b.type === "HERO");
-  const hero = (heroBlock?.data ?? {}) as HeroData;
-  const introBlock = page?.blocks.find((b) => b.type === "RICH_TEXT");
-  const intro = (introBlock?.data ?? {}) as { heading?: string; body?: string };
+  const hero = heroData(page);
+  const intro = richTextData(page);
 
   return (
     <>
       <JsonLdScript
         data={[
           organizationJsonLd(settings),
+          websiteJsonLd(settings),
           shoppingCenterJsonLd(settings, sedes),
+          itemListJsonLd({
+            path: "/",
+            name: "Locales destacados de Palmas Mall",
+            items: locales.map((l) => ({
+              name: l.name,
+              path: `/locales/${l.slug}`,
+              image: l.coverUrl || undefined,
+              description: l.shortDescription || undefined,
+            })),
+          }),
           faqJsonLd(faqs),
         ]}
       />
 
       {/* ── Hero ─────────────────────────────────────────── */}
       <section className="relative flex min-h-[calc(100dvh-64px)] flex-col justify-end overflow-hidden md:min-h-[calc(100dvh-76px)]">
-        <Image
+        <Media
           src={hero.imageUrl || "/images/galeria/20250119_193238112_ios-scaled.webp"}
           alt="Arquitectura a cielo abierto de Palmas Mall al atardecer"
           fill
+          mode="background"
           priority
           sizes="100vw"
           className="object-cover"
@@ -159,10 +164,16 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-t from-palm-950/90 via-palm-950/35 to-palm-950/15" />
         <Container className="relative pb-16 pt-24 sm:pb-20">
           <div className="max-w-2xl">
-            <h1 className="font-display text-[2.5rem] font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-6xl">
+            <h1
+              data-speakable
+              className="font-display text-[2.5rem] font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-6xl"
+            >
               {hero.heading || "Vive tus mejores momentos"}
             </h1>
-            <p className="mt-4 max-w-[46ch] text-base leading-relaxed text-white/85 sm:text-lg">
+            <p
+              data-speakable
+              className="mt-4 max-w-[46ch] text-base leading-relaxed text-white/85 sm:text-lg"
+            >
               {hero.subheading ||
                 "Gastronomía, compras, eventos y arquitectura a cielo abierto en el Lifestyle Mall de Cali."}
             </p>
@@ -371,10 +382,11 @@ export default async function HomePage() {
                     i % 4 === 0 || i % 4 === 3 ? "aspect-[3/4]" : "aspect-square"
                   }`}
                 >
-                  <Image
+                  <Media
                     src={img.url}
                     alt={img.alt || "Momentos en Palmas Mall"}
                     fill
+                    mode="poster"
                     sizes="(max-width: 640px) 50vw, 25vw"
                     className="object-cover transition-transform duration-700 hover:scale-[1.04]"
                   />
@@ -513,6 +525,7 @@ export default async function HomePage() {
           </Container>
         </section>
       )}
+      <ExtraBlocks page={page} consumed={["HERO", "RICH_TEXT"]} />
     </>
   );
 }

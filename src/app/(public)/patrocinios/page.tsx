@@ -11,7 +11,12 @@ import { Container, SectionTitle } from "@/components/public/container";
 import { Reveal } from "@/components/public/reveal";
 import { ContactForm } from "@/components/public/contact-form";
 import { getSiteSettings } from "@/lib/settings";
+import { getPage } from "@/lib/queries";
 import { pageMetadata } from "@/lib/page-metadata";
+import { heroData } from "@/lib/blocks";
+import { ExtraBlocks } from "@/components/public/block-renderer";
+import { PageFaqs } from "@/components/public/page-faqs";
+import { webPageJsonLd, JsonLdScript } from "@/lib/jsonld";
 
 export const dynamic = "force-dynamic";
 
@@ -43,13 +48,21 @@ const OPCIONES = [
 ];
 
 export default async function PatrociniosPage() {
-  const settings = await getSiteSettings();
+  const [settings, page] = await Promise.all([getSiteSettings(), getPage("patrocinios")]);
+  const hero = heroData(page);
 
   return (
     <>
+      <JsonLdScript
+        data={webPageJsonLd({
+          path: "/patrocinios",
+          name: hero.heading || "Be Our Sponsors",
+          description: page?.seoDescription,
+        })}
+      />
       <PageHeader
-        title="Be Our Sponsors"
-        intro="La mejor ubicación para tu marca: haz parte del Lifestyle Mall de Cali."
+        title={hero.heading || "Be Our Sponsors"}
+        intro={hero.subheading || "La mejor ubicación para tu marca: haz parte del Lifestyle Mall de Cali."}
         crumbs={[{ name: "Be Our Sponsors", path: "/patrocinios" }]}
       />
 
@@ -110,6 +123,8 @@ export default async function PatrociniosPage() {
           />
         </Container>
       </section>
+      <PageFaqs faqs={page?.faqs} className="bg-white py-14 sm:py-20" />
+      <ExtraBlocks page={page} />
     </>
   );
 }

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { Local, LocalCategory } from "@prisma/client";
+import { Media } from "@/components/public/media";
 import { Container } from "@/components/public/container";
 import { Breadcrumbs } from "@/components/public/breadcrumbs";
 import { Badge } from "@/components/ui/badge";
@@ -58,10 +59,11 @@ export function LocalHero({
       </div>
 
       <div className="relative h-[42vh] min-h-[300px] overflow-hidden bg-palm-950 md:h-[52vh] md:max-h-[560px]">
-        <Image
+        <Media
           src={local.coverUrl}
           alt={`${local.name} en Palmas Mall Cali`}
           fill
+          mode="background"
           priority
           sizes="100vw"
           className="object-cover"

@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/public/page-header";
 import { Container } from "@/components/public/container";
 import { LightboxGallery } from "@/components/public/lightbox-gallery";
-import { getGalleryAlbums } from "@/lib/queries";
+import { getGalleryAlbums, getPage } from "@/lib/queries";
+import { heroData } from "@/lib/blocks";
+import { ExtraBlocks } from "@/components/public/block-renderer";
+import { PageFaqs } from "@/components/public/page-faqs";
+import { webPageJsonLd, JsonLdScript } from "@/lib/jsonld";
 import { pageMetadata } from "@/lib/page-metadata";
 
 export const dynamic = "force-dynamic";
@@ -12,13 +16,24 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function MomentosPage() {
-  const albums = await getGalleryAlbums();
+  const [albums, page] = await Promise.all([
+    getGalleryAlbums(),
+    getPage("momentos-palmas-mall"),
+  ]);
+  const hero = heroData(page);
 
   return (
     <>
+      <JsonLdScript
+        data={webPageJsonLd({
+          path: "/momentos-palmas-mall",
+          name: hero.heading || "Momentos Palmas Mall",
+          description: page?.seoDescription,
+        })}
+      />
       <PageHeader
-        title="Momentos Palmas Mall"
-        intro="Ferias, gastronomía, moda, familia y noches inolvidables: toca cualquier foto para verla en grande."
+        title={hero.heading || "Momentos Palmas Mall"}
+        intro={hero.subheading || "Ferias, gastronomía, moda, familia y noches inolvidables: toca cualquier foto para verla en grande."}
         crumbs={[{ name: "Momentos", path: "/momentos-palmas-mall" }]}
       />
       <Container className="py-10 sm:py-14">
@@ -53,6 +68,8 @@ export default async function MomentosPage() {
           </div>
         )}
       </Container>
+      <PageFaqs faqs={page?.faqs} className="bg-white py-14 sm:py-20" />
+      <ExtraBlocks page={page} />
     </>
   );
 }

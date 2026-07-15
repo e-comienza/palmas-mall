@@ -17,6 +17,9 @@ import { FaqAccordion } from "@/components/public/faq-section";
 import { getPage, getGlobalFaqs } from "@/lib/queries";
 import { pageMetadata } from "@/lib/page-metadata";
 import { faqJsonLd, JsonLdScript } from "@/lib/jsonld";
+import { heroData } from "@/lib/blocks";
+import { webPageJsonLd } from "@/lib/jsonld";
+import { ExtraBlocks } from "@/components/public/block-renderer";
 
 export const dynamic = "force-dynamic";
 
@@ -59,13 +62,21 @@ const EXPERIENCIAS = [
 
 export default async function ConocePage() {
   const [page, faqs] = await Promise.all([getPage("conoce-palmas-mall"), getGlobalFaqs()]);
+  const hero = heroData(page);
 
   return (
     <>
+      <JsonLdScript
+        data={webPageJsonLd({
+          path: "/conoce-palmas-mall",
+          name: hero.heading || "Conoce Palmas Mall",
+          description: page?.seoDescription,
+        })}
+      />
       {faqs.length ? <JsonLdScript data={faqJsonLd(faqs)} /> : null}
       <PageHeader
-        title="Conoce Palmas Mall"
-        intro="El primer Lifestyle Mall de Colombia: un lugar diseñado para vivir la ciudad de otra manera."
+        title={hero.heading || "Conoce Palmas Mall"}
+        intro={hero.subheading || "El primer Lifestyle Mall de Colombia: un lugar diseñado para vivir la ciudad de otra manera."}
         crumbs={[{ name: "Conoce Palmas Mall", path: "/conoce-palmas-mall" }]}
       />
 
@@ -190,6 +201,7 @@ export default async function ConocePage() {
           </div>
         </div>
       </Container>
+      <ExtraBlocks page={page} consumed={["HERO", "FAQ"]} />
     </>
   );
 }

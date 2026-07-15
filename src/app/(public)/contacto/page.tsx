@@ -5,7 +5,11 @@ import { Container } from "@/components/public/container";
 import { ContactForm } from "@/components/public/contact-form";
 import { SocialIcons } from "@/components/public/social-icons";
 import { getSiteSettings } from "@/lib/settings";
-import { getSedes } from "@/lib/queries";
+import { getSedes, getPage } from "@/lib/queries";
+import { heroData } from "@/lib/blocks";
+import { ExtraBlocks } from "@/components/public/block-renderer";
+import { PageFaqs } from "@/components/public/page-faqs";
+import { webPageJsonLd, JsonLdScript } from "@/lib/jsonld";
 import { pageMetadata } from "@/lib/page-metadata";
 
 export const dynamic = "force-dynamic";
@@ -15,13 +19,25 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ContactoPage() {
-  const [settings, sedes] = await Promise.all([getSiteSettings(), getSedes()]);
+  const [settings, sedes, page] = await Promise.all([
+    getSiteSettings(),
+    getSedes(),
+    getPage("contacto"),
+  ]);
+  const hero = heroData(page);
 
   return (
     <>
+      <JsonLdScript
+        data={webPageJsonLd({
+          path: "/contacto",
+          name: hero.heading || "Contáctanos",
+          description: page?.seoDescription,
+        })}
+      />
       <PageHeader
-        title="Contáctanos"
-        intro="En Palmas Mall estamos siempre dispuestos a escucharte: escríbenos si tienes dudas o inquietudes sobre nuestros locales y servicios."
+        title={hero.heading || "Contáctanos"}
+        intro={hero.subheading || "En Palmas Mall estamos siempre dispuestos a escucharte: escríbenos si tienes dudas o inquietudes sobre nuestros locales y servicios."}
         crumbs={[{ name: "Contacto", path: "/contacto" }]}
       />
       <Container className="py-10 sm:py-14">
@@ -81,6 +97,8 @@ export default async function ContactoPage() {
           </aside>
         </div>
       </Container>
+      <PageFaqs faqs={page?.faqs} className="bg-white py-14 sm:py-20" />
+      <ExtraBlocks page={page} />
     </>
   );
 }

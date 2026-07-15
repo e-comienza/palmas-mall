@@ -5,8 +5,12 @@ import { CalendarBlank, MapPin } from "@phosphor-icons/react/dist/ssr";
 import { PageHeader } from "@/components/public/page-header";
 import { Container, SectionTitle } from "@/components/public/container";
 import { Badge } from "@/components/ui/badge";
-import { getUpcomingEvents, getPastEvents } from "@/lib/queries";
+import { getUpcomingEvents, getPastEvents, getPage } from "@/lib/queries";
+import { heroData } from "@/lib/blocks";
+import { ExtraBlocks } from "@/components/public/block-renderer";
 import { pageMetadata } from "@/lib/page-metadata";
+import { PageFaqs } from "@/components/public/page-faqs";
+import { itemListJsonLd, webPageJsonLd, JsonLdScript } from "@/lib/jsonld";
 import { formatDateEs } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -16,14 +20,38 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function EventosPage() {
-  const [upcoming, past] = await Promise.all([getUpcomingEvents(), getPastEvents(4)]);
+  const [upcoming, past, page] = await Promise.all([
+    getUpcomingEvents(),
+    getPastEvents(4),
+    getPage("eventos"),
+  ]);
   const [next, ...rest] = upcoming;
+  const hero = heroData(page);
 
   return (
     <>
+      <JsonLdScript
+        data={[
+          webPageJsonLd({
+            path: "/eventos",
+            name: hero.heading || "Eventos",
+            description: page?.seoDescription,
+          }),
+          itemListJsonLd({
+            path: "/eventos",
+            name: "Próximos eventos en Palmas Mall",
+            items: upcoming.map((e) => ({
+              name: e.title,
+              path: `/eventos/${e.slug}`,
+              image: e.coverUrl || undefined,
+              description: e.shortDescription || undefined,
+            })),
+          }),
+        ]}
+      />
       <PageHeader
-        title="Eventos"
-        intro="Ferias, música, deporte y planes para toda la familia: esto es lo que viene en Palmas Mall."
+        title={hero.heading || "Eventos"}
+        intro={hero.subheading || "Ferias, música, deporte y planes para toda la familia: esto es lo que viene en Palmas Mall."}
         crumbs={[{ name: "Eventos", path: "/eventos" }]}
       />
       <Container className="py-10 sm:py-14">
@@ -144,6 +172,8 @@ export default async function EventosPage() {
           </div>
         ) : null}
       </Container>
+      <PageFaqs faqs={page?.faqs} className="bg-white py-14 sm:py-20" />
+      <ExtraBlocks page={page} />
     </>
   );
 }

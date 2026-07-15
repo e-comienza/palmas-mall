@@ -7,6 +7,9 @@ import { FaqAccordion } from "@/components/public/faq-section";
 import { getSedes, getPage } from "@/lib/queries";
 import { pageMetadata } from "@/lib/page-metadata";
 import { faqJsonLd, JsonLdScript } from "@/lib/jsonld";
+import { heroData } from "@/lib/blocks";
+import { webPageJsonLd } from "@/lib/jsonld";
+import { ExtraBlocks } from "@/components/public/block-renderer";
 
 export const dynamic = "force-dynamic";
 
@@ -39,13 +42,21 @@ const MEDIOS = [
 
 export default async function ComoLlegarPage() {
   const [sedes, page] = await Promise.all([getSedes(), getPage("como-llegar")]);
+  const hero = heroData(page);
 
   return (
     <>
+      <JsonLdScript
+        data={webPageJsonLd({
+          path: "/como-llegar",
+          name: hero.heading || "Cómo llegar",
+          description: page?.seoDescription,
+        })}
+      />
       {page?.faqs.length ? <JsonLdScript data={faqJsonLd(page.faqs)} /> : null}
       <PageHeader
-        title="Cómo llegar"
-        intro="Elige tu sede, abre la navegación y ven a vivir tus mejores momentos."
+        title={hero.heading || "Cómo llegar"}
+        intro={hero.subheading || "Elige tu sede, abre la navegación y ven a vivir tus mejores momentos."}
         crumbs={[{ name: "Cómo llegar", path: "/como-llegar" }]}
       />
 
@@ -139,6 +150,7 @@ export default async function ComoLlegarPage() {
           </div>
         ) : null}
       </Container>
+      <ExtraBlocks page={page} consumed={["HERO", "FAQ"]} />
     </>
   );
 }
