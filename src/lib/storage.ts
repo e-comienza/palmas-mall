@@ -29,15 +29,19 @@ export async function uploadImage(
   if (cloudinaryConfigured()) {
     const { v2: cloudinary } = await import("cloudinary");
     const baseFolder = process.env.CLOUDINARY_FOLDER || "palmas-mall";
+    const isVideo = file.type.startsWith("video/");
     const result = await new Promise<UploadResult>((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
           {
             folder: `${baseFolder}/${folder}`,
-            // "auto": detecta imagen o video. Los videos se sirven luego con
-            // f_auto,q_auto (ver src/lib/media.ts) para cargar rápido.
+            // "auto": detecta imagen o video.
             resource_type: "auto",
-            transformation: [{ quality: "auto", fetch_format: "auto" }],
+            // Solo las imágenes llevan transformación de entrada. Los videos
+            // NO: Cloudinary rechaza transformar video grande de forma síncrona
+            // ("too large to process synchronously"). Se transforman en delivery
+            // con f_auto,q_auto vía URL (ver src/lib/media.ts).
+            ...(isVideo ? {} : { transformation: [{ quality: "auto", fetch_format: "auto" }] }),
           },
           (error, uploaded) => {
             if (error || !uploaded) {
