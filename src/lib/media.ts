@@ -34,9 +34,13 @@ export function cloudinaryLoader({ src, width, quality }: ImageLoaderProps): str
  * URL de video optimizada por Cloudinary: `f_auto` elige MP4/WebM según el
  * navegador y `q_auto` baja el peso sin pérdida visible.
  */
-export function cloudinaryVideoSrc(url: string, width?: number): string {
+export function cloudinaryVideoSrc(
+  url: string,
+  width?: number,
+  quality = "auto",
+): string {
   if (!url.includes("/video/upload/")) return url;
-  const t = ["f_auto", "q_auto", width ? `w_${width}` : null, "c_limit"]
+  const t = ["f_auto", `q_${quality}`, width ? `w_${width}` : null, "c_limit"]
     .filter(Boolean)
     .join(",");
   return url.replace("/video/upload/", `/video/upload/${t}/`);

@@ -24,10 +24,35 @@ export function BackgroundVideo({
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
+    // iOS Safari solo autoplaya muted + inline, y rechaza play() si se llama
+    // antes de que el video pueda reproducir. Forzamos muted y reintentamos
+    // en cada evento de "listo"; si aún se bloquea, arrancamos al primer toque.
     v.muted = true;
     v.defaultMuted = true;
-    const p = v.play();
-    if (p) p.catch(() => {});
+
+    const tryPlay = () => {
+      const p = v.play();
+      if (p) p.catch(() => {});
+    };
+
+    tryPlay();
+    v.addEventListener("loadeddata", tryPlay);
+    v.addEventListener("canplay", tryPlay);
+
+    const onGesture = () => {
+      tryPlay();
+      window.removeEventListener("touchstart", onGesture);
+      window.removeEventListener("pointerdown", onGesture);
+    };
+    window.addEventListener("touchstart", onGesture, { passive: true, once: true });
+    window.addEventListener("pointerdown", onGesture, { passive: true, once: true });
+
+    return () => {
+      v.removeEventListener("loadeddata", tryPlay);
+      v.removeEventListener("canplay", tryPlay);
+      window.removeEventListener("touchstart", onGesture);
+      window.removeEventListener("pointerdown", onGesture);
+    };
   }, []);
 
   return (

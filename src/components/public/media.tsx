@@ -88,7 +88,7 @@ export function Media({
     if (mode === "background") {
       return (
         <BackgroundVideo
-          src={cloudinaryVideoSrc(src, 1600)}
+          src={cloudinaryVideoSrc(src, 1280, "auto:eco")}
           poster={poster}
           className={cn(fill && "absolute inset-0 size-full", className)}
           ariaLabel={alt}
