@@ -4,8 +4,9 @@ import { Footer } from "@/components/public/footer";
 import { WhatsappFloat } from "@/components/public/whatsapp-float";
 import { Molly } from "@/components/public/molly";
 import { PopupManager, type PopupData } from "@/components/public/popup-manager";
-import { getNavigation, getActivePopups } from "@/lib/queries";
+import { getNavigation, getActivePopups, getEventsByIds } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/settings";
+import { formatDateShortEs } from "@/lib/utils";
 
 export default async function PublicLayout({
   children,
@@ -18,8 +19,20 @@ export default async function PublicLayout({
     getActivePopups(),
   ]);
 
+  // Eventos para los popups en modo carrusel (Popup.eventIds → orden dado)
+  const carouselEventIds = Array.from(
+    new Set(
+      popups
+        .filter((p) => p.mode === "EVENT_CAROUSEL")
+        .flatMap((p) => (Array.isArray(p.eventIds) ? (p.eventIds as string[]) : [])),
+    ),
+  );
+  const carouselEvents = await getEventsByIds(carouselEventIds);
+  const eventById = new Map(carouselEvents.map((e) => [e.id, e]));
+
   const popupData: PopupData[] = popups.map((p) => ({
     id: p.id,
+    mode: p.mode,
     title: p.title,
     body: p.body,
     imageUrl: p.imageUrl,
@@ -32,6 +45,19 @@ export default async function PublicLayout({
     delaySeconds: p.delaySeconds,
     exitIntent: p.exitIntent,
     audience: p.audience,
+    events:
+      p.mode === "EVENT_CAROUSEL" && Array.isArray(p.eventIds)
+        ? (p.eventIds as string[])
+            .map((id) => eventById.get(id))
+            .filter((e): e is NonNullable<typeof e> => Boolean(e))
+            .map((e) => ({
+              id: e.id,
+              slug: e.slug,
+              title: e.title,
+              coverUrl: e.coverUrl,
+              dateLabel: `${formatDateShortEs(e.startsAt)}${e.timeLabel ? ` · ${e.timeLabel}` : ""}`,
+            }))
+        : [],
   }));
 
   return (
@@ -54,7 +80,7 @@ export default async function PublicLayout({
         {children}
       </main>
       <Footer />
-      <WhatsappFloat whatsapp={settings.whatsapp} />
+      {settings.whatsappBubbleEnabled ? <WhatsappFloat whatsapp={settings.whatsapp} /> : null}
       <Molly
         config={{
           enabled: settings.mollyEnabled,

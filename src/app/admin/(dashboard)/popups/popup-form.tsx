@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { Popup } from "@prisma/client";
+import { ArrowUp, ArrowDown, X, Plus } from "@phosphor-icons/react";
 import { upsertPopup } from "@/app/admin/_actions/misc";
 import {
   Field,
@@ -16,6 +17,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
+type EventOption = { id: string; title: string };
+
 function toLocalInput(date?: Date | null): string {
   if (!date) return "";
   const d = new Date(date);
@@ -23,9 +26,88 @@ function toLocalInput(date?: Date | null): string {
   return d.toISOString().slice(0, 16);
 }
 
-export function PopupForm({ popup }: { popup?: Popup }) {
+/** Selector con orden de eventos para el carrusel del popup. */
+function EventCarouselPicker({
+  events,
+  initial,
+}: {
+  events: EventOption[];
+  initial: string[];
+}) {
+  const valid = initial.filter((id) => events.some((e) => e.id === id));
+  const [selected, setSelected] = useState<string[]>(valid);
+  const titleOf = (id: string) => events.find((e) => e.id === id)?.title ?? "(evento eliminado)";
+  const available = events.filter((e) => !selected.includes(e.id));
+
+  const move = (i: number, dir: -1 | 1) => {
+    setSelected((prev) => {
+      const next = [...prev];
+      const j = i + dir;
+      if (j < 0 || j >= next.length) return prev;
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+  };
+
+  return (
+    <div className="space-y-3">
+      <input type="hidden" name="eventIds" value={JSON.stringify(selected)} />
+      {selected.length ? (
+        <ol className="space-y-2">
+          {selected.map((id, i) => (
+            <li key={id} className="flex items-center gap-2 rounded-xl border border-mist-200 bg-white p-2.5">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-palm-100 text-[12px] font-bold text-palm-800">
+                {i + 1}
+              </span>
+              <span className="min-w-0 flex-1 truncate text-sm text-mist-800">{titleOf(id)}</span>
+              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Subir" className="pressable flex size-8 items-center justify-center rounded-lg text-mist-600 hover:bg-mist-100 disabled:opacity-30">
+                <ArrowUp size={15} weight="bold" />
+              </button>
+              <button type="button" onClick={() => move(i, 1)} disabled={i === selected.length - 1} aria-label="Bajar" className="pressable flex size-8 items-center justify-center rounded-lg text-mist-600 hover:bg-mist-100 disabled:opacity-30">
+                <ArrowDown size={15} weight="bold" />
+              </button>
+              <button type="button" onClick={() => setSelected((p) => p.filter((x) => x !== id))} aria-label="Quitar" className="pressable flex size-8 items-center justify-center rounded-lg text-red-600 hover:bg-red-50">
+                <X size={15} weight="bold" />
+              </button>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="rounded-xl border border-dashed border-mist-300 bg-mist-50 p-4 text-center text-[13px] text-mist-500">
+          Aún no agregas eventos al carrusel.
+        </p>
+      )}
+
+      {available.length ? (
+        <div className="flex items-center gap-2">
+          <Select
+            aria-label="Agregar evento"
+            value=""
+            onChange={(e) => {
+              if (e.target.value) setSelected((p) => [...p, e.target.value]);
+            }}
+          >
+            <option value="">Agregar un evento…</option>
+            {available.map((e) => (
+              <option key={e.id} value={e.id}>{e.title}</option>
+            ))}
+          </Select>
+          <span className="pointer-events-none flex size-9 shrink-0 items-center justify-center rounded-lg bg-palm-100 text-palm-700">
+            <Plus size={16} weight="bold" />
+          </span>
+        </div>
+      ) : (
+        <p className="text-[13px] text-mist-500">Ya agregaste todos los eventos disponibles.</p>
+      )}
+    </div>
+  );
+}
+
+export function PopupForm({ popup, events = [] }: { popup?: Popup; events?: EventOption[] }) {
   const [state, action] = useActionState(upsertPopup, initialFormState);
   const err = (f: string) => state.fieldErrors?.[f];
+  const [mode, setMode] = useState<string>(popup?.mode ?? "SIMPLE");
+  const initialEventIds = Array.isArray(popup?.eventIds) ? (popup?.eventIds as string[]) : [];
 
   return (
     <form action={action} className="space-y-6">
@@ -39,21 +121,36 @@ export function PopupForm({ popup }: { popup?: Popup }) {
               <Field label="Nombre interno *" htmlFor="internalName" error={err("internalName")} hint="Solo lo ve el equipo">
                 <Input id="internalName" name="internalName" defaultValue={popup?.internalName} required />
               </Field>
+              <Field label="Tipo de popup" htmlFor="mode" hint="El carrusel muestra tus eventos en orden">
+                <Select id="mode" name="mode" value={mode} onChange={(e) => setMode(e.target.value)}>
+                  <option value="SIMPLE">Simple (imagen + texto + botón)</option>
+                  <option value="EVENT_CAROUSEL">Carrusel de eventos</option>
+                </Select>
+              </Field>
               <Field label="Título visible" htmlFor="title">
                 <Input id="title" name="title" defaultValue={popup?.title} />
               </Field>
               <Field label="Texto" htmlFor="body">
                 <Textarea id="body" name="body" defaultValue={popup?.body} className="min-h-[80px]" />
               </Field>
-              <div className="grid gap-5 sm:grid-cols-2">
-                <Field label="Texto del botón" htmlFor="ctaLabel">
-                  <Input id="ctaLabel" name="ctaLabel" defaultValue={popup?.ctaLabel} />
+
+              {mode === "EVENT_CAROUSEL" ? (
+                <Field label="Eventos del carrusel" htmlFor="eventIds" hint="Ordénalos con las flechas; ese es el orden en que se muestran">
+                  <EventCarouselPicker events={events} initial={initialEventIds} />
                 </Field>
-                <Field label="URL del botón" htmlFor="ctaUrl">
-                  <Input id="ctaUrl" name="ctaUrl" defaultValue={popup?.ctaUrl} placeholder="/eventos" />
-                </Field>
-              </div>
-              <ImageUpload name="imageUrl" label="Imagen (opcional)" defaultValue={popup?.imageUrl} folder="popups" />
+              ) : (
+                <>
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <Field label="Texto del botón" htmlFor="ctaLabel">
+                      <Input id="ctaLabel" name="ctaLabel" defaultValue={popup?.ctaLabel} />
+                    </Field>
+                    <Field label="URL del botón" htmlFor="ctaUrl">
+                      <Input id="ctaUrl" name="ctaUrl" defaultValue={popup?.ctaUrl} placeholder="/eventos" />
+                    </Field>
+                  </div>
+                  <ImageUpload name="imageUrl" label="Imagen (opcional)" defaultValue={popup?.imageUrl} folder="popups" />
+                </>
+              )}
             </div>
           </AdminCard>
 
@@ -63,7 +160,7 @@ export function PopupForm({ popup }: { popup?: Popup }) {
                 <Select id="placement" name="placement" defaultValue={popup?.placement ?? "ALL"}>
                   <option value="ALL">Todas las páginas</option>
                   <option value="HOME">Solo el home</option>
-                  <option value="LOCALES">Locales</option>
+                  <option value="LOCALES">Directorio</option>
                   <option value="EVENTOS">Eventos</option>
                   <option value="BLOG">Blog</option>
                   <option value="CUSTOM">Ruta personalizada</option>

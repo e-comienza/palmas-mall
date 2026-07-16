@@ -29,7 +29,7 @@ export default function NotFound() {
           Volver al inicio
         </Link>
         <Link
-          href="/locales"
+          href="/directorio"
           className="pressable inline-flex h-12 items-center rounded-full border border-palm-700/30 bg-white px-7 text-base font-semibold text-palm-800 transition-colors hover:bg-palm-50"
         >
           Explorar locales

@@ -7,8 +7,17 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { X } from "@phosphor-icons/react";
 
+export type PopupEventSlide = {
+  id: string;
+  slug: string;
+  title: string;
+  coverUrl: string;
+  dateLabel: string;
+};
+
 export type PopupData = {
   id: string;
+  mode: "SIMPLE" | "EVENT_CAROUSEL";
   title: string;
   body: string;
   imageUrl: string;
@@ -21,6 +30,7 @@ export type PopupData = {
   delaySeconds: number;
   exitIntent: boolean;
   audience: "ALL" | "DESKTOP" | "MOBILE";
+  events: PopupEventSlide[];
 };
 
 function matchesPath(popup: PopupData, path: string): boolean {
@@ -30,7 +40,7 @@ function matchesPath(popup: PopupData, path: string): boolean {
     case "HOME":
       return path === "/";
     case "LOCALES":
-      return path.startsWith("/locales");
+      return path.startsWith("/directorio");
     case "EVENTOS":
       return path.startsWith("/eventos");
     case "BLOG":
@@ -72,6 +82,8 @@ export function PopupManager({ popups }: { popups: PopupData[] }) {
       if (!matchesPath(p, pathname)) return false;
       if (p.audience === "DESKTOP" && isMobile) return false;
       if (p.audience === "MOBILE" && !isMobile) return false;
+      // Carrusel sin eventos válidos: no mostrar
+      if (p.mode === "EVENT_CAROUSEL" && !p.events.length) return false;
       return true;
     });
   }, [popups, pathname]);
@@ -130,34 +142,70 @@ export function PopupManager({ popups }: { popups: PopupData[] }) {
           >
             <X size={18} weight="bold" />
           </button>
-          {active.imageUrl ? (
-            <div className="relative h-36 w-full">
-              <Image
-                src={active.imageUrl}
-                alt=""
-                fill
-                sizes="384px"
-                className="object-cover"
-              />
-            </div>
-          ) : null}
-          <div className="p-5">
-            <p className="font-display text-lg font-bold leading-snug text-palm-950">
-              {active.title}
-            </p>
-            {active.body ? (
-              <p className="mt-1.5 text-sm leading-relaxed text-mist-600">{active.body}</p>
-            ) : null}
-            {active.ctaLabel && active.ctaUrl ? (
+          {active.mode === "EVENT_CAROUSEL" ? (
+            <div className="p-5">
+              <p className="font-display text-lg font-bold leading-snug text-palm-950">
+                {active.title || "Próximos eventos"}
+              </p>
+              {active.body ? (
+                <p className="mt-1 text-sm leading-relaxed text-mist-600">{active.body}</p>
+              ) : null}
+              <div className="scrollbar-none -mx-1 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-1">
+                {active.events.map((ev) => (
+                  <Link
+                    key={ev.id}
+                    href={`/eventos/${ev.slug}`}
+                    onClick={close}
+                    className="group w-[80%] shrink-0 snap-center overflow-hidden rounded-xl bg-mist-50 ring-1 ring-mist-200 transition-shadow hover:shadow-card"
+                  >
+                    <div className="relative aspect-[16/10] w-full bg-mist-100">
+                      {ev.coverUrl ? (
+                        <Image src={ev.coverUrl} alt={ev.title} fill sizes="320px" className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+                      ) : null}
+                    </div>
+                    <div className="p-3">
+                      <p className="text-[12px] font-semibold text-palm-700">{ev.dateLabel}</p>
+                      <p className="mt-0.5 line-clamp-2 font-display text-[15px] font-bold leading-snug text-palm-950">
+                        {ev.title}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
               <Link
-                href={active.ctaUrl}
+                href="/eventos"
                 onClick={close}
                 className="pressable mt-4 inline-flex h-10 items-center justify-center rounded-full bg-palm-700 px-5 text-sm font-semibold text-white transition-colors hover:bg-palm-800"
               >
-                {active.ctaLabel}
+                Ver todos los eventos
               </Link>
-            ) : null}
-          </div>
+            </div>
+          ) : (
+            <>
+              {active.imageUrl ? (
+                <div className="relative h-36 w-full">
+                  <Image src={active.imageUrl} alt="" fill sizes="384px" className="object-cover" />
+                </div>
+              ) : null}
+              <div className="p-5">
+                <p className="font-display text-lg font-bold leading-snug text-palm-950">
+                  {active.title}
+                </p>
+                {active.body ? (
+                  <p className="mt-1.5 text-sm leading-relaxed text-mist-600">{active.body}</p>
+                ) : null}
+                {active.ctaLabel && active.ctaUrl ? (
+                  <Link
+                    href={active.ctaUrl}
+                    onClick={close}
+                    className="pressable mt-4 inline-flex h-10 items-center justify-center rounded-full bg-palm-700 px-5 text-sm font-semibold text-white transition-colors hover:bg-palm-800"
+                  >
+                    {active.ctaLabel}
+                  </Link>
+                ) : null}
+              </div>
+            </>
+          )}
         </motion.div>
       )}
     </AnimatePresence>

@@ -128,7 +128,7 @@ export default async function AdminSeoPage() {
         rows={locales.map((l) => ({
           id: l.id,
           title: l.name,
-          path: `/locales/${l.slug}`,
+          path: `/directorio/${l.slug}`,
           editHref: `/admin/locales/${l.id}`,
           seoTitle: l.seoTitle,
           seoDescription: l.seoDescription,

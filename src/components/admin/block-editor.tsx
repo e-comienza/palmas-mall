@@ -99,7 +99,7 @@ export function BlockEditor({
                 <ImageUpload name={`__block-${i}-img`} defaultValue={str(block, "imageUrl")} folder="paginas" onChange={(v) => setData(i, "imageUrl", v)} />
                 <div className="grid grid-cols-2 gap-3">
                   <Input value={str(block, "ctaPrimaryLabel")} onChange={(e) => setData(i, "ctaPrimaryLabel", e.target.value)} placeholder="Texto del botón" aria-label="Texto del botón" />
-                  <Input value={str(block, "ctaPrimaryUrl")} onChange={(e) => setData(i, "ctaPrimaryUrl", e.target.value)} placeholder="/locales" aria-label="URL del botón" />
+                  <Input value={str(block, "ctaPrimaryUrl")} onChange={(e) => setData(i, "ctaPrimaryUrl", e.target.value)} placeholder="/directorio" aria-label="URL del botón" />
                 </div>
               </>
             ) : null}

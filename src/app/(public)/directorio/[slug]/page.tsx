@@ -29,11 +29,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: { absolute: title },
     description,
-    alternates: { canonical: siteUrl(`/locales/${local.slug}`) },
+    alternates: { canonical: siteUrl(`/directorio/${local.slug}`) },
     openGraph: {
       title,
       description,
-      url: siteUrl(`/locales/${local.slug}`),
+      url: siteUrl(`/directorio/${local.slug}`),
       images: ogImage ? [{ url: ogImage }] : undefined,
     },
   };

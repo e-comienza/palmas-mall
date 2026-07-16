@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import {
   Storefront,
   Megaphone,
   CalendarStar,
   ChartLineUp,
+  FilePdf,
+  WhatsappLogo,
 } from "@phosphor-icons/react/dist/ssr";
 import { PageHeader } from "@/components/public/page-header";
 import { Container, SectionTitle } from "@/components/public/container";
 import { Reveal } from "@/components/public/reveal";
+import { Media } from "@/components/public/media";
 import { ContactForm } from "@/components/public/contact-form";
 import { getSiteSettings } from "@/lib/settings";
 import { getPage } from "@/lib/queries";
@@ -67,22 +69,24 @@ export default async function PatrociniosPage() {
       />
 
       <Container className="py-14 sm:py-20">
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-          <Reveal>
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
-              <Image
-                src="/images/galeria/dsc1563-scaled.webp"
-                alt="Feria de marcas en Palmas Mall"
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
-              />
-            </div>
-          </Reveal>
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,340px)_1fr] lg:items-center">
+          {settings.sponsorVideoUrl ? (
+            <Reveal>
+              <div className="relative mx-auto aspect-[9/16] w-full max-w-[340px] overflow-hidden rounded-2xl bg-palm-950 shadow-card">
+                <Media
+                  src={settings.sponsorVideoUrl}
+                  alt="Brochure de Palmas Mall para marcas"
+                  fill
+                  mode="inline"
+                  className="object-cover"
+                />
+              </div>
+            </Reveal>
+          ) : null}
           <Reveal delay={0.08}>
             <div>
-              <h2 className="font-display text-[1.7rem] font-bold leading-[1.15] tracking-[-0.02em] text-palm-950 sm:text-4xl">
-                Tu marca, en el corazón de Ciudad Jardín
+              <h2 className="text-balance font-display text-[1.7rem] font-bold leading-[1.15] tracking-[-0.02em] text-palm-950 sm:text-4xl">
+                Tu marca, en el corazón de la Milla de Oro
               </h2>
               <p className="mt-5 text-[15px] leading-relaxed text-mist-700 sm:text-base">
                 Palmas Mall reúne a los mejores exponentes gastronómicos y de
@@ -91,6 +95,28 @@ export default async function PatrociniosPage() {
                 tráfico calificado y un entorno premium para tu marca, este es
                 el lugar.
               </p>
+              <div className="mt-7 flex flex-wrap gap-3">
+                {settings.sponsorPdfUrl ? (
+                  <a
+                    href={settings.sponsorPdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="pressable inline-flex h-12 items-center gap-2 rounded-full bg-palm-700 px-7 text-sm font-semibold text-white transition-colors hover:bg-palm-800"
+                  >
+                    <FilePdf size={20} weight="bold" /> Descargar brochure (PDF)
+                  </a>
+                ) : null}
+                <a
+                  href={`https://wa.me/${settings.sponsorWhatsapp}?text=${encodeURIComponent(
+                    "Hola, quiero información para ser sponsor / tener presencia de marca en Palmas Mall.",
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pressable inline-flex h-12 items-center gap-2 rounded-full border border-palm-700/30 bg-white px-7 text-sm font-semibold text-palm-800 transition-colors hover:bg-palm-50"
+                >
+                  <WhatsappLogo size={20} weight="fill" /> Hablar por WhatsApp
+                </a>
+              </div>
             </div>
           </Reveal>
         </div>
@@ -119,7 +145,7 @@ export default async function PatrociniosPage() {
           />
           <ContactForm
             subjectOptions={["Local comercial", "Patrocinio", "Activación de marca", "Publicidad"]}
-            whatsapp={settings.whatsapp}
+            whatsapp={settings.sponsorWhatsapp}
           />
         </Container>
       </section>

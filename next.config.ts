@@ -18,6 +18,13 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 31536000,
   },
   poweredByHeader: false,
+  async redirects() {
+    return [
+      // Renombre público /locales -> /directorio (preserva SEO de las URLs viejas)
+      { source: "/locales", destination: "/directorio", permanent: true },
+      { source: "/locales/:slug", destination: "/directorio/:slug", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

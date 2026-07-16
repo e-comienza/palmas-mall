@@ -14,7 +14,8 @@ import { PageHeader } from "@/components/public/page-header";
 import { Container, SectionTitle } from "@/components/public/container";
 import { Reveal } from "@/components/public/reveal";
 import { FaqAccordion } from "@/components/public/faq-section";
-import { getPage, getGlobalFaqs } from "@/lib/queries";
+import { LightboxGallery } from "@/components/public/lightbox-gallery";
+import { getPage, getGlobalFaqs, getHomeGallery } from "@/lib/queries";
 import { pageMetadata } from "@/lib/page-metadata";
 import { faqJsonLd, JsonLdScript } from "@/lib/jsonld";
 import { heroData } from "@/lib/blocks";
@@ -61,7 +62,11 @@ const EXPERIENCIAS = [
 ];
 
 export default async function ConocePage() {
-  const [page, faqs] = await Promise.all([getPage("conoce-palmas-mall"), getGlobalFaqs()]);
+  const [page, faqs, gallery] = await Promise.all([
+    getPage("conoce-palmas-mall"),
+    getGlobalFaqs(),
+    getHomeGallery(),
+  ]);
   const hero = heroData(page);
 
   return (
@@ -161,6 +166,53 @@ export default async function ConocePage() {
         </Container>
       </section>
 
+      {/* Galería de fotos */}
+      {gallery.length ? (
+        <Container className="py-14 sm:py-20">
+          <SectionTitle
+            title="Así se vive Palmas Mall"
+            intro="Arquitectura, gastronomía, moda y momentos en familia. Toca cualquier foto para verla en grande."
+          />
+          <div className="mt-8">
+            <LightboxGallery
+              images={gallery.map((g) => ({ url: g.url, alt: g.alt, caption: g.caption || undefined }))}
+            />
+          </div>
+        </Container>
+      ) : null}
+
+      {/* Galardones */}
+      <section className="bg-white py-14 sm:py-20">
+        <Container>
+          <SectionTitle
+            title="Un diseño reconocido en el mundo"
+            intro="La arquitectura y el concepto de Palmas Mall han sido premiados por las organizaciones más importantes del sector a nivel internacional."
+          />
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <div className="flex items-center gap-5 rounded-2xl bg-palm-50 p-6 sm:p-7">
+              <Image src="/brand/G1.png" alt="Premio FIABCI a la excelencia inmobiliaria" width={96} height={96} className="size-16 w-auto shrink-0 rounded-xl bg-white p-1.5 shadow-card" />
+              <div>
+                <p className="font-display text-lg font-bold text-palm-950">FIABCI · Excelencia Inmobiliaria</p>
+                <p className="mt-1 text-sm leading-relaxed text-mist-600">Premio nacional en la categoría comercio a la excelencia inmobiliaria.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-5 rounded-2xl bg-palm-50 p-6 sm:p-7">
+              <Image src="/brand/G2.png" alt="ICSC Silver Award 2009" width={96} height={96} className="size-16 w-auto shrink-0 rounded-xl bg-white p-1.5 shadow-card" />
+              <div>
+                <p className="font-display text-lg font-bold text-palm-950">ICSC · Silver Award 2009</p>
+                <p className="mt-1 text-sm leading-relaxed text-mist-600">Reconocimiento internacional al diseño y desarrollo de nuevos proyectos.</p>
+              </div>
+            </div>
+          </div>
+          <Link
+            href="/galardones"
+            className="mt-8 inline-flex items-center gap-1.5 font-semibold text-palm-700 transition-colors hover:text-palm-900"
+          >
+            Ver todos los galardones <ArrowRight size={16} weight="bold" />
+          </Link>
+        </Container>
+      </section>
+
       {/* CTA + FAQ */}
       <Container className="py-14 sm:py-20">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr]">
@@ -180,7 +232,7 @@ export default async function ConocePage() {
                 Cómo llegar
               </Link>
               <Link
-                href="/locales"
+                href="/directorio"
                 className="pressable inline-flex h-11 items-center rounded-full border border-palm-700/30 bg-white px-6 text-sm font-semibold text-palm-800 transition-colors hover:bg-palm-50"
               >
                 Explorar locales

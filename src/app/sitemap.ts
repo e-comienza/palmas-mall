@@ -30,7 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: siteUrl("/conoce-palmas-mall"), changeFrequency: "monthly", priority: 0.8 },
     { url: siteUrl("/food-drinks"), changeFrequency: "weekly", priority: 0.9 },
     { url: siteUrl("/shop-more"), changeFrequency: "weekly", priority: 0.9 },
-    { url: siteUrl("/locales"), changeFrequency: "weekly", priority: 0.9 },
+    { url: siteUrl("/directorio"), changeFrequency: "weekly", priority: 0.9 },
     { url: siteUrl("/eventos"), changeFrequency: "daily", priority: 0.9 },
     { url: siteUrl("/blog"), changeFrequency: "weekly", priority: 0.7 },
     { url: siteUrl("/momentos-palmas-mall"), changeFrequency: "monthly", priority: 0.6 },
@@ -45,7 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticRoutes,
     ...locales.map((l) => ({
-      url: siteUrl(`/locales/${l.slug}`),
+      url: siteUrl(`/directorio/${l.slug}`),
       lastModified: l.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.8,

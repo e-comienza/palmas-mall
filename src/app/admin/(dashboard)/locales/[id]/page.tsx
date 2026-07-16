@@ -25,7 +25,7 @@ export default async function EditarLocalPage({
     <div>
       <AdminPageHeader title={`Editar: ${local.name}`}>
         <Link
-          href={`/locales/${local.slug}`}
+          href={`/directorio/${local.slug}`}
           target="_blank"
           className="pressable inline-flex h-10 items-center rounded-full border border-mist-300 bg-white px-5 text-sm font-semibold text-mist-700 hover:bg-mist-100"
         >

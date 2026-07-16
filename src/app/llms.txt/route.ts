@@ -45,7 +45,7 @@ export async function GET() {
   const stores = locales.filter((l) => !l.isRestaurant);
 
   const line = (l: (typeof locales)[number]) =>
-    `- [${l.name}](${siteUrl(`/locales/${l.slug}`)})${
+    `- [${l.name}](${siteUrl(`/directorio/${l.slug}`)})${
       l.category?.name ? ` — ${l.category.name}` : ""
     }${l.shortDescription ? `: ${l.shortDescription}` : ""}`;
 
@@ -67,7 +67,7 @@ export async function GET() {
     `- [Conoce Palmas Mall](${siteUrl("/conoce-palmas-mall")}): historia y concepto de Lifestyle Mall.`,
     `- [Food & Drinks](${siteUrl("/food-drinks")}): el Food Hall y su oferta gastronómica.`,
     `- [Shop & More](${siteUrl("/shop-more")}): tiendas, moda y servicios.`,
-    `- [Directorio de locales](${siteUrl("/locales")}): todos los locales, filtrables por categoría.`,
+    `- [Directorio de locales](${siteUrl("/directorio")}): todos los locales, filtrables por categoría.`,
     `- [Eventos](${siteUrl("/eventos")}): agenda de eventos y experiencias.`,
     `- [Blog](${siteUrl("/blog")}): noticias y guías.`,
     `- [Plano del Mall](${siteUrl("/plano-del-mall")}): mapa de ubicación de los locales.`,
