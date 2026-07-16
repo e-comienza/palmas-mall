@@ -17,6 +17,60 @@ const prisma = new PrismaClient();
 const PH = "[Contenido de ejemplo - edítalo desde el admin] ";
 const U = "https://palmasmall.com/wp-content/uploads";
 
+// Política de tratamiento de datos (contenido oficial, editable desde /admin).
+const POLICY_HTML = `
+<h2>Política para el tratamiento de datos personales de la copropiedad Palmas Mall®</h2>
+<h3>Ámbito de aplicación</h3>
+<p>PALMAS MALL® PROPIEDAD HORIZONTAL (NIT 900.003.968-2) informa a sus accionistas, trabajadores, candidatos a empleo, proveedores y arrendatarios sobre su política de tratamiento de datos personales, en cumplimiento del artículo 15 de la Constitución Política, la Ley 1581 de 2012 y sus decretos reglamentarios.</p>
+
+<h3>Definiciones</h3>
+<ul>
+<li><strong>Autorización:</strong> consentimiento previo, expreso e informado del Titular para llevar a cabo el tratamiento de datos personales.</li>
+<li><strong>Base de datos:</strong> conjunto organizado de datos personales objeto de tratamiento.</li>
+<li><strong>Dato personal:</strong> cualquier información vinculada o que pueda asociarse a una o varias personas naturales determinadas o determinables.</li>
+<li><strong>Dato público:</strong> dato calificado como tal según la ley o la Constitución, y que no sea semiprivado, privado o sensible.</li>
+<li><strong>Datos sensibles:</strong> aquellos que afectan la intimidad del Titular o cuyo uso indebido puede generar discriminación (origen racial, orientación política, convicciones religiosas, datos de salud, vida sexual y datos biométricos).</li>
+<li><strong>Encargado del tratamiento:</strong> persona que realiza el tratamiento de datos por cuenta del responsable.</li>
+<li><strong>Responsable del tratamiento:</strong> persona que decide sobre la base de datos y el tratamiento de los datos.</li>
+<li><strong>Titular:</strong> persona natural cuyos datos personales son objeto de tratamiento.</li>
+<li><strong>Tratamiento:</strong> operación sobre datos personales como recolección, almacenamiento, uso, circulación o supresión.</li>
+</ul>
+
+<h3>Tratamiento y finalidad</h3>
+<p>El responsable recolecta, almacena, usa, circula y suprime datos de accionistas, trabajadores, candidatos, proveedores y arrendatarios para el cumplimiento de sus objetivos organizacionales, respetando los principios de la Ley 1581 de 2012.</p>
+
+<h3>Canales de recolección</h3>
+<p><strong>Canal físico:</strong> hoja de vida, documento de identidad y datos personales (nombre, fecha y lugar de nacimiento, dirección de residencia, teléfono, correo, género, estado civil) e información financiera cuando corresponda.</p>
+<p><strong>Canal digital:</strong> formularios en línea, correo electrónico, llamadas telefónicas y páginas web. El responsable se compromete a recolectar únicamente la información pertinente a sus finalidades.</p>
+
+<h3>Finalidades del tratamiento</h3>
+<ul>
+<li>Cumplir deberes legales y reglamentarios.</li>
+<li>Gestionar la relación con accionistas, trabajadores, candidatos, proveedores y arrendatarios.</li>
+<li>Atender peticiones, quejas, reclamos y sugerencias (PQRS).</li>
+<li>Adelantar procesos de selección de personal.</li>
+<li>Ejecutar contratos con proveedores y arrendatarios.</li>
+<li>Realizar actividades de mercadeo, publicidad y promoción, y ofrecer productos y servicios.</li>
+<li>Realizar encuestas y sondeos de opinión.</li>
+</ul>
+
+<h3>Derechos del titular</h3>
+<ul>
+<li>Conocer, actualizar y rectificar sus datos personales.</li>
+<li>Solicitar prueba de la autorización otorgada.</li>
+<li>Ser informado sobre el uso que se ha dado a sus datos.</li>
+<li>Presentar quejas ante la Superintendencia de Industria y Comercio.</li>
+<li>Revocar la autorización y solicitar la supresión del dato cuando se vulneren los principios legales.</li>
+<li>Acceder de forma gratuita a sus datos personales objeto de tratamiento.</li>
+</ul>
+
+<h3>Contacto para ejercer sus derechos</h3>
+<p>Correo electrónico: palmasmall@palmasmall.com. Dirección: Carrera 105 No. 15-09, Ciudad Jardín, Cali, en el corazón de la Milla de Oro.</p>
+
+<h3>Vigencia</h3>
+<p>Esta política rige a partir de su publicación y aplica a todas las personas cuyos datos sean tratados por el responsable. Cualquier modificación sustancial será comunicada oportunamente.</p>
+`.trim();
+
 async function main() {
   console.log("→ Seed Palmas Mall");
 
@@ -32,7 +86,17 @@ async function main() {
   console.log(`  ✓ Super admin: ${adminEmail}`);
 
   // ── Configuración global ────────────────────────────────────
-  await prisma.siteSettings.upsert({ where: { id: 1 }, update: {}, create: { id: 1 } });
+  // Molly ahora invita directamente al PlayZone.
+  const mollySettings = {
+    mollyMessage: "¡Hola! Soy Molly 🌴 ¿Ya conoces el PlayZone? El plan favorito de los peques te espera.",
+    mollyCtaLabel: "Ir al PlayZone",
+    mollyCtaUrl: "/play-zone",
+  };
+  await prisma.siteSettings.upsert({
+    where: { id: 1 },
+    update: mollySettings,
+    create: { id: 1, ...mollySettings },
+  });
 
   // ── Sede (solo Cali: no existe sede en Barranquilla) ────────
   const cali = await prisma.sede.upsert({
@@ -660,8 +724,9 @@ async function main() {
     },
   ];
 
+  const seededEventIds: string[] = [];
   for (const e of events) {
-    await prisma.event.upsert({
+    const ev = await prisma.event.upsert({
       where: { slug: e.slug },
       update: {},
       create: {
@@ -683,6 +748,7 @@ async function main() {
         seoDescription: e.short,
       },
     });
+    seededEventIds.push(ev.id);
   }
   console.log(`  ✓ ${events.length} eventos demo`);
 
@@ -796,7 +862,7 @@ async function main() {
     },
     {
       q: "¿Dónde queda Palmas Mall?",
-      a: "Palmas Mall está en Cali, Colombia: Carrera 105 No. 15-09, en Ciudad Jardín, cerca de las mejores zonas residenciales del sur de la ciudad.",
+      a: "Palmas Mall está en Cali, Colombia: Carrera 105 No. 15-09, en Ciudad Jardín, en el corazón de la Milla de Oro, cerca de las mejores zonas residenciales del sur de la ciudad.",
     },
     {
       q: "¿Qué restaurantes hay en Palmas Mall?",
@@ -845,7 +911,7 @@ async function main() {
       where: { scope: FaqScope.GLOBAL, question: "¿Dónde queda Palmas Mall?" },
       data: {
         answer:
-          "Palmas Mall está en Cali, Colombia: Carrera 105 No. 15-09, en Ciudad Jardín, cerca de las mejores zonas residenciales del sur de la ciudad.",
+          "Palmas Mall está en Cali, Colombia: Carrera 105 No. 15-09, en Ciudad Jardín, en el corazón de la Milla de Oro, cerca de las mejores zonas residenciales del sur de la ciudad.",
       },
     });
   }
@@ -950,12 +1016,12 @@ async function main() {
         "Ferias, conciertos, planes familiares, fútbol en pantalla gigante y más. Consulta la agenda de eventos de Palmas Mall Cali.",
     },
     {
-      slug: "locales",
-      title: "Directorio de locales",
+      slug: "directorio",
+      title: "Directorio",
       description: "Todos los restaurantes, tiendas y servicios",
       seoTitle: "Directorio de locales de Palmas Mall Cali",
       seoDescription:
-        "Explora todos los locales de Palmas Mall: restaurantes del Food Hall, tiendas de moda, deporte, joyería y servicios. Filtra por categoría y encuentra tu plan.",
+        "Explora todos los locales de Palmas Mall: restaurantes del Food Hall, tiendas de moda, deporte, joyería y servicios. Encuentra cada local en el plano.",
     },
     {
       slug: "blog",
@@ -964,6 +1030,14 @@ async function main() {
       seoTitle: "Blog de Palmas Mall: noticias y guías",
       seoDescription:
         "Novedades, guías gastronómicas, eventos y todo lo que pasa en Palmas Mall, el Lifestyle Mall de Cali.",
+    },
+    {
+      slug: "play-zone",
+      title: "PlayZone",
+      description: "La zona de juegos para niños de Palmas Mall",
+      seoTitle: "PlayZone Palmas Mall: la zona de juegos para niños en Cali",
+      seoDescription:
+        "PlayZone es la zona de juegos de Palmas Mall en Cali: un espacio seguro y divertido para los niños mientras la familia disfruta el Lifestyle Mall.",
     },
   ];
 
@@ -998,10 +1072,10 @@ async function main() {
           data: {
             heading: "Vive tus mejores momentos",
             subheading:
-              "Gastronomía, compras, eventos y arquitectura a cielo abierto en el Lifestyle Mall de Cali.",
+              "Gastronomía, compras, eventos y arquitectura a cielo abierto en el corazón de la Milla de Oro, Cali.",
             imageUrl: "/images/galeria/20250119_193238112_ios-scaled.webp",
-            ctaPrimaryLabel: "Explorar locales",
-            ctaPrimaryUrl: "/locales",
+            ctaPrimaryLabel: "Explorar el directorio",
+            ctaPrimaryUrl: "/directorio",
             ctaSecondaryLabel: "Cómo llegar",
             ctaSecondaryUrl: "/como-llegar",
           },
@@ -1055,7 +1129,7 @@ async function main() {
     },
     "como-llegar": {
       heading: "Cómo llegar",
-      subheading: "Elige tu sede, abre la navegación y ven a vivir tus mejores momentos.",
+      subheading: "Estamos en el corazón de la Milla de Oro, Ciudad Jardín. Abre la navegación y ven a vivir tus mejores momentos.",
     },
     contacto: {
       heading: "Contáctanos",
@@ -1076,9 +1150,13 @@ async function main() {
       subheading:
         "Ferias, música, deporte y planes para toda la familia: esto es lo que viene en Palmas Mall.",
     },
-    locales: {
-      heading: "Directorio de locales",
+    directorio: {
+      heading: "Directorio",
       subheading: "Restaurantes, tiendas y servicios: todo lo que puedes encontrar en Palmas Mall.",
+    },
+    "play-zone": {
+      heading: "PlayZone",
+      subheading: "La zona de juegos donde los peques viven Palmas Mall a su manera.",
     },
     blog: {
       heading: "Blog y noticias",
@@ -1097,6 +1175,51 @@ async function main() {
   }
   console.log(`  ✓ bloques HERO de páginas de sistema`);
 
+  // Bloque RICH_TEXT con la política de tratamiento de datos (editable en admin).
+  const policyBlocks = await prisma.pageBlock.count({
+    where: { pageId: pageId["politica-tratamiento-datos"], type: BlockType.RICH_TEXT },
+  });
+  if (policyBlocks === 0) {
+    await prisma.pageBlock.create({
+      data: {
+        pageId: pageId["politica-tratamiento-datos"],
+        type: BlockType.RICH_TEXT,
+        order: 1,
+        data: { key: "policy", body: POLICY_HTML },
+      },
+    });
+  }
+
+  // PlayZone: video (editable) + texto de intro.
+  const playzoneBlocks = await prisma.pageBlock.count({
+    where: { pageId: pageId["play-zone"], type: { in: [BlockType.VIDEO, BlockType.RICH_TEXT] } },
+  });
+  if (playzoneBlocks === 0) {
+    await prisma.pageBlock.createMany({
+      data: [
+        {
+          pageId: pageId["play-zone"],
+          type: BlockType.RICH_TEXT,
+          order: 1,
+          data: {
+            key: "intro",
+            heading: "Diversión para los más pequeños",
+            body: "PlayZone es el rincón favorito de los niños en Palmas Mall: un espacio seguro y lleno de color para jugar y crear recuerdos, mientras la familia disfruta del Food Hall, las tiendas y la arquitectura a cielo abierto. Un plan redondo para venir en familia, todos los días.",
+          },
+        },
+        {
+          pageId: pageId["play-zone"],
+          type: BlockType.VIDEO,
+          order: 2,
+          data: {
+            heading: "PlayZone en Palmas Mall",
+            url: `${U}/2026/02/video-pantallas-para-web.mp4`,
+          },
+        },
+      ],
+    });
+  }
+
   // ── FAQs por página (AEO) ───────────────────────────────────
   // Estas son las respuestas que citan Google AI Overviews, ChatGPT y
   // Perplexity. Cada una alimenta el JSON-LD FAQPage de su página.
@@ -1114,7 +1237,7 @@ async function main() {
       {
         question: "¿Dónde queda Palmas Mall en Cali?",
         answer:
-          "Palmas Mall está en la Carrera 105 No. 15-09, barrio Ciudad Jardín, al sur de Cali, Colombia.",
+          "Palmas Mall está en la Carrera 105 No. 15-09, barrio Ciudad Jardín, al sur de Cali, en el corazón de la Milla de Oro.",
       },
     ],
     "food-drinks": [
@@ -1205,11 +1328,18 @@ async function main() {
           "En el blog publicamos guías gastronómicas, novedades de locales, eventos y todo lo que está pasando en el mall.",
       },
     ],
-    locales: [
+    directorio: [
       {
         question: "¿Cuántos locales tiene Palmas Mall?",
         answer:
-          "El directorio reúne todos los restaurantes, tiendas y servicios del mall. Puedes filtrarlos por categoría o buscarlos por nombre.",
+          "El directorio reúne todos los restaurantes, tiendas y servicios del mall. Encuéntralos en el plano o búscalos por nombre.",
+      },
+    ],
+    "play-zone": [
+      {
+        question: "¿Qué es el PlayZone de Palmas Mall?",
+        answer:
+          "El PlayZone es la zona de juegos de Palmas Mall pensada para los niños: un espacio seguro y divertido para que los peques disfruten mientras la familia vive el mall.",
       },
     ],
   };
@@ -1247,12 +1377,13 @@ async function main() {
   if (mainItems === 0) {
     await prisma.navigationItem.createMany({
       data: [
-        { menuId: mainMenu.id, label: "Food & Drinks", url: "/food-drinks", order: 0 },
-        { menuId: mainMenu.id, label: "Shop & More", url: "/shop-more", order: 1 },
-        { menuId: mainMenu.id, label: "Locales", url: "/locales", order: 2 },
-        { menuId: mainMenu.id, label: "Eventos", url: "/eventos", order: 3 },
-        { menuId: mainMenu.id, label: "Conoce Palmas Mall", url: "/conoce-palmas-mall", order: 4 },
-        { menuId: mainMenu.id, label: "Cómo llegar", url: "/como-llegar", order: 5 },
+        { menuId: mainMenu.id, label: "Conoce Palmas Mall", url: "/conoce-palmas-mall", order: 0 },
+        { menuId: mainMenu.id, label: "Directorio", url: "/directorio", order: 1 },
+        { menuId: mainMenu.id, label: "Eventos", url: "/eventos", order: 2 },
+        { menuId: mainMenu.id, label: "Cómo llegar", url: "/como-llegar", order: 3 },
+        { menuId: mainMenu.id, label: "Momentos", url: "/momentos-palmas-mall", order: 4 },
+        { menuId: mainMenu.id, label: "Plano", url: "/plano-del-mall", order: 5 },
+        { menuId: mainMenu.id, label: "Be Our Sponsors", url: "/patrocinios", order: 6 },
       ],
     });
   }
@@ -1262,7 +1393,7 @@ async function main() {
     await prisma.navigationItem.createMany({
       data: [
         { menuId: footerMenu.id, label: "Conoce Palmas Mall", url: "/conoce-palmas-mall", order: 0 },
-        { menuId: footerMenu.id, label: "Directorio de locales", url: "/locales", order: 1 },
+        { menuId: footerMenu.id, label: "Directorio", url: "/directorio", order: 1 },
         { menuId: footerMenu.id, label: "Eventos", url: "/eventos", order: 2 },
         { menuId: footerMenu.id, label: "Blog y noticias", url: "/blog", order: 3 },
         { menuId: footerMenu.id, label: "Momentos Palmas Mall", url: "/momentos-palmas-mall", order: 4 },
@@ -1281,12 +1412,11 @@ async function main() {
   if (popupCount === 0) {
     await prisma.popup.create({
       data: {
-        internalName: "PlayZone (demo)",
-        title: "Conoce PlayZone",
-        body: "La zona de juegos para los más pequeños te espera. ¡Ven en familia y descúbrela!",
-        imageUrl: "/images/galeria/dsc1699-1-scaled.webp",
-        ctaLabel: "Ver planes en familia",
-        ctaUrl: "/eventos",
+        internalName: "Eventos destacados (carrusel)",
+        mode: "EVENT_CAROUSEL",
+        eventIds: seededEventIds,
+        title: "No te pierdas nada",
+        body: "Estos son los próximos planes en Palmas Mall.",
         placement: "HOME",
         active: true,
         frequency: "ONCE_PER_SESSION",
@@ -1295,7 +1425,7 @@ async function main() {
       },
     });
   }
-  console.log("  ✓ popup demo");
+  console.log("  ✓ popup (carrusel de eventos)");
 
   console.log("→ Seed completado.");
 }
