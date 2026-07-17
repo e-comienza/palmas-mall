@@ -17,6 +17,13 @@ const prisma = new PrismaClient();
 const PH = "[Contenido de ejemplo - edítalo desde el admin] ";
 const U = "https://palmasmall.com/wp-content/uploads";
 
+// Assets centralizados en Cloudinary (subidos desde los originales de palmasmall.com).
+const CLOUDINARY = {
+  sponsorPdf: "https://res.cloudinary.com/auan6rju/image/upload/v1784293062/palmas-mall/sponsors/nj1crjyxoegotzp9oi83.pdf",
+  sponsorVideo: "https://res.cloudinary.com/auan6rju/video/upload/v1784293063/palmas-mall/sponsors/menzla3kxxymp9dszrpx.mp4",
+  playzoneVideo: "https://res.cloudinary.com/auan6rju/video/upload/v1784293064/palmas-mall/playzone/fgkzfthufpmvqvfqhgq9.mp4",
+};
+
 // Política de tratamiento de datos (contenido oficial, editable desde /admin).
 const POLICY_HTML = `
 <h2>Política para el tratamiento de datos personales de la copropiedad Palmas Mall®</h2>
@@ -86,16 +93,18 @@ async function main() {
   console.log(`  ✓ Super admin: ${adminEmail}`);
 
   // ── Configuración global ────────────────────────────────────
-  // Molly ahora invita directamente al PlayZone.
-  const mollySettings = {
+  // Molly invita al PlayZone; assets de Be Our Sponsors centralizados en Cloudinary.
+  const settingsSeed = {
     mollyMessage: "¡Hola! Soy Molly 🌴 ¿Ya conoces el PlayZone? El plan favorito de los peques te espera.",
     mollyCtaLabel: "Ir al PlayZone",
     mollyCtaUrl: "/play-zone",
+    sponsorPdfUrl: CLOUDINARY.sponsorPdf,
+    sponsorVideoUrl: CLOUDINARY.sponsorVideo,
   };
   await prisma.siteSettings.upsert({
     where: { id: 1 },
-    update: mollySettings,
-    create: { id: 1, ...mollySettings },
+    update: settingsSeed,
+    create: { id: 1, ...settingsSeed },
   });
 
   // ── Sede (solo Cali: no existe sede en Barranquilla) ────────
@@ -1213,7 +1222,7 @@ async function main() {
           order: 2,
           data: {
             heading: "PlayZone en Palmas Mall",
-            url: `${U}/2026/02/video-pantallas-para-web.mp4`,
+            url: CLOUDINARY.playzoneVideo,
           },
         },
       ],
