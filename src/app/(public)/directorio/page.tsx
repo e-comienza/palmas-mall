@@ -63,18 +63,8 @@ export default async function DirectorioPage({
       />
 
       <Container className="py-8 sm:py-12">
-        {/* Plano del mall arriba, el directorio debajo */}
-        <div className="overflow-hidden rounded-2xl bg-white p-3 shadow-card sm:p-4">
-          <PlanoViewer
-            src="/images/plano-del-mall.webp"
-            alt="Plano general de Palmas Mall Cali con la ubicación de todos los locales"
-          />
-          <p className="flex items-center justify-center gap-1.5 px-4 pb-1 pt-3 text-center text-[13px] text-mist-500">
-            <MagnifyingGlassPlus size={15} /> Pellizca o usa la rueda del mouse para acercar el plano
-          </p>
-        </div>
-
-        <div className="mt-12">
+        {/* Directorio de locales arriba, el plano debajo */}
+        <div>
           <LocalesFilter
             categories={categories.map((c) => ({ slug: c.slug, name: c.name, group: c.group }))}
             activeCategory={categoria}
@@ -97,6 +87,22 @@ export default async function DirectorioPage({
               </p>
             </div>
           )}
+        </div>
+
+        {/* Plano del mall debajo del directorio */}
+        <div className="mt-14">
+          <h2 className="mb-4 font-display text-2xl font-bold tracking-[-0.02em] text-palm-950">
+            Plano del mall
+          </h2>
+          <div className="overflow-hidden rounded-2xl bg-white p-3 shadow-card sm:p-4">
+            <PlanoViewer
+              src="/images/plano-del-mall.webp"
+              alt="Plano general de Palmas Mall Cali con la ubicación de todos los locales"
+            />
+            <p className="flex items-center justify-center gap-1.5 px-4 pb-1 pt-3 text-center text-[13px] text-mist-500">
+              <MagnifyingGlassPlus size={15} /> Pellizca o usa la rueda del mouse para acercar el plano
+            </p>
+          </div>
         </div>
       </Container>
 
