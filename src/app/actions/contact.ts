@@ -2,6 +2,8 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { getSiteSettings } from "@/lib/settings";
+import { sendEmail, contactEmailHtml } from "@/lib/email";
 
 const contactSchema = z.object({
   name: z.string().min(2, "Escribe tu nombre").max(80),
@@ -42,6 +44,23 @@ export async function submitContact(
     const { website, ...data } = parsed.data;
     void website; // honeypot: solo se valida, no se guarda
     await prisma.contactMessage.create({ data });
+
+    // Notificación por email (no bloquea: el mensaje ya quedó guardado en el admin)
+    try {
+      const settings = await getSiteSettings();
+      const to = process.env.CONTACT_EMAIL_TO || settings.email;
+      if (to) {
+        await sendEmail({
+          to,
+          replyTo: data.email,
+          subject: `Nuevo mensaje de contacto: ${data.name}${data.subject ? ` · ${data.subject}` : ""}`,
+          html: contactEmailHtml(data),
+        });
+      }
+    } catch (emailError) {
+      console.error("[contact] no se pudo enviar el email de notificación", emailError);
+    }
+
     return { ok: true };
   } catch (error) {
     console.error("[contact] error guardando mensaje", error);

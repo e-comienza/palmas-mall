@@ -71,7 +71,6 @@ export default async function PublicLayout({
         navItems={mainNav.map((i) => ({ label: i.label, url: i.url }))}
         logoUrl={settings.logoUrl}
         mallName={settings.mallName}
-        whatsapp={settings.whatsapp}
         instagramUrl={settings.instagramUrl}
         tiktokUrl={settings.tiktokUrl}
         facebookUrl={settings.facebookUrl}

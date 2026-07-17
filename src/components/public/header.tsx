@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { List, X, MapPin, WhatsappLogo, InstagramLogo, TiktokLogo, FacebookLogo } from "@phosphor-icons/react";
+import { List, X, MapPin, EnvelopeSimple, InstagramLogo, TiktokLogo, FacebookLogo } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 type NavItem = { label: string; url: string };
@@ -19,7 +19,6 @@ export function Header({
   navItems,
   logoUrl,
   mallName,
-  whatsapp,
   instagramUrl,
   tiktokUrl,
   facebookUrl,
@@ -27,7 +26,6 @@ export function Header({
   navItems: NavItem[];
   logoUrl: string;
   mallName: string;
-  whatsapp: string;
   instagramUrl: string;
   tiktokUrl: string;
   facebookUrl: string;
@@ -119,14 +117,12 @@ export function Header({
           </nav>
 
           <div className="flex items-center gap-2">
-            <a
-              href={`https://wa.me/${whatsapp}`}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/contacto"
               className="pressable hidden h-10 items-center gap-2 rounded-full bg-palm-700 px-5 text-sm font-semibold text-white transition-colors hover:bg-palm-800 sm:inline-flex"
             >
-              <WhatsappLogo size={17} weight="fill" /> WhatsApp
-            </a>
+              <EnvelopeSimple size={17} weight="bold" /> Contáctanos
+            </Link>
             <button
               ref={toggleRef}
               type="button"
@@ -187,14 +183,13 @@ export function Header({
               transition={{ delay: 0.06 + navItems.length * 0.05, duration: 0.3 }}
               className="mt-8 flex flex-col gap-3"
             >
-              <a
-                href={`https://wa.me/${whatsapp}`}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/contacto"
+                onClick={close}
                 className="pressable flex h-12 items-center justify-center gap-2 rounded-full bg-palm-700 text-base font-semibold text-white transition-colors hover:bg-palm-800"
               >
-                <WhatsappLogo size={20} weight="fill" /> Escríbenos por WhatsApp
-              </a>
+                <EnvelopeSimple size={20} weight="bold" /> Contáctanos
+              </Link>
               <Link
                 href="/como-llegar"
                 onClick={close}
