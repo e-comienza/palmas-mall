@@ -5,6 +5,8 @@ import { PageHeader } from "@/components/public/page-header";
 import { Container } from "@/components/public/container";
 import { PlanoViewer } from "@/components/public/plano-viewer";
 import { getPage } from "@/lib/queries";
+import { getSiteSettings } from "@/lib/settings";
+import { planoImageSrc } from "@/lib/media";
 import { heroData } from "@/lib/blocks";
 import { ExtraBlocks } from "@/components/public/block-renderer";
 import { PageFaqs } from "@/components/public/page-faqs";
@@ -18,8 +20,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PlanoPage() {
-  const page = await getPage("plano-del-mall");
+  const [page, settings] = await Promise.all([getPage("plano-del-mall"), getSiteSettings()]);
   const hero = heroData(page);
+  const planoSrc = planoImageSrc(settings.planoImageUrl);
 
   return (
     <>
@@ -37,7 +40,7 @@ export default async function PlanoPage() {
       />
       <Container className="py-10 sm:py-14">
         <div className="rounded-2xl bg-white p-3 shadow-card sm:p-4">
-          <PlanoViewer src="/images/plano-del-mall.webp" alt="Plano general de Palmas Mall Cali con la ubicación de todos los locales" />
+          <PlanoViewer src={planoSrc} alt="Plano general de Palmas Mall Cali con la ubicación de todos los locales" />
           <p className="flex items-center justify-center gap-1.5 px-4 pb-2 pt-3 text-center text-[13px] text-mist-500">
             <MagnifyingGlassPlus size={15} /> Pellizca o usa la rueda del mouse para acercar el plano
           </p>

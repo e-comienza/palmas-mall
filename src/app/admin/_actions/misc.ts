@@ -266,6 +266,7 @@ export async function updateSettings(_prev: FormState, formData: FormData): Prom
     "ogImageUrl", "externalScripts", "globalBannerText",
     "mollyImageUrl", "mollyMessage", "mollyCtaLabel", "mollyCtaUrl",
     "rentalWhatsapp", "sponsorWhatsapp", "sponsorPdfUrl", "sponsorVideoUrl",
+    "planoImageUrl",
   ] as const;
 
   const data: Record<string, string | boolean> = {};

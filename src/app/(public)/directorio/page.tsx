@@ -6,6 +6,8 @@ import { LocalCard } from "@/components/public/cards";
 import { LocalesFilter } from "@/components/public/locales-filter";
 import { PlanoViewer } from "@/components/public/plano-viewer";
 import { getPublishedLocales, getCategories, getPage } from "@/lib/queries";
+import { getSiteSettings } from "@/lib/settings";
+import { planoImageSrc } from "@/lib/media";
 import { pageMetadata } from "@/lib/page-metadata";
 import { itemListJsonLd, webPageJsonLd, JsonLdScript } from "@/lib/jsonld";
 import { heroData } from "@/lib/blocks";
@@ -24,13 +26,15 @@ export default async function DirectorioPage({
   searchParams: Promise<{ categoria?: string; q?: string; grupo?: string }>;
 }) {
   const { categoria, q, grupo } = await searchParams;
-  const [locales, categories, page] = await Promise.all([
+  const [locales, categories, page, settings] = await Promise.all([
     getPublishedLocales({ categorySlug: categoria, q, group: grupo }),
     getCategories(),
     getPage("directorio"),
+    getSiteSettings(),
   ]);
 
   const hero = heroData(page);
+  const planoSrc = planoImageSrc(settings.planoImageUrl);
   const isUnfiltered = !categoria && !q && !grupo;
 
   return (
@@ -96,7 +100,7 @@ export default async function DirectorioPage({
           </h2>
           <div className="overflow-hidden rounded-2xl bg-white p-3 shadow-card sm:p-4">
             <PlanoViewer
-              src="/images/plano-del-mall.webp"
+              src={planoSrc}
               alt="Plano general de Palmas Mall Cali con la ubicación de todos los locales"
             />
             <p className="flex items-center justify-center gap-1.5 px-4 pb-1 pt-3 text-center text-[13px] text-mist-500">

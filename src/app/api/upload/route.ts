@@ -5,8 +5,10 @@ import { prisma } from "@/lib/prisma";
 
 const MAX_IMAGE = 8 * 1024 * 1024; // 8 MB
 const MAX_VIDEO = 100 * 1024 * 1024; // 100 MB (Cloudinary free tier)
+const MAX_DOC = 20 * 1024 * 1024; // 20 MB (PDF: plano, brochure)
 const ALLOWED_IMAGE = ["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif", "image/svg+xml"];
 const ALLOWED_VIDEO = ["video/mp4", "video/webm", "video/quicktime", "video/ogg"];
+const ALLOWED_DOC = ["application/pdf"];
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -23,12 +25,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Falta el archivo" }, { status: 400 });
   }
   const isVideo = ALLOWED_VIDEO.includes(file.type);
-  if (!ALLOWED_IMAGE.includes(file.type) && !isVideo) {
-    return NextResponse.json({ error: "Formato no soportado (imagen: JPG, PNG, WebP, AVIF · video: MP4, WebM)" }, { status: 400 });
+  const isDoc = ALLOWED_DOC.includes(file.type);
+  if (!ALLOWED_IMAGE.includes(file.type) && !isVideo && !isDoc) {
+    return NextResponse.json({ error: "Formato no soportado (imagen: JPG, PNG, WebP, AVIF · video: MP4, WebM · documento: PDF)" }, { status: 400 });
   }
-  if (file.size > (isVideo ? MAX_VIDEO : MAX_IMAGE)) {
+  const maxSize = isVideo ? MAX_VIDEO : isDoc ? MAX_DOC : MAX_IMAGE;
+  if (file.size > maxSize) {
     return NextResponse.json(
-      { error: isVideo ? "El video supera 100 MB" : "La imagen supera 8 MB" },
+      { error: isVideo ? "El video supera 100 MB" : isDoc ? "El PDF supera 20 MB" : "La imagen supera 8 MB" },
       { status: 400 },
     );
   }

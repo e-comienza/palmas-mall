@@ -141,6 +141,8 @@ model SiteSettings {
   sponsorWhatsapp    String   @default("573155711045")
   sponsorPdfUrl      String   @default("https://palmasmall.com/wp-content/uploads/2026/04/sponsors-palmas-mall-2026.pdf")
   sponsorVideoUrl    String   @default("https://palmasmall.com/wp-content/uploads/2026/01/video-brochure.mp4")
+  // Plano del mall (imagen o PDF; si es PDF de Cloudinary se rasteriza la pág. 1)
+  planoImageUrl      String   @default("/images/plano-del-mall.webp")
   updatedAt          DateTime @updatedAt
 }
 

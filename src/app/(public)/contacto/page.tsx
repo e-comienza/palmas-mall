@@ -51,17 +51,6 @@ export default async function ContactoPage() {
               <h2 className="font-display text-lg font-bold text-palm-950">Datos de contacto</h2>
               <ul className="mt-4 space-y-4 text-[15px] text-mist-700">
                 <li className="flex items-start gap-3">
-                  <WhatsappLogo size={20} weight="fill" className="mt-0.5 shrink-0 text-palm-700" />
-                  <a
-                    href={`https://wa.me/${settings.whatsapp}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transition-colors hover:text-palm-800"
-                  >
-                    {settings.phone}
-                  </a>
-                </li>
-                <li className="flex items-start gap-3">
                   <Phone size={20} weight="bold" className="mt-0.5 shrink-0 text-palm-700" />
                   <a href={`tel:${settings.phone.replace(/\s/g, '')}`} className="transition-colors hover:text-palm-800">
                     {settings.phone}

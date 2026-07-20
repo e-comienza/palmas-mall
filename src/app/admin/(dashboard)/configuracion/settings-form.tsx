@@ -190,6 +190,23 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
             />
           </div>
         </AdminCard>
+
+        <AdminCard title="Plano del mall">
+          <div className="space-y-3">
+            <ImageUpload
+              name="planoImageUrl"
+              label="Plano (imagen o PDF)"
+              defaultValue={settings.planoImageUrl}
+              folder="plano"
+              aspect="aspect-[4/3] max-w-[360px]"
+              allowPdf
+              allowUrl
+            />
+            <p className="text-[13px] text-mist-500">
+              Sube el plano como imagen (PNG/WebP) o PDF. Si subes un PDF, se muestra la primera página. Se ve en el Directorio y en la página Plano del mall.
+            </p>
+          </div>
+        </AdminCard>
       </div>
 
       <div className="flex justify-end">
