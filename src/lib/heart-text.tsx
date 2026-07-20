@@ -1,5 +1,5 @@
-import { Fragment, type ReactNode } from "react";
-import { Heart } from "@phosphor-icons/react/dist/ssr";
+import { Fragment, type ReactNode } from 'react';
+import { Heart } from '@phosphor-icons/react/dist/ssr';
 
 /**
  * Reemplaza la palabra "corazón" por un ícono de corazón al renderizar
@@ -16,7 +16,7 @@ export function withHeart(text: string): ReactNode {
         <Heart
           weight="fill"
           aria-label="corazón"
-          className="mx-[0.08em] inline-block size-[0.92em] -translate-y-[0.06em] align-baseline text-red-500"
+          className="mx-[0.08em] inline-block size-[0.92em] -translate-y-[0.06em] align-baseline text-red-700"
         />
       ) : null}
       {part}
