@@ -22,6 +22,7 @@ const CLOUDINARY = {
   sponsorPdf: "https://res.cloudinary.com/auan6rju/image/upload/v1784293062/palmas-mall/sponsors/nj1crjyxoegotzp9oi83.pdf",
   sponsorVideo: "https://res.cloudinary.com/auan6rju/video/upload/v1784293063/palmas-mall/sponsors/menzla3kxxymp9dszrpx.mp4",
   playzoneVideo: "https://res.cloudinary.com/auan6rju/video/upload/v1784293064/palmas-mall/playzone/fgkzfthufpmvqvfqhgq9.mp4",
+  plano: "https://res.cloudinary.com/auan6rju/image/upload/v1784560442/palmas-mall/plano/woklnukzucnnggeaqkdj.pdf",
 };
 
 // Política de tratamiento de datos (contenido oficial, editable desde /admin).
@@ -100,6 +101,7 @@ async function main() {
     mollyCtaUrl: "/play-zone",
     sponsorPdfUrl: CLOUDINARY.sponsorPdf,
     sponsorVideoUrl: CLOUDINARY.sponsorVideo,
+    planoImageUrl: CLOUDINARY.plano,
   };
   await prisma.siteSettings.upsert({
     where: { id: 1 },
