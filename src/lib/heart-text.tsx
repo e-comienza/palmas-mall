@@ -16,7 +16,7 @@ export function withHeart(text: string): ReactNode {
         <Heart
           weight="fill"
           aria-label="corazón"
-          className="mx-[0.08em] inline-block size-[0.92em] -translate-y-[0.06em] align-baseline text-palm-600"
+          className="mx-[0.08em] inline-block size-[0.92em] -translate-y-[0.06em] align-baseline text-red-500"
         />
       ) : null}
       {part}
