@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/public/page-header';
 import { Container } from '@/components/public/container';
 import { ContactForm } from '@/components/public/contact-form';
 import { SocialIcons } from '@/components/public/social-icons';
+import { withHeart } from '@/lib/heart-text';
 import { getSiteSettings } from '@/lib/settings';
 import { getSedes, getPage } from '@/lib/queries';
 import { heroData } from '@/lib/blocks';
@@ -92,7 +93,9 @@ export default async function ContactoPage() {
             <div className="max-w-xl">
               <h2 className="font-display text-xl font-bold tracking-[-0.01em] sm:text-2xl">¿Quieres tu marca en Palmas Mall?</h2>
               <p className="mt-2 text-[15px] leading-relaxed text-mist-200">
-                Escríbenos por WhatsApp para conocer la disponibilidad de locales y llevar tu negocio al corazón de la Milla de Oro.
+                {withHeart(
+                  'Escríbenos por WhatsApp para conocer la disponibilidad de locales y llevar tu negocio al corazón de la Milla de Oro.',
+                )}
               </p>
             </div>
             <a

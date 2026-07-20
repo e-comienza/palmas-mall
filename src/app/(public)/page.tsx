@@ -14,6 +14,7 @@ import {
 import { Container, SectionTitle } from "@/components/public/container";
 import { Reveal, RevealStagger } from "@/components/public/reveal";
 import { Media } from "@/components/public/media";
+import { withHeart } from "@/lib/heart-text";
 import { LocalCard, EventCard, PostCard } from "@/components/public/cards";
 import { FaqAccordion } from "@/components/public/faq-section";
 import {
@@ -180,8 +181,10 @@ export default async function HomePage() {
               data-speakable
               className="mt-5 max-w-[46ch] text-base leading-relaxed text-white/85 sm:text-lg"
             >
-              {hero.subheading ||
-                "Gastronomía, compras, eventos y arquitectura a cielo abierto en el Lifestyle Mall de Cali."}
+              {withHeart(
+                hero.subheading ||
+                  "Gastronomía, compras, eventos y arquitectura a cielo abierto en el Lifestyle Mall de Cali.",
+              )}
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Link

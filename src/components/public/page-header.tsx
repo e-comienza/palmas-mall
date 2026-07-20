@@ -1,5 +1,6 @@
 import { Container } from "./container";
 import { Breadcrumbs } from "./breadcrumbs";
+import { withHeart } from "@/lib/heart-text";
 
 /** Cabecera estándar de páginas internas (deja espacio bajo el header fijo). */
 export function PageHeader({
@@ -28,7 +29,7 @@ export function PageHeader({
             data-speakable
             className="mt-4 max-w-[62ch] text-[15px] leading-relaxed text-mist-600 sm:text-lg"
           >
-            {intro}
+            {withHeart(intro)}
           </p>
         ) : null}
         {children}

@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/public/page-header";
 import { Container, SectionTitle } from "@/components/public/container";
 import { Reveal } from "@/components/public/reveal";
 import { Media } from "@/components/public/media";
+import { withHeart } from "@/lib/heart-text";
 import { ContactForm } from "@/components/public/contact-form";
 import { getSiteSettings } from "@/lib/settings";
 import { getPage } from "@/lib/queries";
@@ -86,7 +87,7 @@ export default async function PatrociniosPage() {
           <Reveal delay={0.08}>
             <div>
               <h2 className="text-balance font-display text-[1.7rem] font-bold leading-[1.15] tracking-[-0.02em] text-palm-950 sm:text-4xl">
-                Tu marca, en el corazón de la Milla de Oro
+                {withHeart("Tu marca, en el corazón de la Milla de Oro")}
               </h2>
               <p className="mt-5 text-[15px] leading-relaxed text-mist-700 sm:text-base">
                 Palmas Mall reúne a los mejores exponentes gastronómicos y de
