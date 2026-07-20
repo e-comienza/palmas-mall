@@ -20,8 +20,8 @@ export function LocalHero({
   const crumbs = (
     <Breadcrumbs
       items={[
-        { name: "Locales", path: "/locales" },
-        { name: local.name, path: `/locales/${local.slug}` },
+        { name: "Locales", path: "/directorio" },
+        { name: local.name, path: `/directorio/${local.slug}` },
       ]}
     />
   );

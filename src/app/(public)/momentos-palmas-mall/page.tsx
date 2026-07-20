@@ -41,16 +41,14 @@ export default async function MomentosPage() {
           <div className="space-y-14">
             {albums.map((album) => (
               <section key={album.id} aria-label={album.title}>
-                {albums.length > 1 ? (
-                  <div className="mb-6">
-                    <h2 className="font-display text-2xl font-bold tracking-[-0.02em] text-palm-950">
-                      {album.title}
-                    </h2>
-                    {album.description ? (
-                      <p className="mt-1.5 max-w-[60ch] text-sm text-mist-600">{album.description}</p>
-                    ) : null}
-                  </div>
-                ) : null}
+                <div className="mb-6">
+                  <h2 className="font-display text-2xl font-bold tracking-[-0.02em] text-palm-950 sm:text-[28px]">
+                    {album.title}
+                  </h2>
+                  {album.description ? (
+                    <p className="mt-1.5 max-w-[65ch] text-[15px] leading-relaxed text-mist-600">{album.description}</p>
+                  ) : null}
+                </div>
                 <LightboxGallery
                   images={album.images.map((img) => ({
                     url: img.url,

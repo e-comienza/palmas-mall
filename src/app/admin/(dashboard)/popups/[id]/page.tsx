@@ -13,13 +13,20 @@ export default async function EditarPopupPage({
 }) {
   await requireUser("ADMIN");
   const { id } = await params;
-  const popup = await prisma.popup.findUnique({ where: { id } });
+  const [popup, events] = await Promise.all([
+    prisma.popup.findUnique({ where: { id } }),
+    prisma.event.findMany({
+      where: { deletedAt: null },
+      orderBy: { startsAt: "desc" },
+      select: { id: true, title: true },
+    }),
+  ]);
   if (!popup || popup.deletedAt) notFound();
 
   return (
     <div>
       <AdminPageHeader title={`Editar: ${popup.internalName}`} />
-      <PopupForm popup={popup} />
+      <PopupForm popup={popup} events={events} />
     </div>
   );
 }

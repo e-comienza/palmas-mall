@@ -50,6 +50,21 @@ export function cloudinaryVideoSrc(
  * Poster (primer frame) de un video de Cloudinary como JPG. Carga instantánea:
  * el navegador pinta el poster mientras difiere los bytes del video.
  */
+/**
+ * URL lista para mostrar el plano en el visor. Si es un PDF de Cloudinary,
+ * rasteriza la página 1 a PNG en alta resolución (para que el zoom no pixele);
+ * si ya es imagen, la devuelve tal cual.
+ */
+export function planoImageSrc(url: string): string {
+  if (!url) return url;
+  if (/\.pdf(\?.*)?$/i.test(url) && url.includes("/upload/")) {
+    return url
+      .replace("/upload/", "/upload/pg_1,f_png,q_auto,w_2400/")
+      .replace(/\.pdf(\?.*)?$/i, ".png");
+  }
+  return url;
+}
+
 export function cloudinaryPoster(url: string): string | undefined {
   if (!url.includes("/video/upload/")) return undefined;
   return url

@@ -51,6 +51,11 @@ enum PopupPlacement {
   CUSTOM
 }
 
+enum PopupMode {
+  SIMPLE
+  EVENT_CAROUSEL
+}
+
 enum FaqScope {
   GLOBAL
   PAGE
@@ -128,6 +133,16 @@ model SiteSettings {
   mollyCtaUrl        String   @default("/locales")
   mollyShowMobile    Boolean  @default(true)
   mollyShowDesktop   Boolean  @default(true)
+  // Burbuja flotante de WhatsApp (usa el número `whatsapp` de arriba)
+  whatsappBubbleEnabled Boolean @default(true)
+  // Averiguar por alquiler de local (página Contacto)
+  rentalWhatsapp     String   @default("573152842989")
+  // Be Our Sponsors: número comercial + brochure PDF + video vertical
+  sponsorWhatsapp    String   @default("573155711045")
+  sponsorPdfUrl      String   @default("https://palmasmall.com/wp-content/uploads/2026/04/sponsors-palmas-mall-2026.pdf")
+  sponsorVideoUrl    String   @default("https://palmasmall.com/wp-content/uploads/2026/01/video-brochure.mp4")
+  // Plano del mall (imagen o PDF; si es PDF de Cloudinary se rasteriza la pág. 1)
+  planoImageUrl      String   @default("/images/plano-del-mall.webp")
   updatedAt          DateTime @updatedAt
 }
 
@@ -353,6 +368,9 @@ model GalleryImage {
 model Popup {
   id            String         @id @default(cuid())
   internalName  String
+  mode          PopupMode      @default(SIMPLE)
+  // EVENT_CAROUSEL: orden de eventos a mostrar (string[] de Event.id)
+  eventIds      Json           @default("[]")
   title         String         @default("")
   body          String         @default("")
   imageUrl      String         @default("")

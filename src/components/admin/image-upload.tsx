@@ -3,10 +3,12 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
-import { UploadSimple, X, Spinner, LinkSimple } from "@phosphor-icons/react";
+import { UploadSimple, X, Spinner, LinkSimple, FilePdf } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { normalizeMollyUrl } from "@/lib/molly-image";
 import { isVideoUrl, cloudinaryPoster } from "@/lib/media";
+
+const isPdfUrl = (u: string) => /\.pdf(\?|$)/i.test(u);
 
 /**
  * Upload de imagen drag-and-drop. Sube a /api/upload (Cloudinary o local en dev)
@@ -20,6 +22,7 @@ export function ImageUpload({
   aspect = "aspect-video",
   onChange,
   allowUrl = false,
+  allowPdf = false,
 }: {
   name: string;
   label?: string;
@@ -29,7 +32,10 @@ export function ImageUpload({
   onChange?: (url: string) => void;
   /** Permite pegar una URL externa (imagen, GIF o link de Giphy) */
   allowUrl?: boolean;
+  /** Permite subir PDF (ej. plano del mall) */
+  allowPdf?: boolean;
 }) {
+  const acceptTypes = `image/*,video/mp4,video/webm,video/quicktime${allowPdf ? ",application/pdf" : ""}`;
   const [urlDraft, setUrlDraft] = useState("");
   const [url, setUrlState] = useState(defaultValue);
   const setUrl = (u: string) => {
@@ -64,7 +70,17 @@ export function ImageUpload({
       <input type="hidden" name={name} value={url} />
       {url ? (
         <div className={cn("group relative overflow-hidden rounded-xl border border-mist-200 bg-mist-100", aspect)}>
-          {isVideoUrl(url) ? (
+          {isPdfUrl(url) ? (
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex size-full flex-col items-center justify-center gap-2 bg-mist-50 text-palm-700 transition-colors hover:bg-palm-50"
+            >
+              <FilePdf size={32} weight="duotone" />
+              <span className="text-sm font-semibold">PDF cargado · ver</span>
+            </a>
+          ) : isVideoUrl(url) ? (
             <video
               src={url}
               poster={cloudinaryPoster(url)}
@@ -133,7 +149,7 @@ export function ImageUpload({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*,video/mp4,video/webm,video/quicktime"
+        accept={acceptTypes}
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];

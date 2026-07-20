@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { PencilSimple } from "@phosphor-icons/react";
+import { isVideoUrl, cloudinaryPoster } from "@/lib/media";
 import {
   addGalleryImages,
   updateGalleryImage,
@@ -30,6 +31,28 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+/** Miniatura que soporta imagen o video (poster del frame). */
+function MediaThumb({ url, alt, sizes }: { url: string; alt: string; sizes: string }) {
+  if (isVideoUrl(url)) {
+    const poster = cloudinaryPoster(url);
+    return (
+      <>
+        {poster ? (
+          <Image src={poster} alt={alt} fill sizes={sizes} className="object-cover" />
+        ) : (
+          <video src={url} muted playsInline preload="metadata" className="size-full object-cover" />
+        )}
+        <span className="pointer-events-none absolute left-1.5 top-1.5 rounded bg-palm-950/70 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+          VIDEO
+        </span>
+      </>
+    );
+  }
+  return (
+    <Image src={url} alt={alt} fill sizes={sizes} className="object-cover" unoptimized={url.startsWith("/uploads")} />
+  );
+}
+
 type AlbumItem = { id: string; title: string; description: string };
 type ImageItem = {
   id: string;
@@ -52,9 +75,11 @@ export function GalleryManager({
   const [uploadState, uploadAction] = useActionState(addGalleryImages, initialFormState);
   const [albumState, albumAction] = useActionState(upsertAlbum, initialFormState);
   const [editing, setEditing] = useState<ImageItem | null>(null);
+  const [editingAlbum, setEditingAlbum] = useState<AlbumItem | null>(null);
   const [filter, setFilter] = useState<string>("");
 
   const deleteImage = softDelete.bind(null, "galleryImage");
+  const deleteAlbum = softDelete.bind(null, "galleryAlbum");
   const visible = filter ? images.filter((i) => i.albumId === filter) : images;
 
   return (
@@ -100,11 +125,20 @@ export function GalleryManager({
           {albums.length ? (
             <ul className="mt-5 space-y-1.5 border-t border-mist-100 pt-4 text-sm">
               {albums.map((a) => (
-                <li key={a.id} className="flex items-center justify-between text-mist-700">
-                  <span>{a.title}</span>
-                  <span className="text-[12px] text-mist-500">
-                    {images.filter((i) => i.albumId === a.id).length} imágenes
+                <li key={a.id} className="flex items-center justify-between gap-2 text-mist-700">
+                  <span className="min-w-0 flex-1 truncate">{a.title}</span>
+                  <span className="shrink-0 text-[12px] text-mist-500">
+                    {images.filter((i) => i.albumId === a.id).length} imgs
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => setEditingAlbum(a)}
+                    aria-label={`Editar álbum ${a.title}`}
+                    className="pressable flex size-8 shrink-0 items-center justify-center rounded-lg text-mist-600 hover:bg-mist-100 hover:text-palm-800"
+                  >
+                    <PencilSimple size={14} />
+                  </button>
+                  <DeleteButton action={deleteAlbum} id={a.id} name={a.title} />
                 </li>
               ))}
             </ul>
@@ -124,7 +158,7 @@ export function GalleryManager({
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
           {visible.map((img) => (
             <div key={img.id} className="group relative aspect-square overflow-hidden rounded-xl border border-mist-200 bg-mist-100">
-              <Image src={img.url} alt={img.alt} fill sizes="200px" className="object-cover" unoptimized={img.url.startsWith("/uploads")} />
+              <MediaThumb url={img.url} alt={img.alt} sizes="200px" />
               <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-palm-950/80 to-transparent p-2">
                 <div className="flex gap-1">
                   {img.showOnHome ? <Badge variant="leaf" className="!px-1.5 !text-[10px]">Home</Badge> : null}
@@ -153,7 +187,46 @@ export function GalleryManager({
       {editing ? (
         <EditImageDialog image={editing} albums={albums} onClose={() => setEditing(null)} />
       ) : null}
+      {editingAlbum ? (
+        <EditAlbumDialog album={editingAlbum} onClose={() => setEditingAlbum(null)} />
+      ) : null}
     </div>
+  );
+}
+
+function EditAlbumDialog({ album, onClose }: { album: AlbumItem; onClose: () => void }) {
+  const [state, action] = useActionState(upsertAlbum, initialFormState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.ok) {
+      toast.success("Álbum actualizado");
+      onClose();
+      router.refresh();
+    } else if (state.error) {
+      toast.error(state.error);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogTitle>Editar álbum</DialogTitle>
+        <form action={action} className="mt-4 space-y-4">
+          <input type="hidden" name="id" value={album.id} />
+          <Field label="Título del álbum" htmlFor="edit-album-title">
+            <Input id="edit-album-title" name="title" defaultValue={album.title} required />
+          </Field>
+          <Field label="Descripción" htmlFor="edit-album-desc">
+            <Input id="edit-album-desc" name="description" defaultValue={album.description} />
+          </Field>
+          <div className="flex justify-end">
+            <SubmitButton>Guardar</SubmitButton>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -188,7 +261,7 @@ function EditImageDialog({
           <input type="hidden" name="id" value={image.id} />
           <input type="hidden" name="order" value={image.order} />
           <div className="relative aspect-video overflow-hidden rounded-xl bg-mist-100">
-            <Image src={image.url} alt={image.alt} fill sizes="480px" className="object-cover" unoptimized={image.url.startsWith("/uploads")} />
+            <MediaThumb url={image.url} alt={image.alt} sizes="480px" />
           </div>
           <Field label="Alt text" htmlFor="edit-alt">
             <Input id="edit-alt" name="alt" defaultValue={image.alt} />

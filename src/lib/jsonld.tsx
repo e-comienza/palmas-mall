@@ -69,9 +69,9 @@ export function localJsonLd(local: Local & { category?: { name: string } | null 
   return {
     "@context": "https://schema.org",
     "@type": type,
-    "@id": siteUrl(`/locales/${local.slug}#local`),
+    "@id": siteUrl(`/directorio/${local.slug}#local`),
     name: local.name,
-    url: siteUrl(`/locales/${local.slug}`),
+    url: siteUrl(`/directorio/${local.slug}`),
     image: gallery.length
       ? gallery.map((url, i) => ({
           "@type": "ImageObject",
@@ -198,7 +198,7 @@ export function websiteJsonLd(settings: SiteSettings): JsonLd {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: siteUrl("/locales?q={search_term_string}"),
+        urlTemplate: siteUrl("/directorio?q={search_term_string}"),
       },
       "query-input": "required name=search_term_string",
     },

@@ -42,7 +42,7 @@ export default async function FoodDrinksPage() {
             name: "Restaurantes y bares del Food Hall de Palmas Mall",
             items: locales.map((l) => ({
               name: l.name,
-              path: `/locales/${l.slug}`,
+              path: `/directorio/${l.slug}`,
               image: l.coverUrl || undefined,
               description: l.shortDescription || undefined,
             })),
@@ -108,7 +108,7 @@ export default async function FoodDrinksPage() {
           {foodCategories.map((c) => (
             <Link
               key={c.id}
-              href={`/locales?categoria=${c.slug}`}
+              href={`/directorio?categoria=${c.slug}`}
               className="pressable rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-palm-800 shadow-card transition-colors hover:bg-palm-50"
             >
               {c.name}
@@ -123,7 +123,7 @@ export default async function FoodDrinksPage() {
           <div className="mb-8 flex items-end justify-between gap-4 sm:mb-12">
             <SectionTitle title="Restaurantes y bares" className="mb-0 sm:mb-0" />
             <Link
-              href="/locales?grupo=food-drinks"
+              href="/directorio?grupo=food-drinks"
               className="hidden shrink-0 items-center gap-1.5 font-semibold text-palm-700 transition-colors hover:text-palm-900 sm:inline-flex"
             >
               Ver todos <ArrowRight size={16} weight="bold" />

@@ -56,7 +56,7 @@ export default async function ComoLlegarPage() {
       {page?.faqs.length ? <JsonLdScript data={faqJsonLd(page.faqs)} /> : null}
       <PageHeader
         title={hero.heading || "Cómo llegar"}
-        intro={hero.subheading || "Elige tu sede, abre la navegación y ven a vivir tus mejores momentos."}
+        intro={hero.subheading || "Estamos en el corazón de la Milla de Oro, Ciudad Jardín. Abre la navegación y ven a vivir tus mejores momentos."}
         crumbs={[{ name: "Cómo llegar", path: "/como-llegar" }]}
       />
 

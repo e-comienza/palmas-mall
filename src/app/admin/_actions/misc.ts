@@ -9,7 +9,18 @@ import { logAudit } from "@/lib/audit";
 import type { FormState } from "@/components/admin/form-helpers";
 import { zodErrors, type ActionResult } from "./helpers";
 import { normalizeMollyUrl } from "@/lib/molly-image";
-import { ContentStatus, FaqScope, PopupAudience, PopupFrequency, PopupPlacement, Role } from "@prisma/client";
+import { ContentStatus, FaqScope, PopupAudience, PopupFrequency, PopupMode, PopupPlacement, Role } from "@prisma/client";
+
+/** Parsea un string[] JSON de un campo hidden; [] si es inválido. */
+function jsonStringArray(v: FormDataEntryValue | null): string[] {
+  if (typeof v !== "string" || !v) return [];
+  try {
+    const parsed = JSON.parse(v);
+    return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === "string") : [];
+  } catch {
+    return [];
+  }
+}
 
 function bool(v: FormDataEntryValue | null): boolean {
   return v === "on" || v === "true" || v === "1";
@@ -42,6 +53,8 @@ export async function upsertPopup(_prev: FormState, formData: FormData): Promise
 
   const data = {
     internalName: parsed.data.internalName,
+    mode: (formData.get("mode") as PopupMode) || "SIMPLE",
+    eventIds: jsonStringArray(formData.get("eventIds")),
     title: parsed.data.title,
     body: (formData.get("body") as string) || "",
     imageUrl: (formData.get("imageUrl") as string) || "",
@@ -252,6 +265,8 @@ export async function updateSettings(_prev: FormState, formData: FormData): Prom
     "googleMapsUrl", "seoTitleTemplate", "seoDefaultTitle", "seoDefaultDesc",
     "ogImageUrl", "externalScripts", "globalBannerText",
     "mollyImageUrl", "mollyMessage", "mollyCtaLabel", "mollyCtaUrl",
+    "rentalWhatsapp", "sponsorWhatsapp", "sponsorPdfUrl", "sponsorVideoUrl",
+    "planoImageUrl",
   ] as const;
 
   const data: Record<string, string | boolean> = {};
@@ -264,7 +279,10 @@ export async function updateSettings(_prev: FormState, formData: FormData): Prom
   data.mollyEnabled = bool(formData.get("mollyEnabled"));
   data.mollyShowMobile = bool(formData.get("mollyShowMobile"));
   data.mollyShowDesktop = bool(formData.get("mollyShowDesktop"));
-  if (typeof data.whatsapp === "string") data.whatsapp = data.whatsapp.replace(/[^\d]/g, "");
+  data.whatsappBubbleEnabled = bool(formData.get("whatsappBubbleEnabled"));
+  for (const k of ["whatsapp", "rentalWhatsapp", "sponsorWhatsapp"]) {
+    if (typeof data[k] === "string") data[k] = (data[k] as string).replace(/[^\d]/g, "");
+  }
 
   try {
     await prisma.siteSettings.upsert({

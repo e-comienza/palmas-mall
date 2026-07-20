@@ -132,7 +132,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
                 <Input id="mollyCtaLabel" name="mollyCtaLabel" defaultValue={settings.mollyCtaLabel} />
               </Field>
               <Field label="Enlace del botón" htmlFor="mollyCtaUrl">
-                <Input id="mollyCtaUrl" name="mollyCtaUrl" defaultValue={settings.mollyCtaUrl} placeholder="/locales" />
+                <Input id="mollyCtaUrl" name="mollyCtaUrl" defaultValue={settings.mollyCtaUrl} placeholder="/play-zone" />
               </Field>
             </div>
             <div className="flex items-center gap-8">
@@ -160,6 +160,51 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
             <Field label="Scripts externos permitidos" htmlFor="externalScripts" hint="Uno por línea (ej. Google Analytics). Se documentan; requieren implementación técnica.">
               <Textarea id="externalScripts" name="externalScripts" defaultValue={settings.externalScripts} className="min-h-[70px] font-mono text-[13px]" />
             </Field>
+          </div>
+        </AdminCard>
+
+        <AdminCard title="WhatsApp y Be Our Sponsors">
+          <div className="space-y-5">
+            <label className="flex items-center justify-between gap-3">
+              <span className="text-sm font-semibold text-mist-800">Mostrar burbuja flotante de WhatsApp</span>
+              <Switch name="whatsappBubbleEnabled" defaultChecked={settings.whatsappBubbleEnabled} />
+            </label>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field label="WhatsApp alquiler de local" htmlFor="rentalWhatsapp" hint="Dígitos con país (página Contacto)">
+                <Input id="rentalWhatsapp" name="rentalWhatsapp" defaultValue={settings.rentalWhatsapp} />
+              </Field>
+              <Field label="WhatsApp Be Our Sponsors" htmlFor="sponsorWhatsapp" hint="Dígitos con país">
+                <Input id="sponsorWhatsapp" name="sponsorWhatsapp" defaultValue={settings.sponsorWhatsapp} />
+              </Field>
+            </div>
+            <Field label="Brochure PDF (URL)" htmlFor="sponsorPdfUrl" hint="Link al PDF de patrocinios (se abre al descargar)">
+              <Input id="sponsorPdfUrl" name="sponsorPdfUrl" type="url" defaultValue={settings.sponsorPdfUrl} placeholder="https://…/brochure.pdf" />
+            </Field>
+            <ImageUpload
+              name="sponsorVideoUrl"
+              label="Video Be Our Sponsors (vertical)"
+              defaultValue={settings.sponsorVideoUrl}
+              folder="sponsors"
+              aspect="aspect-[9/16] max-w-[200px]"
+              allowUrl
+            />
+          </div>
+        </AdminCard>
+
+        <AdminCard title="Plano del mall">
+          <div className="space-y-3">
+            <ImageUpload
+              name="planoImageUrl"
+              label="Plano (imagen o PDF)"
+              defaultValue={settings.planoImageUrl}
+              folder="plano"
+              aspect="aspect-[4/3] max-w-[360px]"
+              allowPdf
+              allowUrl
+            />
+            <p className="text-[13px] text-mist-500">
+              Sube el plano como imagen (PNG/WebP) o PDF. Si subes un PDF, se muestra la primera página. Se ve en el Directorio y en la página Plano del mall.
+            </p>
           </div>
         </AdminCard>
       </div>

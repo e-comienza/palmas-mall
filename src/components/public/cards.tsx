@@ -14,7 +14,7 @@ export function LocalCard({
 }) {
   return (
     <Link
-      href={`/locales/${local.slug}`}
+      href={`/directorio/${local.slug}`}
       className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-card transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1 hover:shadow-card-hover"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-mist-100">

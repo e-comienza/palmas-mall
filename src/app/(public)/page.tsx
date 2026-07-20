@@ -14,6 +14,7 @@ import {
 import { Container, SectionTitle } from "@/components/public/container";
 import { Reveal, RevealStagger } from "@/components/public/reveal";
 import { Media } from "@/components/public/media";
+import { withHeart } from "@/lib/heart-text";
 import { LocalCard, EventCard, PostCard } from "@/components/public/cards";
 import { FaqAccordion } from "@/components/public/faq-section";
 import {
@@ -105,7 +106,7 @@ const QUE_HACER = [
   {
     title: "Disfrutar en familia",
     text: "PlayZone y actividades para niños",
-    href: "/blog/playzone-molly-plan-familiar",
+    href: "/play-zone",
     img: "/images/galeria/dsc1699-1-scaled.webp",
     alt: "Familias disfrutando en Palmas Mall",
     big: true,
@@ -141,7 +142,7 @@ export default async function HomePage() {
             name: "Locales destacados de Palmas Mall",
             items: locales.map((l) => ({
               name: l.name,
-              path: `/locales/${l.slug}`,
+              path: `/directorio/${l.slug}`,
               image: l.coverUrl || undefined,
               description: l.shortDescription || undefined,
             })),
@@ -164,22 +165,30 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-t from-palm-950/90 via-palm-950/35 to-palm-950/15" />
         <Container className="relative pb-16 pt-24 sm:pb-20">
           <div className="max-w-2xl">
-            <h1
-              data-speakable
-              className="font-display text-[2.5rem] font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-6xl"
-            >
-              {hero.heading || "Vive tus mejores momentos"}
+            <h1 data-speakable className="sr-only">
+              {hero.heading || "Tus mejores momentos en Palmas Mall"}
             </h1>
+            <Image
+              src={settings.sloganImageUrl || "/brand/slogan.webp"}
+              alt={settings.tagline || "Tus mejores momentos"}
+              width={728}
+              height={78}
+              priority
+              aria-hidden
+              className="h-auto w-[min(85%,30rem)] brightness-0 invert drop-shadow-[0_2px_10px_rgb(6_33_18/0.35)]"
+            />
             <p
               data-speakable
-              className="mt-4 max-w-[46ch] text-base leading-relaxed text-white/85 sm:text-lg"
+              className="mt-5 max-w-[46ch] text-base leading-relaxed text-white/85 sm:text-lg"
             >
-              {hero.subheading ||
-                "Gastronomía, compras, eventos y arquitectura a cielo abierto en el Lifestyle Mall de Cali."}
+              {withHeart(
+                hero.subheading ||
+                  "Gastronomía, compras, eventos y arquitectura a cielo abierto en el Lifestyle Mall de Cali.",
+              )}
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Link
-                href={hero.ctaPrimaryUrl || "/locales"}
+                href={hero.ctaPrimaryUrl || "/directorio"}
                 className="pressable inline-flex h-12 items-center rounded-full bg-white px-7 text-base font-semibold text-palm-900 transition-colors hover:bg-mist-100"
               >
                 {hero.ctaPrimaryLabel || "Explorar locales"}
@@ -298,7 +307,7 @@ export default async function HomePage() {
             <div className="mb-8 flex items-end justify-between gap-4 sm:mb-12">
               <SectionTitle title="Locales destacados" className="mb-0 sm:mb-0" />
               <Link
-                href="/locales"
+                href="/directorio"
                 className="hidden shrink-0 items-center gap-1.5 font-semibold text-palm-700 transition-colors hover:text-palm-900 sm:inline-flex"
               >
                 Ver directorio <ArrowRight size={16} weight="bold" />
@@ -313,7 +322,7 @@ export default async function HomePage() {
             </div>
             <div className="mt-6 sm:hidden">
               <Link
-                href="/locales"
+                href="/directorio"
                 className="pressable flex h-12 items-center justify-center rounded-full border border-palm-700/30 bg-white font-semibold text-palm-800"
               >
                 Ver directorio completo

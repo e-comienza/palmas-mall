@@ -75,6 +75,16 @@ export const getUpcomingEvents = cache((take?: number) => {
   });
 });
 
+/** Eventos publicados por lista de ids, preservando el orden recibido. */
+export const getEventsByIds = cache(async (ids: string[]) => {
+  if (!ids.length) return [];
+  const events = await prisma.event.findMany({
+    where: { ...PUBLISHED, id: { in: ids } },
+  });
+  const byId = new Map(events.map((e) => [e.id, e]));
+  return ids.map((id) => byId.get(id)).filter((e): e is NonNullable<typeof e> => Boolean(e));
+});
+
 export const getPastEvents = cache((take = 6) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
