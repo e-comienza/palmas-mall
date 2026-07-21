@@ -2,14 +2,15 @@
 
 import { useCallback, useRef, useState } from "react";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react";
-import { Media } from "@/components/public/media";
+import { FramedMedia } from "@/components/public/framed-media";
 import { cn } from "@/lib/utils";
 
 export type CarouselImage = { url: string; alt: string };
 
 /**
- * Carrusel de fotos con scroll-snap nativo: swipe fluido en móvil,
- * flechas en desktop y dots discretos. Sin librerías, 60fps, sin layout shift.
+ * Carrusel de fotos: muestra la imagen completa (sin recorte) sobre un fondo
+ * borroso, deja asomar la siguiente foto (peek) para que se lea como carrusel,
+ * y trae flechas visibles en desktop, contador y dots. Scroll-snap nativo.
  */
 export function PhotoCarousel({
   images,
@@ -31,30 +32,38 @@ export function PhotoCarousel({
     raf.current = requestAnimationFrame(() => {
       const el = trackRef.current;
       if (!el) return;
-      setIndex(Math.round(el.scrollLeft / el.clientWidth));
+      let nearest = 0;
+      let best = Infinity;
+      for (let i = 0; i < el.children.length; i++) {
+        const c = el.children[i] as HTMLElement;
+        const d = Math.abs(c.offsetLeft - el.scrollLeft);
+        if (d < best) {
+          best = d;
+          nearest = i;
+        }
+      }
+      setIndex(nearest);
     });
   }, []);
 
   const goTo = useCallback((i: number) => {
     const el = trackRef.current;
     if (!el) return;
-    const clamped = Math.max(0, Math.min(images.length - 1, i));
-    el.scrollTo({ left: clamped * el.clientWidth, behavior: "smooth" });
-  }, [images.length]);
+    const clamped = Math.max(0, Math.min(el.children.length - 1, i));
+    const child = el.children[clamped] as HTMLElement | undefined;
+    if (child) el.scrollTo({ left: child.offsetLeft, behavior: "smooth" });
+  }, []);
 
   if (!images.length) return null;
 
   if (images.length === 1) {
     return (
-      <div className={cn("relative overflow-hidden rounded-2xl bg-mist-100", aspect, className)}>
-        <Media
+      <div className={cn("relative overflow-hidden rounded-2xl bg-palm-950", aspect, className)}>
+        <FramedMedia
           src={images[0].url}
           alt={images[0].alt}
-          fill
-          mode="inline"
           priority={priorityFirst}
-          sizes="(max-width: 768px) 100vw, 800px"
-          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 900px"
         />
       </div>
     );
@@ -65,9 +74,7 @@ export function PhotoCarousel({
       <div
         ref={trackRef}
         onScroll={onScroll}
-        className={cn(
-          "scrollbar-none flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain rounded-2xl bg-mist-100",
-        )}
+        className="scrollbar-none flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain"
       >
         {images.map((img, i) => (
           <div
@@ -75,29 +82,33 @@ export function PhotoCarousel({
             role="group"
             aria-roledescription="foto"
             aria-label={`Foto ${i + 1} de ${images.length}`}
-            className={cn("relative w-full shrink-0 snap-center", aspect)}
+            className={cn(
+              "relative w-[88%] shrink-0 snap-start overflow-hidden rounded-2xl bg-palm-950 sm:w-[72%] lg:w-[62%]",
+              aspect,
+            )}
           >
-            <Media
+            <FramedMedia
               src={img.url}
               alt={img.alt}
-              fill
-              mode="inline"
               priority={priorityFirst && i === 0}
-              loading={i === 0 ? undefined : "lazy"}
-              sizes="(max-width: 768px) 100vw, 800px"
-              className="object-cover"
+              sizes="(max-width: 768px) 88vw, 640px"
             />
           </div>
         ))}
       </div>
 
-      {/* Flechas: visibles en hover en desktop, ocultas en touch */}
+      {/* Contador */}
+      <div className="pointer-events-none absolute right-3 top-3 rounded-full bg-palm-950/60 px-2.5 py-1 text-[12px] font-semibold text-white backdrop-blur-sm">
+        {index + 1} / {images.length}
+      </div>
+
+      {/* Flechas: siempre visibles en desktop */}
       <button
         type="button"
         onClick={() => goTo(index - 1)}
         disabled={index === 0}
         aria-label="Foto anterior"
-        className="pressable absolute left-3 top-1/2 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-palm-900 shadow-card opacity-0 transition-opacity duration-200 hover:bg-white disabled:opacity-0 group-hover:opacity-100 group-hover:disabled:opacity-40 lg:flex"
+        className="pressable absolute left-2 top-1/2 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-palm-900 shadow-card transition hover:bg-mist-50 disabled:pointer-events-none disabled:opacity-35 lg:flex"
       >
         <CaretLeft size={20} weight="bold" />
       </button>
@@ -106,14 +117,14 @@ export function PhotoCarousel({
         onClick={() => goTo(index + 1)}
         disabled={index === images.length - 1}
         aria-label="Foto siguiente"
-        className="pressable absolute right-3 top-1/2 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-palm-900 shadow-card opacity-0 transition-opacity duration-200 hover:bg-white disabled:opacity-0 group-hover:opacity-100 group-hover:disabled:opacity-40 lg:flex"
+        className="pressable absolute right-2 top-1/2 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-palm-900 shadow-card transition hover:bg-mist-50 disabled:pointer-events-none disabled:opacity-35 lg:flex"
       >
         <CaretRight size={20} weight="bold" />
       </button>
 
       {/* Dots */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
-        <div className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-palm-950/40 px-2.5 py-2 backdrop-blur-sm">
+      <div className="mt-3 flex justify-center">
+        <div className="flex items-center gap-1.5">
           {images.map((_, i) => (
             <button
               key={i}
@@ -122,8 +133,8 @@ export function PhotoCarousel({
               aria-label={`Ir a la foto ${i + 1}`}
               aria-current={i === index}
               className={cn(
-                "h-1.5 rounded-full transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]",
-                i === index ? "w-5 bg-white" : "w-1.5 bg-white/60 hover:bg-white/90",
+                "h-1.5 rounded-full transition-all duration-300",
+                i === index ? "w-5 bg-palm-700" : "w-1.5 bg-mist-300 hover:bg-mist-400",
               )}
             />
           ))}

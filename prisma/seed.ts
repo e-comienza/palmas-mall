@@ -11,6 +11,11 @@
  */
 import { PrismaClient, ContentStatus, FaqScope, BlockType } from "@prisma/client";
 import { hash } from "bcryptjs";
+import localMediaRaw from "./local-media.json";
+
+// Covers + galerías de locales centralizadas en Cloudinary (match exacto con
+// el carrusel de palmasmall.com). Regenerable desde el script de subida.
+const LOCAL_MEDIA = localMediaRaw as Record<string, { cover: string; gallery: string[] }>;
 
 const prisma = new PrismaClient();
 
@@ -652,8 +657,8 @@ async function main() {
       instagramUrl: l.instagramUrl ?? "",
       facebookUrl: l.facebookUrl ?? "",
       tiktokUrl: l.tiktokUrl ?? "",
-      coverUrl: l.cover ?? "",
-      gallery: l.gallery ?? [],
+      coverUrl: LOCAL_MEDIA[l.slug]?.cover || l.cover || "",
+      gallery: LOCAL_MEDIA[l.slug]?.gallery ?? l.gallery ?? [],
       tags: l.tags ?? [],
       isRestaurant: l.restaurant ?? false,
       featured: l.featured ?? false,

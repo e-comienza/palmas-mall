@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { Local, LocalCategory } from "@prisma/client";
-import { Media } from "@/components/public/media";
+import { FramedMedia } from "@/components/public/framed-media";
 import { Container } from "@/components/public/container";
 import { Breadcrumbs } from "@/components/public/breadcrumbs";
 import { Badge } from "@/components/ui/badge";
@@ -59,14 +59,11 @@ export function LocalHero({
       </div>
 
       <div className="relative h-[42vh] min-h-[300px] overflow-hidden bg-palm-950 md:h-[52vh] md:max-h-[560px]">
-        <Media
+        <FramedMedia
           src={local.coverUrl}
           alt={`${local.name} en Palmas Mall Cali`}
-          fill
-          mode="background"
           priority
           sizes="100vw"
-          className="object-cover"
         />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-palm-950/85 via-palm-950/15 to-transparent" />
         <Container className="absolute inset-x-0 bottom-0 left-1/2 -translate-x-1/2 pb-6 sm:pb-9">

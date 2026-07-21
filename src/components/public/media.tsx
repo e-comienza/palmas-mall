@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { BackgroundVideo } from "./background-video";
@@ -18,7 +20,7 @@ import {
  *   · mode="inline": <video controls>, difiere bytes con preload="metadata".
  *   · mode="background": autoplay muted loop, para fondos de hero.
  */
-export type MediaMode = "poster" | "inline" | "background";
+export type MediaMode = "poster" | "inline" | "background" | "backdrop";
 
 type MediaProps = {
   src: string;
@@ -61,8 +63,9 @@ export function Media({
   if (isVideoUrl(src)) {
     const poster = cloudinaryPoster(src);
 
-    if (mode === "poster") {
-      // Solo el frame como imagen + badge: sin descargar el video.
+    if (mode === "poster" || mode === "backdrop") {
+      // Solo el frame como imagen; con badge de play en "poster", sin badge
+      // en "backdrop" (para usarlo de fondo borroso). No descarga el video.
       return (
         <>
           {poster ? (
@@ -80,7 +83,7 @@ export function Media({
           ) : (
             <div className="absolute inset-0 bg-palm-950" />
           )}
-          <PlayBadge />
+          {mode === "poster" ? <PlayBadge /> : null}
         </>
       );
     }

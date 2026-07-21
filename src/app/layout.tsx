@@ -52,6 +52,11 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es-CO" data-scroll-behavior="smooth">
+      <head>
+        {/* Acelera la primera imagen: abre la conexión al CDN de Cloudinary antes */}
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+      </head>
       <body className={`${figtree.variable} ${bricolage.variable} min-h-full antialiased`}>
         {children}
         <Toaster position="bottom-right" richColors closeButton />
