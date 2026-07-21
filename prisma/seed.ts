@@ -230,7 +230,7 @@ async function main() {
       ],
       deliveryUrl: "https://domicilios.crepesywaffles.com/",
       instagramUrl: "https://www.instagram.com/crepesywaffles/",
-      cover: `${U}/2024/07/crepe-poblana.jpg`,
+      cover: `${U}/2024/07/crepsfoto.jpg`,
       gallery: [
         `${U}/2024/07/crepe-poblana.jpg`,
         `${U}/2024/07/dsc_0182-crepe-nutella-fresa-sku-50516-copia-2.jpg`,
@@ -287,7 +287,7 @@ async function main() {
       websiteUrl: "https://www.bbccerveceria.com/productos-bbc",
       facebookUrl: "https://www.facebook.com/BCCcerveceriaCO",
       instagramUrl: "https://www.instagram.com/bbcpalmasmallcali/",
-      cover: `${U}/2024/03/cerveceria-bbc-1.jpg`,
+      cover: `${U}/2024/07/20240711_160720_11zon-scaled.jpg`,
       gallery: [
         `${U}/2024/03/cerveceria-bbc-1.jpg`,
         `${U}/2024/03/cerveceria-bbc-2.jpg`,
@@ -353,7 +353,7 @@ async function main() {
       ],
       menuUrl: "https://menupp.co/entrecostas",
       instagramUrl: "https://www.instagram.com/entrecostasrestaurante",
-      cover: `${U}/2024/02/entrecostas-3.jpg`,
+      cover: `${U}/2024/02/img_9722-scaled-e1742046215352.jpg`,
       gallery: [
         `${U}/2024/02/entrecostas-3.jpg`,
         `${U}/2024/02/entrecostas-4.jpg`,
@@ -434,7 +434,7 @@ async function main() {
       facebookUrl: "https://www.facebook.com/restaurantetortelli",
       instagramUrl: "https://www.instagram.com/restaurantetortelli",
       tiktokUrl: "https://www.tiktok.com/@tortellirestaurante",
-      cover: `${U}/2024/03/tortelli1.jpg`,
+      cover: `${U}/2024/03/tortelli.webp`,
       gallery: [
         `${U}/2024/03/tortelli1.jpg`,
         `${U}/2024/03/tortelli2.jpg`,
@@ -452,7 +452,7 @@ async function main() {
       short: "Un pub británico en Cali: ales, cervezas importadas y ambiente de after office.",
       long: "The British Ale House trae a Palmas Mall el espíritu de los pubs británicos: ales artesanales, cervezas importadas y el mejor ambiente para el after office, ver el partido o alargar la noche con amigos.",
       instagramUrl: "https://www.instagram.com/the_british_ale_house",
-      cover: `${U}/2025/05/tbah1.jpg`,
+      cover: `${U}/2025/05/img_2075-scaled.jpg`,
       gallery: [
         `${U}/2025/05/tbah1.jpg`,
         `${U}/2025/05/tbah2.jpg`,
@@ -533,8 +533,8 @@ async function main() {
       long: "Jagi es la marca de gorras y accesorios con identidad propia: diseños originales, materiales de calidad y ediciones que se agotan rápido. Pasa por la tienda en Palmas Mall y encuentra la tuya.",
       websiteUrl: "https://jagicaps.com/",
       instagramUrl: "https://www.instagram.com/jagicaps",
-      cover: `${U}/2026/04/img_3931-scaled.jpg`,
-      gallery: [`${U}/2026/04/img_3931-scaled.jpg`],
+      cover: `${U}/2024/03/img_3931-scaled-1.jpg`,
+      gallery: [`${U}/2024/03/img_3931-scaled-1.jpg`],
       tags: ["gorras", "accesorios", "moda"],
     },
     {
@@ -549,7 +549,7 @@ async function main() {
       ],
       websiteUrl: "https://rafaelcure.com/",
       instagramUrl: "https://www.instagram.com/rafaelcuremen/",
-      cover: `${U}/2024/07/blazer-venecia-azul-rey_01.jpg`,
+      cover: `${U}/2024/07/imagen-de-whatsapp-2024-11-08-a-las-18.58.16_b74eaa06.jpg`,
       gallery: [
         `${U}/2024/07/blazer-venecia-azul-rey_01.jpg`,
         `${U}/2024/07/matrimonios-05-682x1024-1.jpg`,
