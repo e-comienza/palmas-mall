@@ -26,12 +26,19 @@ export function LocalHero({
     />
   );
 
+  // Badges sobre banda oscura: contraste alto (categoría sólida, resto pill
+  // translúcido blanco con texto blanco).
   const badges = (
     <div className="flex flex-wrap items-center gap-2">
-      {local.category ? <Badge>{local.category.name}</Badge> : null}
-      {local.isRestaurant ? <Badge variant="leaf">Servicio a la mesa</Badge> : null}
-      {local.comingSoon ? <Badge variant="dark">Próximamente</Badge> : null}
-      {local.unitNumber ? <Badge variant="outline">Local {local.unitNumber}</Badge> : null}
+      {local.category ? (
+        <Badge className="bg-white text-palm-950">{local.category.name}</Badge>
+      ) : null}
+      {local.isRestaurant ? (
+        <Badge className="bg-white/15 text-white ring-1 ring-inset ring-white/30">Servicio a la mesa</Badge>
+      ) : null}
+      {local.comingSoon ? (
+        <Badge className="bg-white/15 text-white ring-1 ring-inset ring-white/30">Próximamente</Badge>
+      ) : null}
     </div>
   );
 
