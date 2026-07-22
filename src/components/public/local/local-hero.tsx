@@ -58,30 +58,39 @@ export function LocalHero({
         <Container>{crumbs}</Container>
       </div>
 
-      <div className="relative h-[42vh] min-h-[300px] overflow-hidden bg-palm-950 md:h-[52vh] md:max-h-[560px]">
-        <FramedMedia
-          src={local.coverUrl}
-          alt={`${local.name} en Palmas Mall Cali`}
-          priority
-          sizes="100vw"
-        />
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-palm-950/85 via-palm-950/15 to-transparent" />
-        <Container className="absolute inset-x-0 bottom-0 left-1/2 -translate-x-1/2 pb-6 sm:pb-9">
-          <div className="flex items-end gap-4">
-            {logoBadge && local.logoUrl ? (
-              <Image
-                src={local.logoUrl}
-                alt={`Logo de ${local.name}`}
-                width={80}
-                height={80}
-                className="hidden size-16 shrink-0 rounded-2xl border border-white/20 bg-white object-contain p-1.5 shadow-card sm:block sm:size-20"
+      <div className="relative overflow-hidden bg-gradient-to-br from-palm-950 via-palm-900 to-palm-800">
+        <Container className="py-8 sm:py-12">
+          <div className="grid items-center gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] md:gap-10">
+            {/* Imagen enmarcada: se ve completa sobre su propio fondo borroso */}
+            <div className="relative mx-auto aspect-[4/3] w-full max-w-md overflow-hidden rounded-2xl bg-palm-950 shadow-2xl ring-1 ring-white/10">
+              <FramedMedia
+                src={local.coverUrl}
+                alt={`${local.name} en Palmas Mall Cali`}
+                priority
+                sizes="(max-width: 768px) 90vw, 480px"
               />
-            ) : null}
-            <div className="min-w-0">
-              <h1 className="font-display text-[2rem] font-bold leading-[1.05] tracking-[-0.02em] text-white drop-shadow-sm sm:text-5xl">
+            </div>
+
+            {/* Nombre e info, sobre la banda oscura (nunca tapado por la foto) */}
+            <div className="text-white">
+              {logoBadge && local.logoUrl ? (
+                <Image
+                  src={local.logoUrl}
+                  alt={`Logo de ${local.name}`}
+                  width={80}
+                  height={80}
+                  className="mb-4 size-16 rounded-2xl border border-white/20 bg-white object-contain p-1.5 shadow-card sm:size-20"
+                />
+              ) : null}
+              <h1 className="font-display text-[2rem] font-bold leading-[1.05] tracking-[-0.02em] sm:text-5xl">
                 {local.name}
               </h1>
-              <div className="mt-3">{badges}</div>
+              {local.shortDescription ? (
+                <p className="mt-3 max-w-[46ch] text-[15px] leading-relaxed text-white/80">
+                  {local.shortDescription}
+                </p>
+              ) : null}
+              <div className="mt-4">{badges}</div>
             </div>
           </div>
         </Container>
