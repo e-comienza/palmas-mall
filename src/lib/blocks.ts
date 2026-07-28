@@ -20,6 +20,21 @@ export type RichTextData = {
   body?: string;
 };
 
+export type QueHacerCard = {
+  title?: string;
+  text?: string;
+  href?: string;
+  img?: string;
+  alt?: string;
+  big?: boolean;
+};
+
+export type QueHacerData = {
+  heading?: string;
+  intro?: string;
+  items?: QueHacerCard[];
+};
+
 type PageWithBlocks = (Page & { blocks: PageBlock[] }) | null | undefined;
 
 /** Datos del bloque HERO de una página ({} si no existe). */
@@ -32,4 +47,10 @@ export function heroData(page: PageWithBlocks): HeroData {
 export function richTextData(page: PageWithBlocks): RichTextData {
   const block = page?.blocks.find((b) => b.type === "RICH_TEXT");
   return (block?.data ?? {}) as RichTextData;
+}
+
+/** Datos del bloque SERVICE_CARDS (sección "¿Qué hacer?") de una página ({} si no existe). */
+export function queHacerData(page: PageWithBlocks): QueHacerData {
+  const block = page?.blocks.find((b) => b.type === "SERVICE_CARDS");
+  return (block?.data ?? {}) as QueHacerData;
 }

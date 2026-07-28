@@ -27,8 +27,32 @@ const BLOCK_TYPES: { value: string; label: string }[] = [
   { value: "MAP", label: "Mapa / cómo llegar" },
   { value: "FORM", label: "Formulario de contacto" },
   { value: "AWARDS", label: "Galardones" },
+  { value: "SERVICE_CARDS", label: "Cards de secciones (foto + título + subtítulo)" },
   { value: "VIDEO", label: "Video" },
 ];
+
+type CardItem = {
+  title?: string;
+  text?: string;
+  href?: string;
+  img?: string;
+  alt?: string;
+  big?: boolean;
+};
+
+// Defaults de "¿Qué hacer en Palmas Mall?" para prellenar el bloque al agregarlo.
+const QUE_HACER_DEFAULTS: Record<string, unknown> = {
+  heading: "¿Qué hacer en Palmas Mall?",
+  intro: "Seis maneras de vivir el mall: elige tu plan de hoy.",
+  items: [
+    { title: "Comer", text: "El mejor Food Hall de Cali, a la mesa", href: "/food-drinks", img: "/images/galeria/20241229_020127780_ios-scaled.webp", alt: "Food Hall de Palmas Mall iluminado en la noche", big: true },
+    { title: "Comprar", text: "Boutiques y marcas exclusivas", href: "/shop-more", img: "/images/galeria/dsc1837-scaled.webp", alt: "Desfile de moda en Palmas Mall" },
+    { title: "Vivir eventos", text: "Ferias, música y planes cada semana", href: "/eventos", img: "/images/galeria/dsc2143-scaled.webp", alt: "Evento con público en Palmas Mall" },
+    { title: "Venir con tu mascota", text: "Espacios abiertos y petfriendly", href: "/conoce-palmas-mall", img: "/images/galeria/dsc2168-scaled.webp", alt: "Terrazas al aire libre de Palmas Mall" },
+    { title: "Trabajar o reunirte", text: "Coworking rodeado de vegetación", href: "/conoce-palmas-mall", img: "/images/galeria/shopping-cali2.webp", alt: "Arquitectura a cielo abierto de Palmas Mall" },
+    { title: "Disfrutar en familia", text: "PlayZone y actividades para niños", href: "/play-zone", img: "/images/galeria/dsc1699-1-scaled.webp", alt: "Familias disfrutando en Palmas Mall", big: true },
+  ] satisfies CardItem[],
+};
 
 const str = (b: EditableBlock, k: string) => (typeof b.data[k] === "string" ? (b.data[k] as string) : "");
 
@@ -139,11 +163,118 @@ export function BlockEditor({
             {block.type === "VIDEO" ? (
               <Input value={str(block, "url")} onChange={(e) => setData(i, "url", e.target.value)} placeholder="https://www.youtube.com/embed/… o URL de video" aria-label="URL del video" />
             ) : null}
+
+            {block.type === "SERVICE_CARDS" ? (
+              <>
+                <Input
+                  value={str(block, "heading")}
+                  onChange={(e) => setData(i, "heading", e.target.value)}
+                  placeholder="Título de la sección"
+                  aria-label="Título de la sección"
+                />
+                <Input
+                  value={str(block, "intro")}
+                  onChange={(e) => setData(i, "intro", e.target.value)}
+                  placeholder="Texto introductorio (opcional)"
+                  aria-label="Texto introductorio"
+                />
+                <CardsEditor
+                  blockIndex={i}
+                  items={Array.isArray(block.data.items) ? (block.data.items as CardItem[]) : []}
+                  onChange={(items) => setData(i, "items", items)}
+                />
+              </>
+            ) : null}
           </div>
         </div>
       ))}
 
-      <AddBlock onAdd={(type) => setBlocks((prev) => [...prev, { type, data: {}, visible: true }])} />
+      <AddBlock
+        onAdd={(type) =>
+          setBlocks((prev) => [
+            ...prev,
+            { type, data: type === "SERVICE_CARDS" ? QUE_HACER_DEFAULTS : {}, visible: true },
+          ])
+        }
+      />
+    </div>
+  );
+}
+
+/** Editor de cards (foto + título + subtítulo + link) del bloque SERVICE_CARDS. */
+function CardsEditor({
+  blockIndex,
+  items,
+  onChange,
+}: {
+  blockIndex: number;
+  items: CardItem[];
+  onChange: (items: CardItem[]) => void;
+}) {
+  const setItem = (i: number, patch: Partial<CardItem>) =>
+    onChange(items.map((it, j) => (j === i ? { ...it, ...patch } : it)));
+
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= items.length) return;
+    const next = [...items];
+    [next[i], next[j]] = [next[j], next[i]];
+    onChange(next);
+  };
+
+  return (
+    <div className="space-y-3">
+      {items.map((item, i) => (
+        <div key={i} className="rounded-xl border border-mist-200 bg-white p-3">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="text-[13px] font-bold text-palm-950">Card {i + 1}</p>
+            <div className="flex items-center gap-1">
+              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Subir card" className="pressable flex size-7 items-center justify-center rounded-full text-mist-500 hover:bg-mist-100 disabled:opacity-30">
+                <CaretUp size={13} weight="bold" />
+              </button>
+              <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} aria-label="Bajar card" className="pressable flex size-7 items-center justify-center rounded-full text-mist-500 hover:bg-mist-100 disabled:opacity-30">
+                <CaretDown size={13} weight="bold" />
+              </button>
+              <button type="button" onClick={() => onChange(items.filter((_, j) => j !== i))} aria-label="Eliminar card" className="pressable flex size-7 items-center justify-center rounded-full text-mist-500 hover:bg-red-50 hover:text-red-700">
+                <Trash size={13} />
+              </button>
+            </div>
+          </div>
+          <div className="space-y-2.5">
+            <ImageUpload
+              key={`${i}-${item.img || ""}`}
+              name={`__block-${blockIndex}-card-${i}-img`}
+              defaultValue={item.img || ""}
+              folder="paginas"
+              onChange={(v) => setItem(i, { img: v })}
+            />
+            <div className="grid grid-cols-2 gap-2.5">
+              <Input value={item.title || ""} onChange={(e) => setItem(i, { title: e.target.value })} placeholder="Título" aria-label="Título de la card" />
+              <Input value={item.text || ""} onChange={(e) => setItem(i, { text: e.target.value })} placeholder="Subtítulo" aria-label="Subtítulo de la card" />
+            </div>
+            <div className="grid grid-cols-2 gap-2.5">
+              <Input value={item.href || ""} onChange={(e) => setItem(i, { href: e.target.value })} placeholder="/food-drinks" aria-label="URL de destino" />
+              <Input value={item.alt || ""} onChange={(e) => setItem(i, { alt: e.target.value })} placeholder="Texto alternativo (accesibilidad)" aria-label="Alt text" />
+            </div>
+            <label className="flex items-center gap-2 text-[13px] font-semibold text-mist-700">
+              <input
+                type="checkbox"
+                checked={!!item.big}
+                onChange={(e) => setItem(i, { big: e.target.checked })}
+                className="size-4 accent-palm-700"
+              />
+              Card grande (ocupa 2 columnas)
+            </label>
+          </div>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => onChange([...items, {}])}
+        className="pressable inline-flex h-9 items-center gap-1.5 rounded-full border border-palm-700/30 bg-white px-4 text-[13px] font-semibold text-palm-800 hover:bg-palm-50"
+      >
+        <Plus size={13} weight="bold" /> Agregar card
+      </button>
     </div>
   );
 }

@@ -28,7 +28,7 @@ import {
   getSedes,
 } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/settings";
-import { heroData, richTextData } from "@/lib/blocks";
+import { heroData, richTextData, queHacerData } from "@/lib/blocks";
 import { ExtraBlocks } from "@/components/public/block-renderer";
 import {
   organizationJsonLd,
@@ -129,6 +129,10 @@ export default async function HomePage() {
 
   const hero = heroData(page);
   const intro = richTextData(page);
+  const queHacer = queHacerData(page);
+  const queHacerCards = queHacer.items?.length
+    ? queHacer.items.filter((c) => c.title || c.img)
+    : QUE_HACER;
 
   return (
     <>
@@ -267,23 +271,23 @@ export default async function HomePage() {
       <section className="pb-16 sm:pb-24">
         <Container>
           <SectionTitle
-            title="¿Qué hacer en Palmas Mall?"
-            intro="Seis maneras de vivir el mall: elige tu plan de hoy."
+            title={queHacer.heading || "¿Qué hacer en Palmas Mall?"}
+            intro={queHacer.intro || "Seis maneras de vivir el mall: elige tu plan de hoy."}
           />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {QUE_HACER.map((card, i) => (
+            {queHacerCards.map((card, i) => (
               <Reveal
-                key={card.title}
+                key={`${card.title}-${i}`}
                 delay={i * 0.04}
                 className={card.big ? "lg:col-span-2" : ""}
               >
                 <Link
-                  href={card.href}
+                  href={card.href || "/directorio"}
                   className="group relative block h-56 overflow-hidden rounded-2xl sm:h-64"
                 >
                   <Image
-                    src={card.img}
-                    alt={card.alt}
+                    src={card.img || "/images/galeria/shopping-cali2.webp"}
+                    alt={card.alt || card.title || "Palmas Mall"}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.05]"
@@ -534,7 +538,7 @@ export default async function HomePage() {
           </Container>
         </section>
       )}
-      <ExtraBlocks page={page} consumed={["HERO", "RICH_TEXT"]} />
+      <ExtraBlocks page={page} consumed={["HERO", "RICH_TEXT", "SERVICE_CARDS"]} />
     </>
   );
 }

@@ -1110,6 +1110,33 @@ async function main() {
     });
   }
 
+  // Bloque "¿Qué hacer?" del home (cards editables): se agrega si aún no existe,
+  // también en bases de datos que ya tienen los bloques HERO/RICH_TEXT.
+  const queHacerBlock = await prisma.pageBlock.count({
+    where: { pageId: pageId["home"], type: BlockType.SERVICE_CARDS },
+  });
+  if (queHacerBlock === 0) {
+    await prisma.pageBlock.create({
+      data: {
+        pageId: pageId["home"],
+        type: BlockType.SERVICE_CARDS,
+        order: 2,
+        data: {
+          heading: "¿Qué hacer en Palmas Mall?",
+          intro: "Seis maneras de vivir el mall: elige tu plan de hoy.",
+          items: [
+            { title: "Comer", text: "El mejor Food Hall de Cali, a la mesa", href: "/food-drinks", img: "/images/galeria/20241229_020127780_ios-scaled.webp", alt: "Food Hall de Palmas Mall iluminado en la noche", big: true },
+            { title: "Comprar", text: "Boutiques y marcas exclusivas", href: "/shop-more", img: "/images/galeria/dsc1837-scaled.webp", alt: "Desfile de moda en Palmas Mall" },
+            { title: "Vivir eventos", text: "Ferias, música y planes cada semana", href: "/eventos", img: "/images/galeria/dsc2143-scaled.webp", alt: "Evento con público en Palmas Mall" },
+            { title: "Venir con tu mascota", text: "Espacios abiertos y petfriendly", href: "/conoce-palmas-mall", img: "/images/galeria/dsc2168-scaled.webp", alt: "Terrazas al aire libre de Palmas Mall" },
+            { title: "Trabajar o reunirte", text: "Coworking rodeado de vegetación", href: "/conoce-palmas-mall", img: "/images/galeria/shopping-cali2.webp", alt: "Arquitectura a cielo abierto de Palmas Mall" },
+            { title: "Disfrutar en familia", text: "PlayZone y actividades para niños", href: "/play-zone", img: "/images/galeria/dsc1699-1-scaled.webp", alt: "Familias disfrutando en Palmas Mall", big: true },
+          ],
+        },
+      },
+    });
+  }
+
   // Bloques HERO editables de páginas de sistema (título/subtítulo/imagen de cabecera).
   // Los textos replican el diseño actual; el admin puede cambiarlos desde Páginas.
   const heroDefaults: Record<string, { heading: string; subheading: string; imageUrl?: string }> = {

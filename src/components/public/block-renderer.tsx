@@ -263,19 +263,42 @@ export async function BlockRenderer({
 
         case "SERVICE_CARDS": {
           const items = Array.isArray(data.items)
-            ? (data.items as { title?: string; text?: string }[])
+            ? (data.items as { title?: string; text?: string; img?: string; href?: string; alt?: string }[])
             : [];
           if (!items.length) return null;
           return (
             <Container key={block.id} className="py-10">
-              {str(data, "heading") ? <SectionTitle title={str(data, "heading")} /> : null}
+              {str(data, "heading") ? (
+                <SectionTitle title={str(data, "heading")} intro={str(data, "intro") || undefined} />
+              ) : null}
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {items.map((item, i) => (
-                  <div key={i} className="rounded-2xl bg-white p-6 shadow-card">
-                    <h3 className="font-display text-[17px] font-bold text-palm-950">{item.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-mist-600">{item.text}</p>
-                  </div>
-                ))}
+                {items.map((item, i) =>
+                  item.img ? (
+                    <Link
+                      key={i}
+                      href={item.href || "#"}
+                      className="group relative block h-56 overflow-hidden rounded-2xl"
+                    >
+                      <Image
+                        src={item.img}
+                        alt={item.alt || item.title || ""}
+                        fill
+                        sizes="(max-width: 640px) 100vw, 33vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-palm-950/85 via-palm-950/20 to-transparent" />
+                      <div className="absolute inset-x-0 bottom-0 p-5">
+                        <h3 className="font-display text-xl font-bold text-white">{item.title}</h3>
+                        <p className="mt-0.5 text-sm text-white/80">{item.text}</p>
+                      </div>
+                    </Link>
+                  ) : (
+                    <div key={i} className="rounded-2xl bg-white p-6 shadow-card">
+                      <h3 className="font-display text-[17px] font-bold text-palm-950">{item.title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-mist-600">{item.text}</p>
+                    </div>
+                  ),
+                )}
               </div>
             </Container>
           );
