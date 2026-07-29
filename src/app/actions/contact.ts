@@ -48,8 +48,11 @@ export async function submitContact(
     // Notificación por email (no bloquea: el mensaje ya quedó guardado en el admin)
     try {
       const settings = await getSiteSettings();
-      const to = process.env.CONTACT_EMAIL_TO || settings.email;
-      if (to) {
+      // CONTACT_EMAIL_TO admite varios destinatarios separados por coma,
+      // ej. "palmasmall@palmasmall.com, aga@hbc.com.co"
+      const raw = process.env.CONTACT_EMAIL_TO || settings.email || "";
+      const to = raw.split(",").map((e) => e.trim()).filter(Boolean);
+      if (to.length) {
         await sendEmail({
           to,
           replyTo: data.email,
