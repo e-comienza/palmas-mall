@@ -142,16 +142,13 @@ async function main() {
   const categories: { slug: string; name: string; group: string }[] = [
     { slug: "coffee", name: "Coffee", group: "food-drinks" },
     { slug: "parrilla", name: "Parrilla", group: "food-drinks" },
-    { slug: "hamburguesas-familiar", name: "Hamburguesas & Familiar", group: "food-drinks" },
+    { slug: "familiar", name: "Familiar", group: "food-drinks" },
     { slug: "postres", name: "Postres", group: "food-drinks" },
     { slug: "cerveceria", name: "Cervecería", group: "food-drinks" },
     { slug: "internacional", name: "Internacional", group: "food-drinks" },
-    { slug: "moda", name: "Moda", group: "shop-more" },
-    { slug: "deporte", name: "Deporte", group: "shop-more" },
+    { slug: "moda-deporte", name: "Moda & Deporte", group: "shop-more" },
     { slug: "joyeria", name: "Joyería", group: "shop-more" },
-    { slug: "salud-belleza", name: "Salud & Belleza", group: "shop-more" },
     { slug: "servicios", name: "Servicios", group: "shop-more" },
-    { slug: "entretenimiento", name: "Entretenimiento", group: "shop-more" },
   ];
   const catId: Record<string, string> = {};
   for (const [i, c] of categories.entries()) {
@@ -223,7 +220,7 @@ async function main() {
     {
       slug: "crepes-and-waffles-to-go",
       name: "Crepes & Waffles To Go",
-      cat: "hamburguesas-familiar",
+      cat: "familiar",
       restaurant: true,
       featured: true,
       short: "El clásico colombiano desde 1988: crepes, waffles, helados artesanales y brunch.",
@@ -311,7 +308,7 @@ async function main() {
     {
       slug: "viva-litalia",
       name: "Viva L'Italia",
-      cat: "hamburguesas-familiar",
+      cat: "familiar",
       restaurant: true,
       unit: "5-1",
       short: "Pizzas al horno de barro y pastas artesanales: sabor italiano hecho con amor.",
@@ -324,7 +321,7 @@ async function main() {
     {
       slug: "hamburgo",
       name: "Hamburgo",
-      cat: "hamburguesas-familiar",
+      cat: "familiar",
       restaurant: true,
       short: "Hamburguesas artesanales con pan horneado y combinaciones de autor.",
       long: "Hamburguesas hechas a mano con ingredientes frescos y combinaciones de autor que se volvieron favoritas del Food Hall. Pide la tuya al punto, acompáñala con papas y disfrútala en las terrazas a cielo abierto de Palmas Mall.",
@@ -499,7 +496,7 @@ async function main() {
     {
       slug: "puma",
       name: "PUMA",
-      cat: "deporte",
+      cat: "moda-deporte",
       short: "Sneakers, ropa deportiva y estilo urbano de una de las marcas líderes del mundo.",
       long: "La tienda oficial PUMA en Palmas Mall reúne lo mejor de la marca alemana: sneakers icónicos, ropa deportiva y colecciones urbanas para entrenar o para la calle. Encuentra los lanzamientos más recientes en Ciudad Jardín.",
       instagramUrl: "https://www.instagram.com/pumacolombia",
@@ -515,7 +512,7 @@ async function main() {
     {
       slug: "new-balance",
       name: "New Balance",
-      cat: "deporte",
+      cat: "moda-deporte",
       short: "Sneakers icónicos y tecnología premium para correr la ciudad con estilo.",
       long: "New Balance combina herencia deportiva y diseño contemporáneo: sneakers icónicos como los 574 y 990, ropa técnica y calzado de running con tecnología premium. Visita la tienda en Palmas Mall y encuentra tu par.",
       hours: [{ days: "Todos los días", hours: "10:00 a.m. – 8:00 p.m." }],
@@ -533,7 +530,7 @@ async function main() {
     {
       slug: "jagi",
       name: "Jagi",
-      cat: "moda",
+      cat: "moda-deporte",
       short: "Gorras y accesorios con diseño propio para completar tu look.",
       long: "Jagi es la marca de gorras y accesorios con identidad propia: diseños originales, materiales de calidad y ediciones que se agotan rápido. Pasa por la tienda en Palmas Mall y encuentra la tuya.",
       websiteUrl: "https://jagicaps.com/",
@@ -545,7 +542,7 @@ async function main() {
     {
       slug: "rafael-cure",
       name: "Rafael Cure",
-      cat: "moda",
+      cat: "moda-deporte",
       short: "Sastrería y moda masculina de alta factura para las ocasiones que importan.",
       long: "Rafael Cure viste al hombre contemporáneo: sastrería a medida, blazers, trajes de matrimonio y prendas de alta factura. Una experiencia de moda masculina personalizada en Palmas Mall.",
       hours: [
@@ -567,7 +564,7 @@ async function main() {
     {
       slug: "morea",
       name: "Morea",
-      cat: "moda",
+      cat: "moda-deporte",
       comingSoon: true,
       placeholder: true,
       short: "Próximamente: una nueva experiencia de moda llega a Palmas Mall.",
@@ -598,7 +595,7 @@ async function main() {
     {
       slug: "milanelo",
       name: "Milanelo",
-      cat: "moda",
+      cat: "moda-deporte",
       short: "Calzado y accesorios de inspiración italiana con carácter propio.",
       long: "Milanelo trae a Palmas Mall calzado y accesorios de inspiración italiana: diseño, materiales de calidad y piezas con carácter para elevar cualquier look.",
       hours: [
