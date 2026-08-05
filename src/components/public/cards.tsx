@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Local, LocalCategory, Event, BlogPost } from "@prisma/client";
 import { Media } from "@/components/public/media";
+import { FramedMedia } from "@/components/public/framed-media";
 import { Badge } from "@/components/ui/badge";
 import { formatDateShortEs } from "@/lib/utils";
 import { eventDateLabel } from "@/lib/events";
@@ -57,12 +58,11 @@ export function EventCard({ event }: { event: Event }) {
       className="group flex gap-4 overflow-hidden rounded-2xl bg-white p-3 shadow-card transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:shadow-card-hover sm:p-4"
     >
       <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-xl bg-mist-100 sm:w-28">
-        <Media
+        <FramedMedia
           src={event.coverUrl || FALLBACK_COVER}
           alt={event.title}
-          fill
           sizes="112px"
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+          foregroundMode="poster"
         />
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center">

@@ -9,7 +9,7 @@ import {
   ArrowRight,
 } from "@phosphor-icons/react/dist/ssr";
 import { Container } from "@/components/public/container";
-import { Media } from "@/components/public/media";
+import { FramedMedia } from "@/components/public/framed-media";
 import { Breadcrumbs } from "@/components/public/breadcrumbs";
 import { FaqAccordion } from "@/components/public/faq-section";
 import { Badge } from "@/components/ui/badge";
@@ -84,15 +84,12 @@ export default async function EventoPage({ params }: Props) {
         <div className="grid gap-10 lg:grid-cols-[1.6fr_1fr]">
           <div>
             {event.coverUrl ? (
-              <div className="relative aspect-[16/9] overflow-hidden rounded-2xl">
-                <Media
+              <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-mist-100">
+                <FramedMedia
                   src={event.coverUrl}
                   alt={event.title}
-                  fill
-                  mode="inline"
                   priority
                   sizes="(max-width: 1024px) 100vw, 760px"
-                  className="object-cover"
                 />
               </div>
             ) : null}

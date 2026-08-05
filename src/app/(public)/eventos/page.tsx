@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { CalendarBlank, MapPin } from "@phosphor-icons/react/dist/ssr";
 import { PageHeader } from "@/components/public/page-header";
+import { FramedMedia } from "@/components/public/framed-media";
 import { Container, SectionTitle } from "@/components/public/container";
 import { Badge } from "@/components/ui/badge";
 import { getUpcomingEvents, getPastEvents, getPage } from "@/lib/queries";
@@ -14,6 +14,8 @@ import { itemListJsonLd, webPageJsonLd, JsonLdScript } from "@/lib/jsonld";
 import { eventDateLabel } from "@/lib/events";
 
 export const dynamic = "force-dynamic";
+
+const FALLBACK_COVER = "/images/galeria/dsc2143-scaled.webp";
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata("eventos", "/eventos");
@@ -61,14 +63,13 @@ export default async function EventosPage() {
             href={`/eventos/${next.slug}`}
             className="group block overflow-hidden rounded-2xl bg-white shadow-card transition-shadow hover:shadow-card-hover lg:grid lg:grid-cols-2"
           >
-            <div className="relative aspect-[16/9] lg:aspect-auto lg:min-h-[320px]">
-              <Image
-                src={next.coverUrl || "/images/galeria/dsc2143-scaled.webp"}
+            <div className="relative aspect-[16/9] overflow-hidden bg-mist-100 lg:aspect-auto lg:min-h-[320px]">
+              <FramedMedia
+                src={next.coverUrl || FALLBACK_COVER}
                 alt={next.title}
-                fill
                 priority
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                foregroundMode="poster"
               />
             </div>
             <div className="flex flex-col justify-center p-6 sm:p-10">
@@ -116,12 +117,11 @@ export default async function EventosPage() {
                 className="group flex gap-4 rounded-2xl bg-white p-4 shadow-card transition-shadow hover:shadow-card-hover"
               >
                 <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-xl bg-mist-100 sm:w-28">
-                  <Image
-                    src={event.coverUrl || "/images/galeria/dsc2143-scaled.webp"}
+                  <FramedMedia
+                    src={event.coverUrl || FALLBACK_COVER}
                     alt={event.title}
-                    fill
                     sizes="112px"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+                    foregroundMode="poster"
                   />
                 </div>
                 <div className="min-w-0">
@@ -153,13 +153,12 @@ export default async function EventosPage() {
                   href={`/eventos/${event.slug}`}
                   className="group overflow-hidden rounded-2xl bg-white shadow-card"
                 >
-                  <div className="relative aspect-[4/3] bg-mist-100">
-                    <Image
-                      src={event.coverUrl || "/images/galeria/dsc2143-scaled.webp"}
+                  <div className="relative aspect-[4/3] overflow-hidden bg-mist-100 opacity-80 grayscale-[30%] transition-all duration-500 group-hover:opacity-100 group-hover:grayscale-0">
+                    <FramedMedia
+                      src={event.coverUrl || FALLBACK_COVER}
                       alt={event.title}
-                      fill
                       sizes="(max-width: 1024px) 50vw, 25vw"
-                      className="object-cover opacity-80 grayscale-[30%] transition-all duration-500 group-hover:opacity-100 group-hover:grayscale-0"
+                      foregroundMode="poster"
                     />
                   </div>
                   <div className="p-4">
