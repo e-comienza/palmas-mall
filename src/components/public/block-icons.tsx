@@ -42,7 +42,7 @@ export function BlockIcon({ name, size = 22 }: { name?: string; size?: number })
   if (!entry) return null;
   const { Icon } = entry;
   return (
-    <span className="flex size-11 items-center justify-center rounded-full bg-palm-100 text-palm-700">
+    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-palm-100 text-palm-700">
       <Icon size={size} weight="bold" />
     </span>
   );
