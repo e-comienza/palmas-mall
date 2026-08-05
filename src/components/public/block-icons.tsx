@@ -11,6 +11,9 @@ import {
   Star,
   Users,
   Baby,
+  Tree,
+  Laptop,
+  Storefront,
 } from "@phosphor-icons/react/dist/ssr";
 
 /** Iconos elegibles desde el admin para cards sin foto. */
@@ -27,6 +30,9 @@ export const BLOCK_ICONS = {
   star: { label: "Estrella", Icon: Star },
   users: { label: "Personas", Icon: Users },
   kids: { label: "Niños", Icon: Baby },
+  tree: { label: "Naturaleza", Icon: Tree },
+  laptop: { label: "Coworking", Icon: Laptop },
+  store: { label: "Tienda", Icon: Storefront },
 } as const;
 
 export type BlockIconName = keyof typeof BLOCK_ICONS;

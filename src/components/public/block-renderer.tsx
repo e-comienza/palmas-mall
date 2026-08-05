@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import type { Page, PageBlock, Faq, BlockType } from "@prisma/client";
 import { Media } from "./media";
 import { BlockIcon } from "./block-icons";
@@ -128,7 +129,9 @@ export async function BlockRenderer({
           if (!urls.length) return null;
           return (
             <Container key={block.id} className="py-8">
-              {str(data, "heading") ? <SectionTitle title={str(data, "heading")} /> : null}
+              {str(data, "heading") ? (
+                <SectionTitle title={str(data, "heading")} intro={str(data, "intro") || undefined} />
+              ) : null}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {urls.map((url, i) => (
                   <div key={`${url}-${i}`} className="relative aspect-square overflow-hidden rounded-2xl bg-mist-100">
@@ -136,6 +139,14 @@ export async function BlockRenderer({
                   </div>
                 ))}
               </div>
+              {str(data, "ctaLabel") && str(data, "ctaUrl") ? (
+                <Link
+                  href={str(data, "ctaUrl")}
+                  className="mt-6 inline-flex items-center gap-1.5 font-semibold text-palm-700 transition-colors hover:text-palm-900"
+                >
+                  {str(data, "ctaLabel")} <ArrowRight size={16} weight="bold" />
+                </Link>
+              ) : null}
             </Container>
           );
         }

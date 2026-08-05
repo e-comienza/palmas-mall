@@ -59,7 +59,7 @@ type CardItem = {
   icon?: string;
 };
 
-type MediaTextButton = { label?: string; url?: string; variant?: "primary" | "secondary" };
+type MediaTextButton = { label?: string; url?: string; variant?: "primary" | "secondary" | "link" };
 
 // Defaults de "¿Qué hacer en Palmas Mall?" para prellenar el bloque al agregarlo.
 const QUE_HACER_DEFAULTS: Record<string, unknown> = {
@@ -167,7 +167,27 @@ export function BlockEditor({
 
             {block.type === "GALLERY" ? (
               <>
+                <Input
+                  value={str(block, "intro")}
+                  onChange={(e) => setData(i, "intro", e.target.value)}
+                  placeholder="Texto introductorio (opcional)"
+                  aria-label="Texto introductorio"
+                />
                 <GalleryUpload name={`__block-${i}-gal`} defaultValue={Array.isArray(block.data.urls) ? (block.data.urls as string[]) : []} folder="paginas" onChange={(urls) => setData(i, "urls", urls)} />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    value={str(block, "ctaLabel")}
+                    onChange={(e) => setData(i, "ctaLabel", e.target.value)}
+                    placeholder="Texto del enlace (opcional)"
+                    aria-label="Texto del enlace"
+                  />
+                  <Input
+                    value={str(block, "ctaUrl")}
+                    onChange={(e) => setData(i, "ctaUrl", e.target.value)}
+                    placeholder="/momentos-palmas-mall"
+                    aria-label="URL del enlace"
+                  />
+                </div>
               </>
             ) : null}
 
@@ -199,12 +219,27 @@ export function BlockEditor({
                   folder="paginas"
                   onChange={(v) => setData(i, "imageUrl", v)}
                 />
+                <p className="text-[13px] text-mist-500">
+                  Segunda imagen (opcional): si la cargas, las dos fotos se muestran en collage.
+                </p>
+                <ImageUpload
+                  name={`__block-${i}-mt-img2`}
+                  defaultValue={str(block, "imageUrl2")}
+                  folder="paginas"
+                  onChange={(v) => setData(i, "imageUrl2", v)}
+                />
                 <div className="grid grid-cols-2 gap-3">
                   <Input
                     value={str(block, "imageAlt")}
                     onChange={(e) => setData(i, "imageAlt", e.target.value)}
                     placeholder="Texto alternativo (accesibilidad)"
                     aria-label="Alt text"
+                  />
+                  <Input
+                    value={str(block, "imageAlt2")}
+                    onChange={(e) => setData(i, "imageAlt2", e.target.value)}
+                    placeholder="Texto alternativo de la 2ª imagen"
+                    aria-label="Alt text de la segunda imagen"
                   />
                   <Select
                     value={str(block, "imagePosition") || "left"}
@@ -299,6 +334,7 @@ function ButtonsEditor({
           >
             <option value="primary">Principal</option>
             <option value="secondary">Secundario</option>
+            <option value="link">Enlace</option>
           </Select>
           <button
             type="button"

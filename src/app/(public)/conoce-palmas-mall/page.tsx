@@ -18,9 +18,11 @@ import { LightboxGallery } from "@/components/public/lightbox-gallery";
 import { getPage, getGlobalFaqs, getHomeGallery } from "@/lib/queries";
 import { pageMetadata } from "@/lib/page-metadata";
 import { faqJsonLd, JsonLdScript } from "@/lib/jsonld";
-import { heroData } from "@/lib/blocks";
+import { heroData, mediaTextData, queHacerData, galleryData } from "@/lib/blocks";
 import { webPageJsonLd } from "@/lib/jsonld";
 import { ExtraBlocks } from "@/components/public/block-renderer";
+import { MediaTextSection } from "@/components/public/media-text-section";
+import { BlockIcon } from "@/components/public/block-icons";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +70,13 @@ export default async function ConocePage() {
     getHomeGallery(),
   ]);
   const hero = heroData(page);
+  // Secciones editables desde el admin; sin bloque se usa el contenido base.
+  const historia = mediaTextData(page);
+  const experiencias = queHacerData(page).items?.length ? queHacerData(page).items! : null;
+  const galeria = galleryData(page);
+  const galeriaImages = galeria.urls?.length
+    ? galeria.urls.map((url) => ({ url, alt: galeria.alt || "Galería Palmas Mall" }))
+    : gallery.map((g) => ({ url: g.url, alt: g.alt, caption: g.caption || undefined }));
 
   return (
     <>
@@ -86,8 +95,13 @@ export default async function ConocePage() {
         imageUrl={hero.imageUrl}
       />
 
-      {/* Historia / concepto */}
+      {/* Historia / concepto — editable (bloque "Imagen + texto + botones") */}
       <Container className="py-14 sm:py-20">
+        {historia.heading || historia.body || historia.imageUrl ? (
+          <Reveal>
+            <MediaTextSection data={{ ...historia, imagePosition: "right" }} variant="plain" />
+          </Reveal>
+        ) : (
         <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
           <Reveal>
             <div>
@@ -140,45 +154,68 @@ export default async function ConocePage() {
             </div>
           </Reveal>
         </div>
+        )}
       </Container>
 
-      {/* Experiencias */}
+      {/* Experiencias — editable (bloque "Cards de secciones") */}
       <section className="bg-white py-14 sm:py-20">
         <Container>
           <SectionTitle
-            title="Un mall diseñado alrededor de experiencias"
-            intro="Seis razones por las que Palmas Mall es mucho más que un centro comercial."
+            title={queHacerData(page).heading || "Un mall diseñado alrededor de experiencias"}
+            intro={
+              queHacerData(page).intro ||
+              "Seis razones por las que Palmas Mall es mucho más que un centro comercial."
+            }
           />
           <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-            {EXPERIENCIAS.map((exp, i) => (
-              <Reveal key={exp.title} delay={i * 0.05}>
-                <div className="flex gap-4">
-                  <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-palm-100 text-palm-700">
-                    <exp.icon size={22} weight="bold" />
-                  </span>
-                  <div>
-                    <h3 className="font-display text-[17px] font-bold text-palm-950">{exp.title}</h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-mist-600">{exp.text}</p>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
+            {experiencias
+              ? experiencias.map((exp, i) => (
+                  <Reveal key={i} delay={i * 0.05}>
+                    <div className="flex gap-4">
+                      <BlockIcon name={exp.icon} />
+                      <div>
+                        <h3 className="font-display text-[17px] font-bold text-palm-950">{exp.title}</h3>
+                        <p className="mt-1.5 text-sm leading-relaxed text-mist-600">{exp.text}</p>
+                      </div>
+                    </div>
+                  </Reveal>
+                ))
+              : EXPERIENCIAS.map((exp, i) => (
+                  <Reveal key={exp.title} delay={i * 0.05}>
+                    <div className="flex gap-4">
+                      <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-palm-100 text-palm-700">
+                        <exp.icon size={22} weight="bold" />
+                      </span>
+                      <div>
+                        <h3 className="font-display text-[17px] font-bold text-palm-950">{exp.title}</h3>
+                        <p className="mt-1.5 text-sm leading-relaxed text-mist-600">{exp.text}</p>
+                      </div>
+                    </div>
+                  </Reveal>
+                ))}
           </div>
         </Container>
       </section>
 
-      {/* Galería de fotos */}
-      {gallery.length ? (
+      {/* Galería de fotos — editable (bloque "Galería") */}
+      {galeriaImages.length ? (
         <Container className="py-14 sm:py-20">
           <SectionTitle
-            title="Así se vive Palmas Mall"
-            intro="Arquitectura, gastronomía, moda y momentos en familia. Toca cualquier foto para verla en grande."
+            title={galeria.heading || "Así se vive Palmas Mall"}
+            intro={
+              galeria.intro ||
+              "Arquitectura, gastronomía, moda y momentos en familia. Toca cualquier foto para verla en grande."
+            }
           />
           <div className="mt-8">
-            <LightboxGallery
-              images={gallery.map((g) => ({ url: g.url, alt: g.alt, caption: g.caption || undefined }))}
-            />
+            <LightboxGallery images={galeriaImages} />
           </div>
+          <Link
+            href={galeria.ctaUrl || "/momentos-palmas-mall"}
+            className="mt-8 inline-flex items-center gap-1.5 font-semibold text-palm-700 transition-colors hover:text-palm-900"
+          >
+            {galeria.ctaLabel || "Ver todos los momentos"} <ArrowRight size={16} weight="bold" />
+          </Link>
         </Container>
       ) : null}
 
@@ -254,7 +291,7 @@ export default async function ConocePage() {
           </div>
         </div>
       </Container>
-      <ExtraBlocks page={page} consumed={["HERO", "FAQ"]} />
+      <ExtraBlocks page={page} consumed={["HERO", "FAQ", "MEDIA_TEXT", "SERVICE_CARDS", "GALLERY"]} />
     </>
   );
 }

@@ -34,7 +34,7 @@ export type QueHacerCard = {
 export type MediaTextButton = {
   label?: string;
   url?: string;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "link";
 };
 
 export type MediaTextData = {
@@ -42,8 +42,20 @@ export type MediaTextData = {
   body?: string;
   imageUrl?: string;
   imageAlt?: string;
+  /** Segunda imagen opcional: dos fotos en collage en vez de una. */
+  imageUrl2?: string;
+  imageAlt2?: string;
   imagePosition?: "left" | "right";
   buttons?: MediaTextButton[];
+};
+
+export type GalleryData = {
+  heading?: string;
+  intro?: string;
+  urls?: string[];
+  alt?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
 };
 
 export type QueHacerData = {
@@ -76,4 +88,10 @@ export function queHacerData(page: PageWithBlocks): QueHacerData {
 export function mediaTextData(page: PageWithBlocks): MediaTextData {
   const block = page?.blocks.find((b) => b.type === "MEDIA_TEXT");
   return (block?.data ?? {}) as MediaTextData;
+}
+
+/** Datos del primer bloque GALLERY de una página ({} si no existe). */
+export function galleryData(page: PageWithBlocks): GalleryData {
+  const block = page?.blocks.find((b) => b.type === "GALLERY");
+  return (block?.data ?? {}) as GalleryData;
 }
