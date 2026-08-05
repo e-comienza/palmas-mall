@@ -67,6 +67,7 @@ export default async function PatrociniosPage() {
         title={hero.heading || "Be Our Sponsors"}
         intro={hero.subheading || "La mejor ubicación para tu marca: haz parte del Lifestyle Mall de Cali."}
         crumbs={[{ name: "Be Our Sponsors", path: "/patrocinios" }]}
+        imageUrl={hero.imageUrl}
       />
 
       <Container className="py-14 sm:py-20">

@@ -100,7 +100,9 @@ export function localJsonLd(local: Local & { category?: { name: string } | null 
   };
 }
 
-export function eventJsonLd(event: Event, settings: SiteSettings): JsonLd {
+/** schema.org/Event exige startDate: los anuncios sin fecha no generan JSON-LD. */
+export function eventJsonLd(event: Event, settings: SiteSettings): JsonLd | null {
+  if (!event.startsAt) return null;
   return {
     "@context": "https://schema.org",
     "@type": "Event",

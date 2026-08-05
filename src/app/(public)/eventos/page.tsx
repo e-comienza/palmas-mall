@@ -11,7 +11,7 @@ import { ExtraBlocks } from "@/components/public/block-renderer";
 import { pageMetadata } from "@/lib/page-metadata";
 import { PageFaqs } from "@/components/public/page-faqs";
 import { itemListJsonLd, webPageJsonLd, JsonLdScript } from "@/lib/jsonld";
-import { formatDateEs } from "@/lib/utils";
+import { eventDateLabel } from "@/lib/events";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +53,7 @@ export default async function EventosPage() {
         title={hero.heading || "Eventos"}
         intro={hero.subheading || "Ferias, música, deporte y planes para toda la familia: esto es lo que viene en Palmas Mall."}
         crumbs={[{ name: "Eventos", path: "/eventos" }]}
+        imageUrl={hero.imageUrl}
       />
       <Container className="py-10 sm:py-14">
         {next ? (
@@ -79,11 +80,12 @@ export default async function EventosPage() {
                 {next.shortDescription}
               </p>
               <div className="mt-5 space-y-2 text-sm text-mist-700">
-                <p className="flex items-center gap-2">
-                  <CalendarBlank size={17} weight="bold" className="text-palm-700" />
-                  {formatDateEs(next.startsAt)}
-                  {next.timeLabel ? ` · ${next.timeLabel}` : ""}
-                </p>
+                {eventDateLabel(next) || next.timeLabel ? (
+                  <p className="flex items-center gap-2">
+                    <CalendarBlank size={17} weight="bold" className="text-palm-700" />
+                    {[eventDateLabel(next), next.timeLabel].filter(Boolean).join(" · ")}
+                  </p>
+                ) : null}
                 {next.location ? (
                   <p className="flex items-center gap-2">
                     <MapPin size={17} weight="bold" className="text-palm-700" />
@@ -123,10 +125,12 @@ export default async function EventosPage() {
                   />
                 </div>
                 <div className="min-w-0">
-                  <p className="flex items-center gap-1.5 text-[13px] font-semibold text-palm-700">
-                    <CalendarBlank size={14} weight="bold" />
-                    {formatDateEs(event.startsAt)}
-                  </p>
+                  {eventDateLabel(event) ? (
+                    <p className="flex items-center gap-1.5 text-[13px] font-semibold text-palm-700">
+                      <CalendarBlank size={14} weight="bold" />
+                      {eventDateLabel(event)}
+                    </p>
+                  ) : null}
                   <h3 className="mt-1 line-clamp-2 font-display text-[17px] font-bold leading-snug text-palm-950">
                     {event.title}
                   </h3>
@@ -160,7 +164,7 @@ export default async function EventosPage() {
                   </div>
                   <div className="p-4">
                     <p className="text-[12px] font-semibold text-mist-500">
-                      {formatDateEs(event.startsAt)}
+                      {eventDateLabel(event)}
                     </p>
                     <h3 className="mt-1 line-clamp-2 text-sm font-bold text-palm-950">
                       {event.title}

@@ -27,8 +27,26 @@ const BLOCK_TYPES: { value: string; label: string }[] = [
   { value: "MAP", label: "Mapa / cómo llegar" },
   { value: "FORM", label: "Formulario de contacto" },
   { value: "AWARDS", label: "Galardones" },
-  { value: "SERVICE_CARDS", label: "Cards de secciones (foto + título + subtítulo)" },
+  { value: "SERVICE_CARDS", label: "Cards de secciones (foto o icono + título + subtítulo)" },
+  { value: "MEDIA_TEXT", label: "Imagen + texto + botones" },
   { value: "VIDEO", label: "Video" },
+];
+
+// Debe coincidir con BLOCK_ICONS en components/public/block-icons.tsx.
+const ICON_OPTIONS: { value: string; label: string }[] = [
+  { value: "", label: "Sin icono" },
+  { value: "car", label: "Carro" },
+  { value: "taxi", label: "Taxi" },
+  { value: "bus", label: "Bus" },
+  { value: "pet", label: "Mascota" },
+  { value: "clock", label: "Reloj" },
+  { value: "pin", label: "Ubicación" },
+  { value: "food", label: "Comida" },
+  { value: "shopping", label: "Compras" },
+  { value: "ticket", label: "Entradas" },
+  { value: "star", label: "Estrella" },
+  { value: "users", label: "Personas" },
+  { value: "kids", label: "Niños" },
 ];
 
 type CardItem = {
@@ -38,7 +56,10 @@ type CardItem = {
   img?: string;
   alt?: string;
   big?: boolean;
+  icon?: string;
 };
+
+type MediaTextButton = { label?: string; url?: string; variant?: "primary" | "secondary" };
 
 // Defaults de "¿Qué hacer en Palmas Mall?" para prellenar el bloque al agregarlo.
 const QUE_HACER_DEFAULTS: Record<string, unknown> = {
@@ -164,6 +185,48 @@ export function BlockEditor({
               <Input value={str(block, "url")} onChange={(e) => setData(i, "url", e.target.value)} placeholder="https://www.youtube.com/embed/… o URL de video" aria-label="URL del video" />
             ) : null}
 
+            {block.type === "MEDIA_TEXT" ? (
+              <>
+                <Input
+                  value={str(block, "heading")}
+                  onChange={(e) => setData(i, "heading", e.target.value)}
+                  placeholder="Título de la sección"
+                  aria-label="Título de la sección"
+                />
+                <ImageUpload
+                  name={`__block-${i}-mt-img`}
+                  defaultValue={str(block, "imageUrl")}
+                  folder="paginas"
+                  onChange={(v) => setData(i, "imageUrl", v)}
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    value={str(block, "imageAlt")}
+                    onChange={(e) => setData(i, "imageAlt", e.target.value)}
+                    placeholder="Texto alternativo (accesibilidad)"
+                    aria-label="Alt text"
+                  />
+                  <Select
+                    value={str(block, "imagePosition") || "left"}
+                    onChange={(e) => setData(i, "imagePosition", e.target.value)}
+                    aria-label="Posición de la imagen"
+                  >
+                    <option value="left">Imagen a la izquierda</option>
+                    <option value="right">Imagen a la derecha</option>
+                  </Select>
+                </div>
+                <RichTextEditor
+                  name={`__block-${i}-mt-body-ignored`}
+                  defaultValue={str(block, "body")}
+                  onChange={(v) => setData(i, "body", v)}
+                />
+                <ButtonsEditor
+                  buttons={Array.isArray(block.data.buttons) ? (block.data.buttons as MediaTextButton[]) : []}
+                  onChange={(buttons) => setData(i, "buttons", buttons)}
+                />
+              </>
+            ) : null}
+
             {block.type === "SERVICE_CARDS" ? (
               <>
                 <Input
@@ -201,7 +264,64 @@ export function BlockEditor({
   );
 }
 
-/** Editor de cards (foto + título + subtítulo + link) del bloque SERVICE_CARDS. */
+/** Editor de botones del bloque MEDIA_TEXT. */
+function ButtonsEditor({
+  buttons,
+  onChange,
+}: {
+  buttons: MediaTextButton[];
+  onChange: (buttons: MediaTextButton[]) => void;
+}) {
+  const setButton = (i: number, patch: Partial<MediaTextButton>) =>
+    onChange(buttons.map((b, j) => (j === i ? { ...b, ...patch } : b)));
+
+  return (
+    <div className="space-y-2.5">
+      {buttons.map((b, i) => (
+        <div key={i} className="flex items-center gap-2.5">
+          <Input
+            value={b.label || ""}
+            onChange={(e) => setButton(i, { label: e.target.value })}
+            placeholder="Texto del botón"
+            aria-label="Texto del botón"
+          />
+          <Input
+            value={b.url || ""}
+            onChange={(e) => setButton(i, { url: e.target.value })}
+            placeholder="https://… o /contacto"
+            aria-label="URL del botón"
+          />
+          <Select
+            value={b.variant || "primary"}
+            onChange={(e) => setButton(i, { variant: e.target.value as MediaTextButton["variant"] })}
+            aria-label="Estilo del botón"
+            className="max-w-36"
+          >
+            <option value="primary">Principal</option>
+            <option value="secondary">Secundario</option>
+          </Select>
+          <button
+            type="button"
+            onClick={() => onChange(buttons.filter((_, j) => j !== i))}
+            aria-label="Eliminar botón"
+            className="pressable flex size-8 shrink-0 items-center justify-center rounded-full text-mist-500 hover:bg-red-50 hover:text-red-700"
+          >
+            <Trash size={14} />
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => onChange([...buttons, { variant: "primary" }])}
+        className="pressable inline-flex h-9 items-center gap-1.5 rounded-full border border-palm-700/30 bg-white px-4 text-[13px] font-semibold text-palm-800 hover:bg-palm-50"
+      >
+        <Plus size={13} weight="bold" /> Agregar botón
+      </button>
+    </div>
+  );
+}
+
+/** Editor de cards (foto o icono + título + subtítulo + link) del bloque SERVICE_CARDS. */
 function CardsEditor({
   blockIndex,
   items,
@@ -256,6 +376,17 @@ function CardsEditor({
               <Input value={item.href || ""} onChange={(e) => setItem(i, { href: e.target.value })} placeholder="/food-drinks" aria-label="URL de destino" />
               <Input value={item.alt || ""} onChange={(e) => setItem(i, { alt: e.target.value })} placeholder="Texto alternativo (accesibilidad)" aria-label="Alt text" />
             </div>
+            <Select
+              value={item.icon || ""}
+              onChange={(e) => setItem(i, { icon: e.target.value })}
+              aria-label="Icono de la card"
+            >
+              {ICON_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label === "Sin icono" ? "Icono: sin icono (solo si no hay foto)" : `Icono: ${o.label}`}
+                </option>
+              ))}
+            </Select>
             <label className="flex items-center gap-2 text-[13px] font-semibold text-mist-700">
               <input
                 type="checkbox"

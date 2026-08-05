@@ -25,8 +25,12 @@ export async function GET() {
       orderBy: { name: "asc" },
     }),
     prisma.event.findMany({
-      where: { status: ContentStatus.PUBLISHED, deletedAt: null, startsAt: { gte: new Date() } },
-      orderBy: { startsAt: "asc" },
+      where: {
+        status: ContentStatus.PUBLISHED,
+        deletedAt: null,
+        OR: [{ startsAt: { gte: new Date() } }, { startsAt: null }],
+      },
+      orderBy: { startsAt: { sort: "asc", nulls: "last" } },
       take: 10,
     }),
     prisma.blogPost.findMany({
@@ -96,9 +100,9 @@ export async function GET() {
       "",
       ...events.map(
         (e) =>
-          `- [${e.title}](${siteUrl(`/eventos/${e.slug}`)}) — ${e.startsAt
-            .toISOString()
-            .slice(0, 10)}${e.shortDescription ? `: ${e.shortDescription}` : ""}`,
+          `- [${e.title}](${siteUrl(`/eventos/${e.slug}`)})${
+            e.startsAt ? ` — ${e.startsAt.toISOString().slice(0, 10)}` : e.dateLabel ? ` — ${e.dateLabel}` : ""
+          }${e.shortDescription ? `: ${e.shortDescription}` : ""}`,
       ),
       "",
     );

@@ -43,6 +43,7 @@ export default async function PlayZonePage() {
         title={hero.heading || "PlayZone"}
         intro={hero.subheading || "La zona de juegos donde los peques viven Palmas Mall a su manera."}
         crumbs={[{ name: "PlayZone", path: "/play-zone" }]}
+        imageUrl={hero.imageUrl}
       />
 
       <Container className="py-10 sm:py-14">

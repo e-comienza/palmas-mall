@@ -27,6 +27,23 @@ export type QueHacerCard = {
   img?: string;
   alt?: string;
   big?: boolean;
+  /** Icono para cards sin foto (ver BLOCK_ICONS). */
+  icon?: string;
+};
+
+export type MediaTextButton = {
+  label?: string;
+  url?: string;
+  variant?: "primary" | "secondary";
+};
+
+export type MediaTextData = {
+  heading?: string;
+  body?: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  imagePosition?: "left" | "right";
+  buttons?: MediaTextButton[];
 };
 
 export type QueHacerData = {
@@ -53,4 +70,10 @@ export function richTextData(page: PageWithBlocks): RichTextData {
 export function queHacerData(page: PageWithBlocks): QueHacerData {
   const block = page?.blocks.find((b) => b.type === "SERVICE_CARDS");
   return (block?.data ?? {}) as QueHacerData;
+}
+
+/** Datos del primer bloque MEDIA_TEXT (imagen + texto + botones) de una página. */
+export function mediaTextData(page: PageWithBlocks): MediaTextData {
+  const block = page?.blocks.find((b) => b.type === "MEDIA_TEXT");
+  return (block?.data ?? {}) as MediaTextData;
 }

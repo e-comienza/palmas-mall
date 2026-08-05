@@ -8,7 +8,7 @@ import { DeleteButton } from "@/components/admin/action-buttons";
 import { softDelete } from "@/app/admin/_actions/helpers";
 import { Badge } from "@/components/ui/badge";
 import { SearchInput } from "@/components/admin/search-input";
-import { formatDateShortEs } from "@/lib/utils";
+import { eventDateLabel, eventIsPast } from "@/lib/events";
 
 export const metadata = { title: "Eventos" };
 
@@ -57,7 +57,7 @@ export default async function AdminEventosPage({
               </thead>
               <tbody className="divide-y divide-mist-100">
                 {events.map((event) => {
-                  const finished = (event.endsAt ?? event.startsAt) < now;
+                  const finished = eventIsPast(event, now);
                   return (
                     <tr key={event.id} className="transition-colors hover:bg-mist-50">
                       <td className="px-5 py-3">
@@ -76,7 +76,9 @@ export default async function AdminEventosPage({
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-3 text-mist-700">{formatDateShortEs(event.startsAt)}</td>
+                      <td className="px-5 py-3 text-mist-700">
+                        {eventDateLabel(event, { short: true }) || "Sin fecha"}
+                      </td>
                       <td className="px-5 py-3"><StatusBadge status={event.status} /></td>
                       <td className="px-5 py-3">
                         {finished ? <Badge variant="muted">Finalizado</Badge> : <Badge variant="leaf">Vigente</Badge>}

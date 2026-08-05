@@ -79,6 +79,7 @@ enum BlockType {
   SERVICE_CARDS
   TESTIMONIALS
   VIDEO
+  MEDIA_TEXT
 }
 
 // ─────────────────────────── Auth ───────────────────────────
@@ -273,8 +274,10 @@ model Event {
   title            String
   shortDescription String        @default("")
   longDescription  String        @default("")
-  startsAt         DateTime
+  // Sin fecha = anuncio permanente o evento recurrente; usar dateLabel para el texto visible.
+  startsAt         DateTime?
   endsAt           DateTime?
+  dateLabel        String        @default("") // Ej.: "Todos los sábados", "Permanente"
   timeLabel        String        @default("")
   location         String        @default("")
   coverUrl         String        @default("")

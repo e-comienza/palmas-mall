@@ -33,7 +33,11 @@ export default async function AdminDashboard() {
       where: {
         deletedAt: null,
         status: ContentStatus.PUBLISHED,
-        OR: [{ endsAt: { gte: now } }, { endsAt: null, startsAt: { gte: now } }],
+        OR: [
+          { endsAt: { gte: now } },
+          { endsAt: null, startsAt: { gte: now } },
+          { startsAt: null, endsAt: null },
+        ],
       },
     }),
     prisma.blogPost.count({ where: { deletedAt: null, status: ContentStatus.PUBLISHED } }),

@@ -44,6 +44,7 @@ export default async function BlogPage() {
         title={hero.heading || "Blog y noticias"}
         intro={hero.subheading || "Guías, novedades y todo lo que está pasando en Palmas Mall."}
         crumbs={[{ name: "Blog", path: "/blog" }]}
+        imageUrl={hero.imageUrl}
       />
       <Container className="py-10 sm:py-14">
         {posts.length ? (

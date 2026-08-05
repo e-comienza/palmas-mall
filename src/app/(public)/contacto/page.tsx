@@ -39,6 +39,7 @@ export default async function ContactoPage() {
           'En Palmas Mall estamos siempre dispuestos a escucharte: escríbenos si tienes dudas o inquietudes sobre nuestros locales y servicios.'
         }
         crumbs={[{ name: 'Contacto', path: '/contacto' }]}
+        imageUrl={hero.imageUrl}
       />
       <Container className="py-10 sm:py-14">
         <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr]">

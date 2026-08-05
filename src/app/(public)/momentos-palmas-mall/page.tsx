@@ -35,6 +35,7 @@ export default async function MomentosPage() {
         title={hero.heading || "Momentos Palmas Mall"}
         intro={hero.subheading || "Ferias, gastronomía, moda, familia y noches inolvidables: toca cualquier foto para verla en grande."}
         crumbs={[{ name: "Momentos", path: "/momentos-palmas-mall" }]}
+        imageUrl={hero.imageUrl}
       />
       <Container className="py-10 sm:py-14">
         {albums.length ? (

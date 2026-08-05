@@ -7,9 +7,11 @@ import { FaqAccordion } from "@/components/public/faq-section";
 import { getSedes, getPage } from "@/lib/queries";
 import { pageMetadata } from "@/lib/page-metadata";
 import { faqJsonLd, JsonLdScript } from "@/lib/jsonld";
-import { heroData } from "@/lib/blocks";
+import { heroData, mediaTextData, queHacerData } from "@/lib/blocks";
 import { webPageJsonLd } from "@/lib/jsonld";
 import { ExtraBlocks } from "@/components/public/block-renderer";
+import { MediaTextSection } from "@/components/public/media-text-section";
+import { BlockIcon } from "@/components/public/block-icons";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +45,10 @@ const MEDIOS = [
 export default async function ComoLlegarPage() {
   const [sedes, page] = await Promise.all([getSedes(), getPage("como-llegar")]);
   const hero = heroData(page);
+  // Secciones editables desde el admin; si el bloque no existe se usa el contenido base.
+  const sedeBlock = mediaTextData(page);
+  const mediosBlock = queHacerData(page);
+  const mediosCards = mediosBlock.items?.length ? mediosBlock.items : null;
 
   return (
     <>
@@ -58,10 +64,14 @@ export default async function ComoLlegarPage() {
         title={hero.heading || "Cómo llegar"}
         intro={hero.subheading || "Estamos en el corazón de la Milla de Oro, Ciudad Jardín. Abre la navegación y ven a vivir tus mejores momentos."}
         crumbs={[{ name: "Cómo llegar", path: "/como-llegar" }]}
+        imageUrl={hero.imageUrl}
       />
 
       <Container className="py-10 sm:py-14">
-        {/* Sede + fachada */}
+        {/* Sede + fachada — editable desde el admin (bloque "Imagen + texto + botones") */}
+        {sedeBlock.heading || sedeBlock.body || sedeBlock.imageUrl ? (
+          <MediaTextSection data={sedeBlock} />
+        ) : (
         <div className="grid gap-5 lg:grid-cols-2">
           <div className="relative order-last min-h-[240px] overflow-hidden rounded-2xl lg:order-first">
             <Image
@@ -124,18 +134,29 @@ export default async function ComoLlegarPage() {
             </div>
           ))}
         </div>
+        )}
 
-        {/* Medios de transporte */}
+        {/* Medios de transporte — editable desde el admin (bloque "Cards de secciones") */}
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {MEDIOS.map((m) => (
-            <div key={m.title} className="rounded-2xl bg-white p-6 shadow-card">
-              <span className="flex size-11 items-center justify-center rounded-full bg-palm-100 text-palm-700">
-                <m.icon size={22} weight="bold" />
-              </span>
-              <h3 className="mt-4 font-display text-[16px] font-bold text-palm-950">{m.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-mist-600">{m.text}</p>
-            </div>
-          ))}
+          {mediosCards
+            ? mediosCards.map((m, i) => (
+                <div key={i} className="rounded-2xl bg-white p-6 shadow-card">
+                  <BlockIcon name={m.icon} />
+                  <h3 className={`font-display text-[16px] font-bold text-palm-950 ${m.icon ? "mt-4" : ""}`}>
+                    {m.title}
+                  </h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-mist-600">{m.text}</p>
+                </div>
+              ))
+            : MEDIOS.map((m) => (
+                <div key={m.title} className="rounded-2xl bg-white p-6 shadow-card">
+                  <span className="flex size-11 items-center justify-center rounded-full bg-palm-100 text-palm-700">
+                    <m.icon size={22} weight="bold" />
+                  </span>
+                  <h3 className="mt-4 font-display text-[16px] font-bold text-palm-950">{m.title}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-mist-600">{m.text}</p>
+                </div>
+              ))}
         </div>
 
         {/* FAQ de la página */}
@@ -150,7 +171,7 @@ export default async function ComoLlegarPage() {
           </div>
         ) : null}
       </Container>
-      <ExtraBlocks page={page} consumed={["HERO", "FAQ"]} />
+      <ExtraBlocks page={page} consumed={["HERO", "FAQ", "MEDIA_TEXT", "SERVICE_CARDS"]} />
     </>
   );
 }

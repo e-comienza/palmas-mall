@@ -38,6 +38,7 @@ export default async function PlanoPage() {
         title={hero.heading || "Plano del Mall"}
         intro={hero.subheading || "Ubica restaurantes, tiendas y servicios dentro de Palmas Mall."}
         crumbs={[{ name: "Plano del Mall", path: "/plano-del-mall" }]}
+        imageUrl={hero.imageUrl}
       />
       <Container className="py-10 sm:py-14">
         <div className="rounded-2xl bg-white p-3 shadow-card sm:p-4">

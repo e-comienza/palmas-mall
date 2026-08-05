@@ -165,7 +165,8 @@ export async function upsertLocal(_prev: FormState, formData: FormData): Promise
 const eventSchema = z.object({
   title: z.string().min(2, "El título es obligatorio").max(160),
   shortDescription: z.string().max(300, "Máximo 300 caracteres"),
-  startsAt: z.string().min(1, "La fecha de inicio es obligatoria"),
+  // Opcional: anuncios sin fecha y eventos recurrentes usan dateLabel.
+  startsAt: z.string(),
   status: statusSchema,
 });
 
@@ -180,7 +181,7 @@ export async function upsertEvent(_prev: FormState, formData: FormData): Promise
   const parsed = eventSchema.safeParse({
     title: formData.get("title"),
     shortDescription: formData.get("shortDescription") ?? "",
-    startsAt: formData.get("startsAt"),
+    startsAt: formData.get("startsAt") ?? "",
     status: formData.get("status") ?? "DRAFT",
   });
   if (!parsed.success) return zodErrors(parsed.error);
@@ -195,8 +196,9 @@ export async function upsertEvent(_prev: FormState, formData: FormData): Promise
     slug,
     shortDescription: parsed.data.shortDescription,
     longDescription: (formData.get("longDescription") as string) || "",
-    startsAt: new Date(parsed.data.startsAt),
+    startsAt: parsed.data.startsAt ? new Date(parsed.data.startsAt) : null,
     endsAt: endsAtRaw ? new Date(endsAtRaw) : null,
+    dateLabel: (formData.get("dateLabel") as string) || "",
     timeLabel: (formData.get("timeLabel") as string) || "",
     location: (formData.get("location") as string) || "",
     coverUrl: (formData.get("coverUrl") as string) || "",

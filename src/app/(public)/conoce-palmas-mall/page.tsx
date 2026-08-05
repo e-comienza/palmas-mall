@@ -83,6 +83,7 @@ export default async function ConocePage() {
         title={hero.heading || "Conoce Palmas Mall"}
         intro={hero.subheading || "El primer Lifestyle Mall de Colombia: un lugar diseñado para vivir la ciudad de otra manera."}
         crumbs={[{ name: "Conoce Palmas Mall", path: "/conoce-palmas-mall" }]}
+        imageUrl={hero.imageUrl}
       />
 
       {/* Historia / concepto */}

@@ -64,6 +64,7 @@ export default async function DirectorioPage({
         title={hero.heading || "Directorio"}
         intro={hero.subheading || "Restaurantes, tiendas y servicios: todo lo que puedes encontrar en Palmas Mall."}
         crumbs={[{ name: "Directorio", path: "/directorio" }]}
+        imageUrl={hero.imageUrl}
       />
 
       <Container className="py-8 sm:py-12">

@@ -62,12 +62,20 @@ export function EventForm({
           </AdminCard>
 
           <AdminCard title="Fecha y lugar">
+            <p className="mb-4 rounded-xl bg-mist-50 px-4 py-3 text-[13px] leading-relaxed text-mist-600">
+              La fecha es opcional. Déjala vacía para anuncios permanentes o eventos
+              recurrentes y escribe el texto que quieres mostrar en «Fecha (texto visible)»
+              (ej.: «Todos los sábados»). Los eventos sin fecha siempre aparecen como vigentes.
+            </p>
             <div className="grid gap-5 sm:grid-cols-2">
-              <Field label="Inicio *" htmlFor="startsAt" error={err("startsAt")}>
-                <Input id="startsAt" name="startsAt" type="datetime-local" defaultValue={toLocalInput(event?.startsAt)} required />
+              <Field label="Inicio" htmlFor="startsAt" error={err("startsAt")}>
+                <Input id="startsAt" name="startsAt" type="datetime-local" defaultValue={toLocalInput(event?.startsAt)} />
               </Field>
               <Field label="Fin" htmlFor="endsAt">
                 <Input id="endsAt" name="endsAt" type="datetime-local" defaultValue={toLocalInput(event?.endsAt)} />
+              </Field>
+              <Field label="Fecha (texto visible)" htmlFor="dateLabel" hint="Reemplaza la fecha. Ej.: Todos los sábados">
+                <Input id="dateLabel" name="dateLabel" defaultValue={event?.dateLabel} placeholder="Todos los sábados" />
               </Field>
               <Field label="Hora (texto visible)" htmlFor="timeLabel" hint="Ej.: 5:00 p.m. – 11:00 p.m.">
                 <Input id="timeLabel" name="timeLabel" defaultValue={event?.timeLabel} />

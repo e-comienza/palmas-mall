@@ -2,7 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Page, PageBlock, Faq, BlockType } from "@prisma/client";
 import { Media } from "./media";
+import { BlockIcon } from "./block-icons";
+import { MediaTextSection } from "./media-text-section";
 import { Container, SectionTitle } from "./container";
+import type { MediaTextData } from "@/lib/blocks";
 import { FaqAccordion } from "./faq-section";
 import { LocalCard, EventCard, PostCard } from "./cards";
 import { ContactForm } from "./contact-form";
@@ -263,7 +266,7 @@ export async function BlockRenderer({
 
         case "SERVICE_CARDS": {
           const items = Array.isArray(data.items)
-            ? (data.items as { title?: string; text?: string; img?: string; href?: string; alt?: string }[])
+            ? (data.items as { title?: string; text?: string; img?: string; href?: string; alt?: string; icon?: string }[])
             : [];
           if (!items.length) return null;
           return (
@@ -294,7 +297,10 @@ export async function BlockRenderer({
                     </Link>
                   ) : (
                     <div key={i} className="rounded-2xl bg-white p-6 shadow-card">
-                      <h3 className="font-display text-[17px] font-bold text-palm-950">{item.title}</h3>
+                      <BlockIcon name={item.icon} />
+                      <h3 className={`font-display text-[17px] font-bold text-palm-950 ${item.icon ? "mt-4" : ""}`}>
+                        {item.title}
+                      </h3>
                       <p className="mt-2 text-sm leading-relaxed text-mist-600">{item.text}</p>
                     </div>
                   ),
@@ -303,6 +309,13 @@ export async function BlockRenderer({
             </Container>
           );
         }
+
+        case "MEDIA_TEXT":
+          return (
+            <Container key={block.id} className="py-10">
+              <MediaTextSection data={data as MediaTextData} />
+            </Container>
+          );
 
         case "TESTIMONIALS": {
           const items = Array.isArray(data.items)

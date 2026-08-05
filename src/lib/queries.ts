@@ -27,7 +27,8 @@ export const getPublishedLocales = cache(
           : {}),
       },
       include: { category: true },
-      orderBy: [{ featured: "desc" }, { order: "asc" }, { name: "asc" }],
+      // Mismo orden que el listado del admin: el campo "Orden" manda.
+      orderBy: [{ order: "asc" }, { name: "asc" }],
     }),
 );
 
@@ -68,9 +69,14 @@ export const getUpcomingEvents = cache((take?: number) => {
   return prisma.event.findMany({
     where: {
       ...PUBLISHED,
-      OR: [{ endsAt: { gte: today } }, { endsAt: null, startsAt: { gte: today } }],
+      OR: [
+        { endsAt: { gte: today } },
+        { endsAt: null, startsAt: { gte: today } },
+        // Anuncios / recurrentes sin fecha: siempre vigentes.
+        { startsAt: null, endsAt: null },
+      ],
     },
-    orderBy: { startsAt: "asc" },
+    orderBy: [{ startsAt: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }],
     take,
   });
 });
@@ -92,6 +98,7 @@ export const getPastEvents = cache((take = 6) => {
     where: {
       ...PUBLISHED,
       AND: [
+        { startsAt: { not: null } },
         { OR: [{ endsAt: { lt: today } }, { endsAt: null, startsAt: { lt: today } }] },
       ],
     },

@@ -6,7 +6,7 @@ import { Molly } from "@/components/public/molly";
 import { PopupManager, type PopupData } from "@/components/public/popup-manager";
 import { getNavigation, getActivePopups, getEventsByIds } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/settings";
-import { formatDateShortEs } from "@/lib/utils";
+import { eventDateLabel } from "@/lib/events";
 
 export default async function PublicLayout({
   children,
@@ -55,7 +55,7 @@ export default async function PublicLayout({
               slug: e.slug,
               title: e.title,
               coverUrl: e.coverUrl,
-              dateLabel: `${formatDateShortEs(e.startsAt)}${e.timeLabel ? ` · ${e.timeLabel}` : ""}`,
+              dateLabel: [eventDateLabel(e, { short: true }), e.timeLabel].filter(Boolean).join(" · "),
             }))
         : [],
   }));

@@ -3,6 +3,7 @@ import type { Local, LocalCategory, Event, BlogPost } from "@prisma/client";
 import { Media } from "@/components/public/media";
 import { Badge } from "@/components/ui/badge";
 import { formatDateShortEs } from "@/lib/utils";
+import { eventDateLabel } from "@/lib/events";
 import { CalendarBlank, MapPin } from "@phosphor-icons/react/dist/ssr";
 
 const FALLBACK_COVER = "/images/galeria/shopping-cali2.webp";
@@ -49,6 +50,7 @@ export function LocalCard({
 }
 
 export function EventCard({ event }: { event: Event }) {
+  const dateLabel = eventDateLabel(event, { short: true });
   return (
     <Link
       href={`/eventos/${event.slug}`}
@@ -64,11 +66,12 @@ export function EventCard({ event }: { event: Event }) {
         />
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center">
-        <p className="flex items-center gap-1.5 text-[13px] font-semibold text-palm-700">
-          <CalendarBlank size={15} weight="bold" />
-          {formatDateShortEs(event.startsAt)}
-          {event.timeLabel ? ` · ${event.timeLabel}` : ""}
-        </p>
+        {dateLabel || event.timeLabel ? (
+          <p className="flex items-center gap-1.5 text-[13px] font-semibold text-palm-700">
+            <CalendarBlank size={15} weight="bold" />
+            {[dateLabel, event.timeLabel].filter(Boolean).join(" · ")}
+          </p>
+        ) : null}
         <h3 className="mt-1 line-clamp-2 font-display text-[16px] font-bold leading-snug text-palm-950 sm:text-[17px]">
           {event.title}
         </h3>

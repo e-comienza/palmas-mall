@@ -16,7 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { getEventBySlug, getUpcomingEvents } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/settings";
 import { eventJsonLd, faqJsonLd, JsonLdScript } from "@/lib/jsonld";
-import { formatDateEs, siteUrl } from "@/lib/utils";
+import { siteUrl } from "@/lib/utils";
+import { eventDateLabel, eventIsPast } from "@/lib/events";
 import { EventCard } from "@/components/public/cards";
 
 export const dynamic = "force-dynamic";
@@ -49,7 +50,8 @@ export default async function EventoPage({ params }: Props) {
 
   const [settings, others] = await Promise.all([getSiteSettings(), getUpcomingEvents(3)]);
   const otherEvents = others.filter((e) => e.id !== event.id).slice(0, 2);
-  const isPast = (event.endsAt ?? event.startsAt) < new Date();
+  const isPast = eventIsPast(event);
+  const dateLabel = eventDateLabel(event);
 
   return (
     <>
@@ -117,15 +119,12 @@ export default async function EventoPage({ params }: Props) {
             <div className="rounded-2xl bg-white p-6 shadow-card">
               <h2 className="font-display text-lg font-bold text-palm-950">Detalles</h2>
               <ul className="mt-4 space-y-3.5 text-sm text-mist-700">
-                <li className="flex items-start gap-3">
-                  <CalendarBlank size={19} weight="bold" className="mt-0.5 shrink-0 text-palm-700" />
-                  <span>
-                    {formatDateEs(event.startsAt)}
-                    {event.endsAt && event.endsAt.toDateString() !== event.startsAt.toDateString()
-                      ? ` al ${formatDateEs(event.endsAt)}`
-                      : ""}
-                  </span>
-                </li>
+                {dateLabel ? (
+                  <li className="flex items-start gap-3">
+                    <CalendarBlank size={19} weight="bold" className="mt-0.5 shrink-0 text-palm-700" />
+                    <span>{dateLabel}</span>
+                  </li>
+                ) : null}
                 {event.timeLabel ? (
                   <li className="flex items-start gap-3">
                     <Clock size={19} weight="bold" className="mt-0.5 shrink-0 text-palm-700" />

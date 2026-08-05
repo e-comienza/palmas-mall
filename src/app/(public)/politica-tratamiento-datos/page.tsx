@@ -27,6 +27,7 @@ export default async function PoliticaPage() {
       <PageHeader
         title={hero.heading || "Política de tratamiento de datos"}
         crumbs={[{ name: "Política de datos", path: "/politica-tratamiento-datos" }]}
+        imageUrl={hero.imageUrl}
       />
       <Container className="max-w-3xl py-10 sm:py-14">
         {customBody ? (
