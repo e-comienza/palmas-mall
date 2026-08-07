@@ -191,7 +191,7 @@ export async function BlockRenderer({
           if (!locales.length) return null;
           return (
             <Container key={block.id} className="py-10">
-              <SectionTitle title={str(data, "heading") || "Locales destacados"} />
+              <SectionTitle title={str(data, "heading") || "Nuevos en Palmas Mall"} />
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {locales.slice(0, 4).map((l) => (
                   <LocalCard key={l.id} local={l} />

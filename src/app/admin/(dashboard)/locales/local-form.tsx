@@ -155,7 +155,7 @@ export function LocalForm({
               </Field>
               <div className="space-y-3">
                 <label className="flex items-center justify-between gap-3">
-                  <span className="text-sm font-semibold text-mist-800">Destacado en el home</span>
+                  <span className="text-sm font-semibold text-mist-800">Nuevo en Palmas Mall</span>
                   <Switch name="featured" defaultChecked={local?.featured} />
                 </label>
                 <label className="flex items-center justify-between gap-3">

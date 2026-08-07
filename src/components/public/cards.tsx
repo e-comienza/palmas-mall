@@ -27,9 +27,10 @@ export function LocalCard({
           sizes="(max-width: 640px) 75vw, (max-width: 1024px) 45vw, 280px"
           className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.04]"
         />
-        {local.comingSoon ? (
-          <div className="absolute left-3 top-3">
-            <Badge variant="dark">Próximamente</Badge>
+        {local.comingSoon || local.featured ? (
+          <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+            {local.comingSoon ? <Badge variant="dark">Próximamente</Badge> : null}
+            {local.featured ? <Badge className="bg-palm-700 text-white">Nuevo</Badge> : null}
           </div>
         ) : null}
       </div>

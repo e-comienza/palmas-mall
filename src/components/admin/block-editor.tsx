@@ -21,7 +21,7 @@ const BLOCK_TYPES: { value: string; label: string }[] = [
   { value: "GALLERY", label: "Galería" },
   { value: "CTA", label: "Llamado a la acción" },
   { value: "FAQ", label: "Preguntas frecuentes" },
-  { value: "FEATURED_LOCALES", label: "Locales destacados" },
+  { value: "FEATURED_LOCALES", label: "Locales nuevos" },
   { value: "FEATURED_EVENTS", label: "Eventos próximos" },
   { value: "FEATURED_POSTS", label: "Posts recientes" },
   { value: "MAP", label: "Mapa / cómo llegar" },

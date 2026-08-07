@@ -143,7 +143,7 @@ export default async function HomePage() {
           shoppingCenterJsonLd(settings, sedes),
           itemListJsonLd({
             path: "/",
-            name: "Locales destacados de Palmas Mall",
+            name: "Locales nuevos en Palmas Mall",
             items: locales.map((l) => ({
               name: l.name,
               path: `/directorio/${l.slug}`,
@@ -304,12 +304,12 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {/* ── Locales destacados ───────────────────────────── */}
+      {/* ── Locales nuevos ───────────────────────────────── */}
       {locales.length > 0 && (
         <section className="bg-white py-16 sm:py-24">
           <Container>
             <div className="mb-8 flex items-end justify-between gap-4 sm:mb-12">
-              <SectionTitle title="Locales destacados" className="mb-0 sm:mb-0" />
+              <SectionTitle title="Nuevos en Palmas Mall" className="mb-0 sm:mb-0" />
               <Link
                 href="/directorio"
                 className="hidden shrink-0 items-center gap-1.5 font-semibold text-palm-700 transition-colors hover:text-palm-900 sm:inline-flex"

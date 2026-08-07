@@ -76,7 +76,7 @@ export default async function AdminLocalesPage({
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex flex-wrap gap-1">
-                        {local.featured ? <Badge variant="leaf">Destacado</Badge> : null}
+                        {local.featured ? <Badge variant="leaf">Nuevo</Badge> : null}
                         {local.comingSoon ? <Badge variant="dark">Próximamente</Badge> : null}
                         {local.isPlaceholder ? <Badge variant="warning">Placeholder</Badge> : null}
                       </div>
