@@ -76,7 +76,12 @@ export const getUpcomingEvents = cache((take?: number) => {
         { startsAt: null, endsAt: null },
       ],
     },
-    orderBy: [{ startsAt: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }],
+    // El orden manual del admin manda; la fecha solo desempata.
+    orderBy: [
+      { order: "asc" },
+      { startsAt: { sort: "asc", nulls: "last" } },
+      { createdAt: "desc" },
+    ],
     take,
   });
 });
@@ -102,7 +107,7 @@ export const getPastEvents = cache((take = 6) => {
         { OR: [{ endsAt: { lt: today } }, { endsAt: null, startsAt: { lt: today } }] },
       ],
     },
-    orderBy: { startsAt: "desc" },
+    orderBy: [{ order: "asc" }, { startsAt: "desc" }],
     take,
   });
 });
@@ -136,7 +141,7 @@ export const getPostBySlug = cache((slug: string) =>
 export const getHomeGallery = cache(() =>
   prisma.galleryImage.findMany({
     where: { status: ContentStatus.PUBLISHED, deletedAt: null, showOnHome: true },
-    orderBy: { order: "asc" },
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
     take: 8,
   }),
 );
@@ -147,10 +152,10 @@ export const getGalleryAlbums = cache(() =>
     include: {
       images: {
         where: { status: ContentStatus.PUBLISHED, deletedAt: null },
-        orderBy: { order: "asc" },
+        orderBy: [{ order: "asc" }, { createdAt: "asc" }],
       },
     },
-    orderBy: { order: "asc" },
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
   }),
 );
 

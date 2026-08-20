@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { SiteSettings } from "@prisma/client";
 import { updateSettings } from "@/app/admin/_actions/misc";
 import {
@@ -17,6 +17,8 @@ import { Switch } from "@/components/ui/switch";
 
 export function SettingsForm({ settings }: { settings: SiteSettings }) {
   const [state, action] = useActionState(updateSettings, initialFormState);
+  // Se rellena solo al subir el PDF (Cloudinary devuelve el nº de páginas).
+  const [pdfPages, setPdfPages] = useState(settings.sponsorPdfPages);
 
   return (
     <form action={action} className="space-y-6">
@@ -177,8 +179,42 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
                 <Input id="sponsorWhatsapp" name="sponsorWhatsapp" defaultValue={settings.sponsorWhatsapp} />
               </Field>
             </div>
-            <Field label="Brochure PDF (URL)" htmlFor="sponsorPdfUrl" hint="Link al PDF de patrocinios (se abre al descargar)">
-              <Input id="sponsorPdfUrl" name="sponsorPdfUrl" type="url" defaultValue={settings.sponsorPdfUrl} placeholder="https://…/brochure.pdf" />
+            <ImageUpload
+              name="sponsorPdfUrl"
+              label="Brochure de sponsors (PDF)"
+              defaultValue={settings.sponsorPdfUrl}
+              folder="sponsors"
+              aspect="aspect-[4/3] max-w-[240px]"
+              allowPdf
+              allowUrl
+              onChange={(url, meta) => {
+                if (!url) setPdfPages(0);
+                else if (meta?.pages) setPdfPages(meta.pages);
+              }}
+            />
+            <p className="-mt-3 text-[13px] text-mist-500">
+              Sube el PDF (máx. 20 MB) y la página Be Our Sponsors lo muestra hoja por hoja, con
+              enlace para descargarlo. Las hojas se cuentan solas al guardar. Si pegas una URL
+              externa (no subida aquí) solo queda el enlace de descarga.
+            </p>
+            <div className="grid gap-5 sm:grid-cols-[140px_1fr]">
+              <Field label="Hojas del PDF" htmlFor="sponsorPdfPages" hint="0 = se detecta al guardar">
+                <Input
+                  id="sponsorPdfPages"
+                  name="sponsorPdfPages"
+                  type="number"
+                  min={0}
+                  max={200}
+                  value={pdfPages}
+                  onChange={(e) => setPdfPages(Number(e.target.value) || 0)}
+                />
+              </Field>
+              <Field label="Título de la sección" htmlFor="sponsorPdfHeading">
+                <Input id="sponsorPdfHeading" name="sponsorPdfHeading" defaultValue={settings.sponsorPdfHeading} />
+              </Field>
+            </div>
+            <Field label="Texto de la sección" htmlFor="sponsorPdfIntro">
+              <Textarea id="sponsorPdfIntro" name="sponsorPdfIntro" defaultValue={settings.sponsorPdfIntro} className="min-h-[70px]" />
             </Field>
             <ImageUpload
               name="sponsorVideoUrl"
@@ -188,6 +224,28 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
               aspect="aspect-[9/16] max-w-[200px]"
               allowUrl
             />
+            <p className="-mt-3 text-[13px] text-mist-500">
+              Se ve en la página Be Our Sponsors. Sube un MP4 o WebM vertical (máx. 100 MB) o pega
+              la URL del video. Con la X quitas el actual y la sección desaparece del sitio.
+            </p>
+          </div>
+        </AdminCard>
+
+        <AdminCard title="Bloque “Quieres tu marca en Palmas Mall”">
+          <div className="space-y-5">
+            <p className="text-[13px] text-mist-500">
+              Sale en Contacto y en Plano del mall, con el WhatsApp de alquiler de local. Deja el
+              título y el texto vacíos para quitar el bloque del sitio.
+            </p>
+            <Field label="Título" htmlFor="rentalCtaTitle">
+              <Input id="rentalCtaTitle" name="rentalCtaTitle" defaultValue={settings.rentalCtaTitle} />
+            </Field>
+            <Field label="Texto" htmlFor="rentalCtaText">
+              <Textarea id="rentalCtaText" name="rentalCtaText" defaultValue={settings.rentalCtaText} className="min-h-[80px]" />
+            </Field>
+            <Field label="Texto del botón" htmlFor="rentalCtaLabel" hint="Vacío = sin botón">
+              <Input id="rentalCtaLabel" name="rentalCtaLabel" defaultValue={settings.rentalCtaLabel} />
+            </Field>
           </div>
         </AdminCard>
 

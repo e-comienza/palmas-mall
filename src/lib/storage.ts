@@ -8,6 +8,8 @@ export type UploadResult = {
   width: number;
   height: number;
   bytes: number;
+  /** Nº de páginas (solo PDFs subidos a Cloudinary); 0 si no aplica. */
+  pages: number;
 };
 
 function cloudinaryConfigured(): boolean {
@@ -54,6 +56,7 @@ export async function uploadImage(
               width: uploaded.width,
               height: uploaded.height,
               bytes: uploaded.bytes,
+              pages: uploaded.pages ?? 0,
             });
           },
         )
@@ -81,7 +84,45 @@ export async function uploadImage(
     width: 0,
     height: 0,
     bytes: buffer.length,
+    pages: 0,
   };
+}
+
+/**
+ * `public_id` de Cloudinary a partir de una URL de entrega: descarta el prefijo
+ * `/upload/`, las transformaciones, la versión y la extensión.
+ */
+function publicIdFromUrl(url: string): string {
+  const after = url.split("/upload/")[1];
+  if (!after) return "";
+  const parts = after.split("?")[0].split("/");
+  while (parts.length > 1) {
+    const first = parts[0];
+    const isTransform = first.includes(",") || /^[a-z]{1,3}_[^/]+$/.test(first);
+    const isVersion = /^v\d+$/.test(first);
+    if (!isTransform && !isVersion) break;
+    parts.shift();
+  }
+  return parts.join("/").replace(/\.[a-z0-9]+$/i, "");
+}
+
+/**
+ * Nº de páginas de un PDF ya subido a Cloudinary (0 si no se puede saber).
+ * Se usa para mostrar el brochure de sponsors hoja por hoja.
+ */
+export async function pdfPageCount(url: string): Promise<number> {
+  if (!cloudinaryConfigured()) return 0;
+  if (!url.includes("res.cloudinary.com") || !/\.pdf(\?|$)/i.test(url)) return 0;
+  const publicId = publicIdFromUrl(url);
+  if (!publicId) return 0;
+  try {
+    const { v2: cloudinary } = await import("cloudinary");
+    const info = await cloudinary.api.resource(publicId, { pages: true });
+    return typeof info.pages === "number" ? info.pages : 0;
+  } catch (error) {
+    console.error("[storage] no se pudo leer el nº de páginas del PDF", error);
+    return 0;
+  }
 }
 
 export async function deleteImage(publicId: string): Promise<void> {

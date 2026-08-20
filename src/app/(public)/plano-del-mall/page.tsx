@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, MagnifyingGlassPlus, WhatsappLogo } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, MagnifyingGlassPlus } from "@phosphor-icons/react/dist/ssr";
 import { PageHeader } from "@/components/public/page-header";
 import { Container } from "@/components/public/container";
+import { RentalCta } from "@/components/public/rental-cta";
 import { PlanoViewer } from "@/components/public/plano-viewer";
 import { getPage } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/settings";
 import { planoImageSrc } from "@/lib/media";
-import { withHeart } from "@/lib/heart-text";
 import { heroData } from "@/lib/blocks";
 import { ExtraBlocks } from "@/components/public/block-renderer";
 import { PageFaqs } from "@/components/public/page-faqs";
@@ -58,28 +58,14 @@ export default async function PlanoPage() {
         </div>
 
         {/* Averiguar por disponibilidad de locales */}
-        <div className="mt-10 overflow-hidden rounded-2xl bg-palm-950 px-6 py-8 text-white sm:px-10 sm:py-10">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="max-w-xl">
-              <h2 className="font-display text-xl font-bold tracking-[-0.01em] sm:text-2xl">¿Quieres tu marca en Palmas Mall?</h2>
-              <p className="mt-2 text-[15px] leading-relaxed text-mist-200">
-                {withHeart(
-                  "Escríbenos por WhatsApp para conocer la disponibilidad de locales y llevar tu negocio al corazón de la Milla de Oro.",
-                )}
-              </p>
-            </div>
-            <a
-              href={`https://wa.me/${settings.rentalWhatsapp}?text=${encodeURIComponent(
-                "Hola, quiero información sobre la disponibilidad de locales en Palmas Mall.",
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="pressable inline-flex h-12 shrink-0 items-center gap-2 self-start rounded-full bg-white px-7 text-sm font-semibold text-palm-900 transition-colors hover:bg-mist-100 sm:self-auto"
-            >
-              <WhatsappLogo size={20} weight="fill" /> Averiguar por un local
-            </a>
-          </div>
-        </div>
+        <RentalCta
+          className="mt-10"
+          title={settings.rentalCtaTitle}
+          text={settings.rentalCtaText}
+          label={settings.rentalCtaLabel}
+          whatsapp={settings.rentalWhatsapp}
+          message="Hola, quiero información sobre la disponibilidad de locales en Palmas Mall."
+        />
       </Container>
       <PageFaqs faqs={page?.faqs} className="bg-white py-14 sm:py-20" />
       <ExtraBlocks page={page} />

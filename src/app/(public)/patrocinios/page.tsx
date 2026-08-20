@@ -7,6 +7,8 @@ import {
   FilePdf,
   WhatsappLogo,
 } from "@phosphor-icons/react/dist/ssr";
+import { BrochureViewer, type BrochurePage } from "@/components/public/brochure-viewer";
+import { pdfPageSrc } from "@/lib/media";
 import { PageHeader } from "@/components/public/page-header";
 import { Container, SectionTitle } from "@/components/public/container";
 import { Reveal } from "@/components/public/reveal";
@@ -54,6 +56,17 @@ export default async function PatrociniosPage() {
   const [settings, page] = await Promise.all([getSiteSettings(), getPage("patrocinios")]);
   const hero = heroData(page);
 
+  // Hojas del brochure: solo si el PDF está en Cloudinary y sabemos cuántas
+  // páginas tiene (se guarda al subirlo). Si no, queda solo el enlace al PDF.
+  const brochurePages: BrochurePage[] = Array.from(
+    { length: Math.max(0, settings.sponsorPdfPages) },
+    (_, i) => {
+      const src = pdfPageSrc(settings.sponsorPdfUrl, i + 1, 1600);
+      const thumb = pdfPageSrc(settings.sponsorPdfUrl, i + 1, 320);
+      return src && thumb ? { src, thumb, label: `Hoja ${i + 1}` } : null;
+    },
+  ).filter((p): p is BrochurePage => p !== null);
+
   return (
     <>
       <JsonLdScript
@@ -98,7 +111,14 @@ export default async function PatrociniosPage() {
                 el lugar.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
-                {settings.sponsorPdfUrl ? (
+                {brochurePages.length ? (
+                  <a
+                    href="#brochure"
+                    className="pressable inline-flex h-12 items-center gap-2 rounded-full bg-palm-700 px-7 text-sm font-semibold text-white transition-colors hover:bg-palm-800"
+                  >
+                    <FilePdf size={20} weight="bold" /> Ver el brochure
+                  </a>
+                ) : settings.sponsorPdfUrl ? (
                   <a
                     href={settings.sponsorPdfUrl}
                     target="_blank"
@@ -137,6 +157,22 @@ export default async function PatrociniosPage() {
           ))}
         </div>
       </Container>
+
+      {brochurePages.length ? (
+        <section id="brochure" className="scroll-mt-24 bg-palm-50 py-14 sm:py-20">
+          <Container>
+            <div className="mx-auto max-w-5xl">
+              <SectionTitle
+                title={settings.sponsorPdfHeading || "Brochure de sponsors"}
+                intro={settings.sponsorPdfIntro}
+              />
+              <Reveal>
+                <BrochureViewer pages={brochurePages} pdfUrl={settings.sponsorPdfUrl} />
+              </Reveal>
+            </div>
+          </Container>
+        </section>
+      ) : null}
 
       <section className="bg-white py-14 sm:py-20">
         <Container className="max-w-3xl">

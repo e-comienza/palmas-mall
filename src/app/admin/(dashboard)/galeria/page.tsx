@@ -10,11 +10,11 @@ export default async function AdminGaleriaPage() {
   const [albums, images] = await Promise.all([
     prisma.galleryAlbum.findMany({
       where: { deletedAt: null },
-      orderBy: { order: "asc" },
+      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
     }),
     prisma.galleryImage.findMany({
       where: { deletedAt: null },
-      orderBy: { order: "asc" },
+      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
       include: { album: true },
     }),
   ]);
@@ -23,7 +23,7 @@ export default async function AdminGaleriaPage() {
     <div>
       <AdminPageHeader
         title="Galería · Momentos Palmas Mall"
-        description="Sube imágenes, organízalas en álbumes y elige cuáles aparecen en el home."
+        description="Sube imágenes, organízalas en álbumes y ordénalas: el orden de los álbumes y de sus fotos es el que se ve en Momentos Palmas Mall."
       />
       <GalleryManager
         albums={albums.map((a) => ({ id: a.id, title: a.title, description: a.description }))}

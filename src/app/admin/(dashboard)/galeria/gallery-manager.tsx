@@ -8,6 +8,8 @@ import { PencilSimple } from "@phosphor-icons/react";
 import { isVideoUrl, cloudinaryPoster } from "@/lib/media";
 import {
   addGalleryImages,
+  moveAlbum,
+  moveGalleryImage,
   updateGalleryImage,
   upsertAlbum,
 } from "@/app/admin/_actions/misc";
@@ -20,7 +22,7 @@ import {
 } from "@/components/admin/form-helpers";
 import { AdminCard } from "@/components/admin/ui";
 import { GalleryUpload } from "@/components/admin/image-upload";
-import { DeleteButton } from "@/components/admin/action-buttons";
+import { DeleteButton, MoveButtons } from "@/components/admin/action-buttons";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -42,7 +44,7 @@ function MediaThumb({ url, alt, sizes }: { url: string; alt: string; sizes: stri
         ) : (
           <video src={url} muted playsInline preload="metadata" className="size-full object-cover" />
         )}
-        <span className="pointer-events-none absolute left-1.5 top-1.5 rounded bg-palm-950/70 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+        <span className="pointer-events-none absolute right-1.5 top-1.5 rounded bg-palm-950/70 px-1.5 py-0.5 text-[10px] font-semibold text-white">
           VIDEO
         </span>
       </>
@@ -80,7 +82,12 @@ export function GalleryManager({
 
   const deleteImage = softDelete.bind(null, "galleryImage");
   const deleteAlbum = softDelete.bind(null, "galleryAlbum");
-  const visible = filter ? images.filter((i) => i.albumId === filter) : images;
+  const visible =
+    filter === ""
+      ? images
+      : images.filter((i) => (filter === "none" ? i.albumId === null : i.albumId === filter));
+  // El orden se guarda por álbum, así que solo se puede reordenar dentro de uno.
+  const sortable = filter !== "";
 
   return (
     <div className="space-y-6">
@@ -123,12 +130,23 @@ export function GalleryManager({
             <SubmitButton>Crear álbum</SubmitButton>
           </form>
           {albums.length ? (
-            <ul className="mt-5 space-y-1.5 border-t border-mist-100 pt-4 text-sm">
-              {albums.map((a) => (
+            <>
+              <p className="mt-5 border-t border-mist-100 pt-4 text-[13px] text-mist-500">
+                Este es el orden en que las galerías salen en Momentos Palmas Mall.
+              </p>
+              <ul className="mt-2 space-y-1.5 text-sm">
+                {albums.map((a, i) => (
                 <li key={a.id} className="flex items-center justify-between gap-2 text-mist-700">
+                  <MoveButtons
+                    action={moveAlbum}
+                    id={a.id}
+                    name={a.title}
+                    isFirst={i === 0}
+                    isLast={i === albums.length - 1}
+                  />
                   <span className="min-w-0 flex-1 truncate">{a.title}</span>
                   <span className="shrink-0 text-[12px] text-mist-500">
-                    {images.filter((i) => i.albumId === a.id).length} imgs
+                    {images.filter((img) => img.albumId === a.id).length} imgs
                   </span>
                   <button
                     type="button"
@@ -141,24 +159,46 @@ export function GalleryManager({
                   <DeleteButton action={deleteAlbum} id={a.id} name={a.title} />
                 </li>
               ))}
-            </ul>
+              </ul>
+            </>
           ) : null}
         </AdminCard>
       </div>
 
       <AdminCard title={`Imágenes (${visible.length})`}>
-        <div className="mb-4 max-w-xs">
-          <Select value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Filtrar por álbum">
-            <option value="">Todos los álbumes</option>
-            {albums.map((a) => (
-              <option key={a.id} value={a.id}>{a.title}</option>
-            ))}
-          </Select>
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <div className="max-w-xs flex-1">
+            <Select value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Filtrar por álbum">
+              <option value="">Todos los álbumes</option>
+              {albums.map((a) => (
+                <option key={a.id} value={a.id}>{a.title}</option>
+              ))}
+              <option value="none">Sin álbum</option>
+            </Select>
+          </div>
+          <p className="text-[13px] text-mist-500">
+            {sortable
+              ? "Usa las flechas de cada foto para ordenarlas dentro del álbum."
+              : "Elige un álbum para ordenar sus fotos."}
+          </p>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-          {visible.map((img) => (
+          {visible.map((img, i) => (
             <div key={img.id} className="group relative aspect-square overflow-hidden rounded-xl border border-mist-200 bg-mist-100">
               <MediaThumb url={img.url} alt={img.alt} sizes="200px" />
+              {sortable ? (
+                <div className="absolute left-1.5 top-1.5 flex items-center gap-1 rounded-full bg-white/95 px-1 shadow-card">
+                  <MoveButtons
+                    action={moveGalleryImage}
+                    id={img.id}
+                    name={img.alt || "la foto"}
+                    isFirst={i === 0}
+                    isLast={i === visible.length - 1}
+                    orientation="horizontal"
+                  />
+                  <span className="pr-1 text-[11px] font-bold tabular-nums text-mist-600">{i + 1}</span>
+                </div>
+              ) : null}
               <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-palm-950/80 to-transparent p-2">
                 <div className="flex gap-1">
                   {img.showOnHome ? <Badge variant="leaf" className="!px-1.5 !text-[10px]">Home</Badge> : null}

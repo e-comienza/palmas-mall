@@ -29,7 +29,7 @@ export function ImageUpload({
   defaultValue?: string;
   folder?: string;
   aspect?: string;
-  onChange?: (url: string) => void;
+  onChange?: (url: string, meta?: { pages?: number }) => void;
   /** Permite pegar una URL externa (imagen, GIF o link de Giphy) */
   allowUrl?: boolean;
   /** Permite subir PDF (ej. plano del mall) */
@@ -38,9 +38,9 @@ export function ImageUpload({
   const acceptTypes = `image/*,video/mp4,video/webm,video/quicktime${allowPdf ? ",application/pdf" : ""}`;
   const [urlDraft, setUrlDraft] = useState("");
   const [url, setUrlState] = useState(defaultValue);
-  const setUrl = (u: string) => {
+  const setUrl = (u: string, meta?: { pages?: number }) => {
     setUrlState(u);
-    onChange?.(u);
+    onChange?.(u, meta);
   };
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -54,11 +54,11 @@ export function ImageUpload({
       body.append("folder", folder);
       const res = await fetch("/api/upload", { method: "POST", body });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error subiendo la imagen");
-      setUrl(data.url);
-      toast.success("Imagen subida");
+      if (!res.ok) throw new Error(data.error || "Error subiendo el archivo");
+      setUrl(data.url, { pages: typeof data.pages === "number" ? data.pages : 0 });
+      toast.success(isPdfUrl(String(data.url)) ? "PDF subido" : "Imagen subida");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Error subiendo la imagen");
+      toast.error(error instanceof Error ? error.message : "Error subiendo el archivo");
     } finally {
       setUploading(false);
     }
@@ -157,7 +157,7 @@ export function ImageUpload({
           e.target.value = "";
         }}
       />
-      {allowUrl && !url ? (
+      {allowUrl ? (
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <LinkSimple size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-mist-500" />
@@ -165,8 +165,8 @@ export function ImageUpload({
               type="url"
               value={urlDraft}
               onChange={(e) => setUrlDraft(e.target.value)}
-              placeholder="o pega una URL de imagen, GIF o Giphy…"
-              aria-label="URL de imagen o GIF"
+              placeholder={url ? "o pega otra URL para reemplazar…" : "o pega una URL de imagen, video o GIF…"}
+              aria-label="URL de imagen, video o GIF"
               className="h-10 w-full rounded-xl border border-mist-300 bg-white pl-9 pr-3 text-sm text-mist-900 placeholder:text-mist-500 focus:border-palm-600 focus:outline-none focus:ring-2 focus:ring-palm-600/20"
             />
           </div>
@@ -177,7 +177,7 @@ export function ImageUpload({
               if (!normalized) return;
               setUrl(normalized);
               setUrlDraft("");
-              toast.success("Imagen enlazada");
+              toast.success("Archivo enlazado");
             }}
             disabled={!urlDraft.trim()}
             className="pressable h-10 shrink-0 rounded-full border border-palm-700/30 bg-white px-4 text-sm font-semibold text-palm-800 transition-colors hover:bg-palm-50 disabled:opacity-40"

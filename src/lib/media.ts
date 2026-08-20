@@ -46,10 +46,23 @@ export function cloudinaryVideoSrc(
   return url.replace("/video/upload/", `/video/upload/${t}/`);
 }
 
+/** ¿La URL apunta a un PDF? */
+export function isPdfUrl(url: string): boolean {
+  return /\.pdf(\?.*)?$/i.test(url);
+}
+
 /**
- * Poster (primer frame) de un video de Cloudinary como JPG. Carga instantánea:
- * el navegador pinta el poster mientras difiere los bytes del video.
+ * Una página de un PDF de Cloudinary rasterizada a JPG (`pg_N`). Devuelve
+ * `undefined` si el PDF no está en Cloudinary: sin rasterizar no hay hojas que
+ * mostrar y la página cae al enlace de descarga.
  */
+export function pdfPageSrc(url: string, page: number, width = 1600): string | undefined {
+  if (!isPdfUrl(url) || !url.includes("/upload/")) return undefined;
+  return url
+    .replace("/upload/", `/upload/pg_${page},f_jpg,q_auto,w_${width}/`)
+    .replace(/\.pdf(\?.*)?$/i, ".jpg");
+}
+
 /**
  * URL lista para mostrar el plano en el visor. Si es un PDF de Cloudinary,
  * rasteriza la página 1 a PNG en alta resolución (para que el zoom no pixele);
@@ -57,7 +70,7 @@ export function cloudinaryVideoSrc(
  */
 export function planoImageSrc(url: string): string {
   if (!url) return url;
-  if (/\.pdf(\?.*)?$/i.test(url) && url.includes("/upload/")) {
+  if (isPdfUrl(url) && url.includes("/upload/")) {
     return url
       .replace("/upload/", "/upload/pg_1,f_png,q_auto,w_2400/")
       .replace(/\.pdf(\?.*)?$/i, ".png");
@@ -65,6 +78,10 @@ export function planoImageSrc(url: string): string {
   return url;
 }
 
+/**
+ * Poster (primer frame) de un video de Cloudinary como JPG. Carga instantánea:
+ * el navegador pinta el poster mientras difiere los bytes del video.
+ */
 export function cloudinaryPoster(url: string): string | undefined {
   if (!url.includes("/video/upload/")) return undefined;
   return url

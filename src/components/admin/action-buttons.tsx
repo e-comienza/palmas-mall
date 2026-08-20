@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Trash, ArrowCounterClockwise, Warning } from "@phosphor-icons/react";
+import { Trash, ArrowCounterClockwise, Warning, CaretUp, CaretDown } from "@phosphor-icons/react";
 import {
   Dialog,
   DialogContent,
@@ -115,5 +115,61 @@ export function RestoreButton({
     >
       <ArrowCounterClockwise size={15} /> {pending ? "Restaurando…" : "Restaurar"}
     </button>
+  );
+}
+
+/**
+ * Subir / bajar un elemento en una lista ordenada a mano. Guarda al instante:
+ * el orden que se ve en el admin es el que queda publicado.
+ */
+export function MoveButtons({
+  action,
+  id,
+  name,
+  isFirst,
+  isLast,
+  orientation = "vertical",
+}: {
+  action: (id: string, dir: -1 | 1) => Promise<ActionResult>;
+  id: string;
+  name: string;
+  isFirst: boolean;
+  isLast: boolean;
+  orientation?: "vertical" | "horizontal";
+}) {
+  const [pending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const move = (dir: -1 | 1) =>
+    startTransition(async () => {
+      const result = await action(id, dir);
+      if (result.ok) router.refresh();
+      else toast.error(result.error || "No se pudo cambiar el orden");
+    });
+
+  const cls =
+    "pressable flex size-6 items-center justify-center rounded text-mist-400 transition-colors hover:bg-palm-50 hover:text-palm-700 disabled:opacity-25 disabled:hover:bg-transparent";
+
+  return (
+    <div className={orientation === "vertical" ? "flex flex-col" : "flex items-center gap-0.5"}>
+      <button
+        type="button"
+        onClick={() => move(-1)}
+        disabled={pending || isFirst}
+        aria-label={orientation === "horizontal" ? `Mover ${name} antes` : `Subir ${name}`}
+        className={cls}
+      >
+        <CaretUp size={13} weight="bold" className={orientation === "horizontal" ? "-rotate-90" : ""} />
+      </button>
+      <button
+        type="button"
+        onClick={() => move(1)}
+        disabled={pending || isLast}
+        aria-label={orientation === "horizontal" ? `Mover ${name} después` : `Bajar ${name}`}
+        className={cls}
+      >
+        <CaretDown size={13} weight="bold" className={orientation === "horizontal" ? "-rotate-90" : ""} />
+      </button>
+    </div>
   );
 }

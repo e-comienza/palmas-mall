@@ -165,8 +165,11 @@ export async function addGalleryImages(_prev: FormState, formData: FormData): Pr
   if (!urls.length) return { ok: false, error: "Sube al menos una imagen" };
 
   try {
-    const max = await prisma.galleryImage.aggregate({ _max: { order: true } });
-    let order = (max._max.order ?? 0) + 1;
+    const max = await prisma.galleryImage.aggregate({
+      where: { albumId, deletedAt: null },
+      _max: { order: true },
+    });
+    let order = (max._max.order ?? -1) + 1;
     for (const url of urls) {
       await prisma.galleryImage.create({
         data: { albumId, url, alt, order: order++, showOnHome: bool(formData.get("showOnHome")) },
@@ -248,6 +251,101 @@ export async function upsertAlbum(_prev: FormState, formData: FormData): Promise
   }
 }
 
+// ─────────────────────────── Orden manual ───────────────────────────
+
+/** Reescribe el campo `order` de una lista ya ordenada (0..n-1). */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function persistOrder(
+  model: "event" | "galleryImage" | "galleryAlbum",
+  ids: string[],
+): Promise<void> {
+  await prisma.$transaction(
+    ids.map((id, i) => (prisma as any)[model].update({ where: { id }, data: { order: i } })),
+  );
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
+/** Mueve un id una posición dentro de la lista y devuelve el nuevo orden. */
+function swapped(ids: string[], id: string, dir: -1 | 1): string[] | null {
+  const i = ids.indexOf(id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= ids.length) return null;
+  const next = [...ids];
+  [next[i], next[j]] = [next[j], next[i]];
+  return next;
+}
+
+/**
+ * Sube o baja un evento en el listado. El orden manual manda sobre la fecha en
+ * /eventos, así que mover aquí se ve al instante en el sitio.
+ */
+export async function moveEvent(id: string, dir: -1 | 1): Promise<ActionResult> {
+  try {
+    await requireActionUser("EDITOR");
+    const events = await prisma.event.findMany({
+      where: { deletedAt: null },
+      orderBy: [{ order: "asc" }, { startsAt: "desc" }],
+      select: { id: true },
+    });
+    const next = swapped(events.map((e) => e.id), id, dir);
+    if (!next) return { ok: true };
+    await persistOrder("event", next);
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (error) {
+    console.error("[admin] moveEvent", error);
+    return { ok: false, error: "No se pudo cambiar el orden de los eventos" };
+  }
+}
+
+/** Sube o baja un álbum: define el orden de las galerías en Momentos. */
+export async function moveAlbum(id: string, dir: -1 | 1): Promise<ActionResult> {
+  try {
+    await requireActionUser("EDITOR");
+    const albums = await prisma.galleryAlbum.findMany({
+      where: { deletedAt: null },
+      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+      select: { id: true },
+    });
+    const next = swapped(albums.map((a) => a.id), id, dir);
+    if (!next) return { ok: true };
+    await persistOrder("galleryAlbum", next);
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (error) {
+    console.error("[admin] moveAlbum", error);
+    return { ok: false, error: "No se pudo cambiar el orden de los álbumes" };
+  }
+}
+
+/**
+ * Sube o baja una foto dentro de su álbum. Se ordena solo entre las fotos del
+ * mismo álbum: así el orden que se guarda es el que se ve en Momentos.
+ */
+export async function moveGalleryImage(id: string, dir: -1 | 1): Promise<ActionResult> {
+  try {
+    await requireActionUser("EDITOR");
+    const image = await prisma.galleryImage.findUnique({
+      where: { id },
+      select: { albumId: true },
+    });
+    if (!image) return { ok: false, error: "La imagen ya no existe" };
+    const siblings = await prisma.galleryImage.findMany({
+      where: { albumId: image.albumId, deletedAt: null },
+      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+      select: { id: true },
+    });
+    const next = swapped(siblings.map((i) => i.id), id, dir);
+    if (!next) return { ok: true };
+    await persistOrder("galleryImage", next);
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (error) {
+    console.error("[admin] moveGalleryImage", error);
+    return { ok: false, error: "No se pudo cambiar el orden de las fotos" };
+  }
+}
+
 // ─────────────────────── Configuración global ───────────────────────
 
 export async function updateSettings(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -265,11 +363,13 @@ export async function updateSettings(_prev: FormState, formData: FormData): Prom
     "googleMapsUrl", "seoTitleTemplate", "seoDefaultTitle", "seoDefaultDesc",
     "ogImageUrl", "externalScripts", "globalBannerText",
     "mollyImageUrl", "mollyMessage", "mollyCtaLabel", "mollyCtaUrl",
-    "rentalWhatsapp", "sponsorWhatsapp", "sponsorPdfUrl", "sponsorVideoUrl",
+    "rentalWhatsapp", "sponsorWhatsapp", "sponsorPdfUrl", "sponsorPdfHeading",
+    "sponsorPdfIntro", "sponsorVideoUrl",
+    "rentalCtaTitle", "rentalCtaText", "rentalCtaLabel",
     "planoImageUrl",
   ] as const;
 
-  const data: Record<string, string | boolean> = {};
+  const data: Record<string, string | boolean | number> = {};
   for (const field of fields) {
     const value = formData.get(field);
     if (typeof value === "string") data[field] = value;
@@ -283,6 +383,15 @@ export async function updateSettings(_prev: FormState, formData: FormData): Prom
   for (const k of ["whatsapp", "rentalWhatsapp", "sponsorWhatsapp"]) {
     if (typeof data[k] === "string") data[k] = (data[k] as string).replace(/[^\d]/g, "");
   }
+  // Nº de hojas del brochure. Si llega en 0 y el PDF está en Cloudinary lo
+  // preguntamos ahí: así el visor funciona sin que nadie cuente las páginas.
+  const pages = Number(formData.get("sponsorPdfPages"));
+  let sponsorPdfPages = Number.isFinite(pages) ? Math.max(0, Math.min(200, Math.trunc(pages))) : 0;
+  if (!sponsorPdfPages && typeof data.sponsorPdfUrl === "string" && data.sponsorPdfUrl) {
+    const { pdfPageCount } = await import("@/lib/storage");
+    sponsorPdfPages = await pdfPageCount(data.sponsorPdfUrl);
+  }
+  data.sponsorPdfPages = sponsorPdfPages;
 
   try {
     await prisma.siteSettings.upsert({

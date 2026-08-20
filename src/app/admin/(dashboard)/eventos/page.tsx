@@ -4,8 +4,9 @@ import { PencilSimple } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireUser, can } from "@/lib/permissions";
 import { AdminPageHeader, StatusBadge, EmptyState } from "@/components/admin/ui";
-import { DeleteButton } from "@/components/admin/action-buttons";
+import { DeleteButton, MoveButtons } from "@/components/admin/action-buttons";
 import { softDelete } from "@/app/admin/_actions/helpers";
+import { moveEvent } from "@/app/admin/_actions/misc";
 import { Badge } from "@/components/ui/badge";
 import { SearchInput } from "@/components/admin/search-input";
 import { eventDateLabel, eventIsPast } from "@/lib/events";
@@ -26,16 +27,19 @@ export default async function AdminEventosPage({
       deletedAt: null,
       ...(q ? { title: { contains: q, mode: "insensitive" } } : {}),
     },
-    orderBy: { startsAt: "desc" },
+    orderBy: [{ order: "asc" }, { startsAt: "desc" }],
   });
 
   const deleteEvent = softDelete.bind(null, "event");
+  // Reordenar con la lista filtrada movería el evento a una posición que no se
+  // ve: el orden manual solo se ofrece sobre la lista completa.
+  const sortable = !q;
 
   return (
     <div>
       <AdminPageHeader
         title="Eventos"
-        description="Agenda de eventos y experiencias del mall."
+        description="Agenda de eventos y experiencias del mall. El orden de esta lista es el que se ve en la página de Eventos."
         createHref="/admin/eventos/nuevo"
         createLabel="Nuevo evento"
       >
@@ -48,6 +52,11 @@ export default async function AdminEventosPage({
             <table className="w-full min-w-[720px] text-sm">
               <thead>
                 <tr className="border-b border-mist-200 text-left text-[12px] uppercase tracking-wide text-mist-500">
+                  {sortable ? (
+                    <th className="w-10 px-2 py-3">
+                      <span className="sr-only">Orden</span>
+                    </th>
+                  ) : null}
                   <th className="px-5 py-3 font-semibold">Evento</th>
                   <th className="px-5 py-3 font-semibold">Fecha</th>
                   <th className="px-5 py-3 font-semibold">Estado</th>
@@ -56,10 +65,21 @@ export default async function AdminEventosPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-mist-100">
-                {events.map((event) => {
+                {events.map((event, i) => {
                   const finished = eventIsPast(event, now);
                   return (
                     <tr key={event.id} className="transition-colors hover:bg-mist-50">
+                      {sortable ? (
+                        <td className="px-2 py-3">
+                          <MoveButtons
+                            action={moveEvent}
+                            id={event.id}
+                            name={event.title}
+                            isFirst={i === 0}
+                            isLast={i === events.length - 1}
+                          />
+                        </td>
+                      ) : null}
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
                           <div className="relative size-10 shrink-0 overflow-hidden rounded-lg bg-mist-100">

@@ -141,7 +141,16 @@ model SiteSettings {
   // Be Our Sponsors: número comercial + brochure PDF + video vertical
   sponsorWhatsapp    String   @default("573155711045")
   sponsorPdfUrl      String   @default("https://palmasmall.com/wp-content/uploads/2026/04/sponsors-palmas-mall-2026.pdf")
+  // Nº de páginas del brochure: si es > 0 y el PDF está en Cloudinary, la página
+  // muestra el brochure hoja por hoja (rasterizado con pg_N) además del enlace.
+  sponsorPdfPages    Int      @default(0)
+  sponsorPdfHeading  String   @default("Brochure de sponsors")
+  sponsorPdfIntro    String   @default("Modalidades, medidas y tarifas de publicidad dentro y fuera del mall. Pasa las hojas o descarga el PDF completo.")
   sponsorVideoUrl    String   @default("https://palmasmall.com/wp-content/uploads/2026/01/video-brochure.mp4")
+  // Bloque "¿Quieres tu marca en Palmas Mall?" (páginas Contacto y Plano del mall)
+  rentalCtaTitle     String   @default("¿Quieres tu marca en Palmas Mall?")
+  rentalCtaText      String   @default("Escríbenos por WhatsApp para conocer la disponibilidad de locales y llevar tu negocio al corazón de la Milla de Oro.")
+  rentalCtaLabel     String   @default("Averiguar por un local")
   // Plano del mall (imagen o PDF; si es PDF de Cloudinary se rasteriza la pág. 1)
   planoImageUrl      String   @default("/images/plano-del-mall.webp")
   updatedAt          DateTime @updatedAt
@@ -287,6 +296,8 @@ model Event {
   priceDetail      String        @default("")
   registrationUrl  String        @default("")
   featured         Boolean       @default(false)
+  // Orden manual: manda sobre la fecha en el listado de Eventos.
+  order            Int           @default(0)
   status           ContentStatus @default(DRAFT)
   isPlaceholder    Boolean       @default(false)
   sedeId           String?
@@ -302,6 +313,7 @@ model Event {
   updatedAt        DateTime      @updatedAt
 
   @@index([status, startsAt, deletedAt])
+  @@index([order])
 }
 
 // ─────────────────────────── Blog ───────────────────────────

@@ -52,7 +52,7 @@ export async function POST(request: Request) {
         createdBy: session.user.id,
       },
     });
-    return NextResponse.json({ url: result.url });
+    return NextResponse.json({ url: result.url, pages: result.pages });
   } catch (error) {
     console.error("[upload] error", error);
     const message = error instanceof Error ? error.message : "Error subiendo la imagen";
