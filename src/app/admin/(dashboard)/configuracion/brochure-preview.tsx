@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Warning } from "@phosphor-icons/react";
+import { ArrowSquareOut, Warning } from "@phosphor-icons/react";
 import { isPdfUrl, pdfPageSrc } from "@/lib/media";
 
 /**
@@ -39,10 +39,20 @@ export function BrochurePreview({ url, pages }: { url: string; pages: number }) 
 
   return (
     <div>
-      <p className="text-sm font-semibold text-mist-800">
-        Hojas que verán los visitantes{" "}
-        <span className="font-normal text-mist-500">({sheets.length})</span>
-      </p>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-sm font-semibold text-mist-800">
+          Hojas que verán los visitantes{" "}
+          <span className="font-normal text-mist-500">({sheets.length})</span>
+        </p>
+        <a
+          href="/api/brochure"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-palm-700 hover:text-palm-800"
+        >
+          <ArrowSquareOut size={15} weight="bold" /> Abrir el PDF completo
+        </a>
+      </div>
       <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
         {sheets.map((sheet) => (
           <a

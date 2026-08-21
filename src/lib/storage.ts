@@ -129,6 +129,29 @@ export async function pdfPageCount(url: string): Promise<number> {
   }
 }
 
+/**
+ * URL temporal y firmada para abrir el PDF original. Cloudinary bloquea la
+ * entrega pública de PDF por defecto (la URL `.pdf` responde 401), pero el
+ * endpoint autenticado de descarga sí lo sirve. Devuelve null si no aplica.
+ */
+export async function signedPdfUrl(url: string, ttlSeconds = 3600): Promise<string | null> {
+  if (!cloudinaryConfigured()) return null;
+  if (!url.includes("res.cloudinary.com") || !/\.pdf(\?|$)/i.test(url)) return null;
+  const publicId = publicIdFromUrl(url);
+  if (!publicId) return null;
+  try {
+    const { v2: cloudinary } = await import("cloudinary");
+    return cloudinary.utils.private_download_url(publicId, "pdf", {
+      resource_type: "image",
+      type: "upload",
+      expires_at: Math.floor(Date.now() / 1000) + ttlSeconds,
+    });
+  } catch (error) {
+    console.error("[storage] no se pudo firmar la URL del PDF", error);
+    return null;
+  }
+}
+
 export async function deleteImage(publicId: string): Promise<void> {
   if (!publicId || !cloudinaryConfigured()) return;
   const { v2: cloudinary } = await import("cloudinary");

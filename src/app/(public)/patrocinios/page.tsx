@@ -120,12 +120,12 @@ export default async function PatrociniosPage() {
                   </a>
                 ) : settings.sponsorPdfUrl ? (
                   <a
-                    href={settings.sponsorPdfUrl}
+                    href="/api/brochure"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="pressable inline-flex h-12 items-center gap-2 rounded-full bg-palm-700 px-7 text-sm font-semibold text-white transition-colors hover:bg-palm-800"
                   >
-                    <FilePdf size={20} weight="bold" /> Descargar brochure (PDF)
+                    <FilePdf size={20} weight="bold" /> Abrir el brochure (PDF)
                   </a>
                 ) : null}
                 <a
@@ -167,7 +167,7 @@ export default async function PatrociniosPage() {
                 intro={settings.sponsorPdfIntro}
               />
               <Reveal>
-                <BrochureViewer pages={brochurePages} pdfUrl={settings.sponsorPdfUrl} />
+                <BrochureViewer pages={brochurePages} pdfUrl="/api/brochure" />
               </Reveal>
             </div>
           </Container>

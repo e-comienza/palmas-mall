@@ -6,9 +6,7 @@ import { toast } from "sonner";
 import { UploadSimple, X, Spinner, LinkSimple, FilePdf } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { normalizeMollyUrl } from "@/lib/molly-image";
-import { isVideoUrl, cloudinaryPoster } from "@/lib/media";
-
-const isPdfUrl = (u: string) => /\.pdf(\?|$)/i.test(u);
+import { isVideoUrl, cloudinaryPoster, isPdfUrl, pdfPageSrc } from "@/lib/media";
 
 /**
  * Upload de imagen drag-and-drop. Sube a /api/upload (Cloudinary o local en dev)
@@ -71,15 +69,16 @@ export function ImageUpload({
       {url ? (
         <div className={cn("group relative overflow-hidden rounded-xl border border-mist-200 bg-mist-100", aspect)}>
           {isPdfUrl(url) ? (
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex size-full flex-col items-center justify-center gap-2 bg-mist-50 text-palm-700 transition-colors hover:bg-palm-50"
-            >
-              <FilePdf size={32} weight="duotone" />
-              <span className="text-sm font-semibold">PDF cargado · ver</span>
-            </a>
+            // Primera página rasterizada: Cloudinary bloquea la entrega del PDF
+            // en sí, pero sus derivados de imagen sí se sirven.
+            pdfPageSrc(url, 1, 640) ? (
+              <Image src={pdfPageSrc(url, 1, 640)!} alt="Primera página del PDF" fill unoptimized sizes="480px" className="object-contain" />
+            ) : (
+              <span className="flex size-full flex-col items-center justify-center gap-2 bg-mist-50 text-palm-700">
+                <FilePdf size={32} weight="duotone" />
+                <span className="text-sm font-semibold">PDF enlazado</span>
+              </span>
+            )
           ) : isVideoUrl(url) ? (
             <video
               src={url}

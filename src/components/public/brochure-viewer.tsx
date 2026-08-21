@@ -16,8 +16,8 @@ export type BrochurePage = { src: string; thumb: string; label: string };
 /**
  * Visor del brochure de sponsors: las hojas del PDF (rasterizadas por
  * Cloudinary con `pg_N`) se pasan una por una sobre un fondo oscuro, con tira
- * de miniaturas, teclado, swipe y pantalla completa. El PDF sigue disponible
- * para descargar: esto es la vitrina, no el reemplazo.
+ * de miniaturas, teclado, swipe y pantalla completa. `pdfUrl` abre el
+ * documento completo: esto es la vitrina, no el reemplazo.
  */
 export function BrochureViewer({
   pages,
@@ -204,7 +204,7 @@ export function BrochureViewer({
           rel="noopener noreferrer"
           className="pressable inline-flex h-12 items-center gap-2 rounded-full bg-palm-700 px-7 text-sm font-semibold text-white transition-colors hover:bg-palm-800"
         >
-          <DownloadSimple size={19} weight="bold" /> Descargar el PDF
+          <DownloadSimple size={19} weight="bold" /> Abrir el PDF completo
         </a>
         <p className="text-[13px] text-mist-500">
           {total} hojas · deslízalas o usa las flechas del teclado
