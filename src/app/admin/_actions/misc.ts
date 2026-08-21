@@ -256,7 +256,7 @@ export async function upsertAlbum(_prev: FormState, formData: FormData): Promise
 /** Reescribe el campo `order` de una lista ya ordenada (0..n-1). */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 async function persistOrder(
-  model: "event" | "galleryImage" | "galleryAlbum",
+  model: "event" | "galleryImage" | "galleryAlbum" | "local",
   ids: string[],
 ): Promise<void> {
   await prisma.$transaction(
@@ -295,6 +295,47 @@ export async function moveEvent(id: string, dir: -1 | 1): Promise<ActionResult> 
   } catch (error) {
     console.error("[admin] moveEvent", error);
     return { ok: false, error: "No se pudo cambiar el orden de los eventos" };
+  }
+}
+
+/**
+ * Sube o baja un local. `order` es una sola secuencia global, así que se
+ * intercambia con el vecino *de la lista que se está viendo*: con un filtro de
+ * categoría activo el local se mueve dentro de su categoría, y sin filtro se
+ * mueve en el directorio completo. En ambos casos el resto no se mueve.
+ */
+export async function moveLocal(
+  id: string,
+  dir: -1 | 1,
+  filter?: { q?: string; categoria?: string },
+): Promise<ActionResult> {
+  try {
+    await requireActionUser("EDITOR");
+    const all = await prisma.local.findMany({
+      where: { deletedAt: null },
+      orderBy: [{ order: "asc" }, { name: "asc" }],
+      select: { id: true, name: true, categoryId: true, category: { select: { slug: true } } },
+    });
+    const q = filter?.q?.trim().toLowerCase();
+    const visible = all.filter(
+      (l) =>
+        (!filter?.categoria || l.category?.slug === filter.categoria) &&
+        (!q || l.name.toLowerCase().includes(q)),
+    );
+    const from = visible.findIndex((l) => l.id === id);
+    const to = from + dir;
+    if (from < 0 || to < 0 || to >= visible.length) return { ok: true };
+
+    const ids = all.map((l) => l.id);
+    const a = ids.indexOf(visible[from].id);
+    const b = ids.indexOf(visible[to].id);
+    [ids[a], ids[b]] = [ids[b], ids[a]];
+    await persistOrder("local", ids);
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (error) {
+    console.error("[admin] moveLocal", error);
+    return { ok: false, error: "No se pudo cambiar el orden de los locales" };
   }
 }
 

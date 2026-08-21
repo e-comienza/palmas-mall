@@ -11,14 +11,16 @@ import {
 } from "@/components/admin/form-helpers";
 import { AdminCard } from "@/components/admin/ui";
 import { ImageUpload } from "@/components/admin/image-upload";
+import { BrochurePreview } from "./brochure-preview";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 
 export function SettingsForm({ settings }: { settings: SiteSettings }) {
   const [state, action] = useActionState(updateSettings, initialFormState);
-  // Se rellena solo al subir el PDF (Cloudinary devuelve el nº de páginas).
+  // Se rellenan solos al subir el PDF (Cloudinary devuelve el nº de páginas).
   const [pdfPages, setPdfPages] = useState(settings.sponsorPdfPages);
+  const [pdfUrl, setPdfUrl] = useState(settings.sponsorPdfUrl);
 
   return (
     <form action={action} className="space-y-6">
@@ -188,6 +190,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
               allowPdf
               allowUrl
               onChange={(url, meta) => {
+                setPdfUrl(url);
                 if (!url) setPdfPages(0);
                 else if (meta?.pages) setPdfPages(meta.pages);
               }}
@@ -216,6 +219,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
             <Field label="Texto de la sección" htmlFor="sponsorPdfIntro">
               <Textarea id="sponsorPdfIntro" name="sponsorPdfIntro" defaultValue={settings.sponsorPdfIntro} className="min-h-[70px]" />
             </Field>
+            <BrochurePreview url={pdfUrl} pages={pdfPages} />
             <ImageUpload
               name="sponsorVideoUrl"
               label="Video Be Our Sponsors (vertical)"

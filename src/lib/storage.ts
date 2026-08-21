@@ -32,6 +32,9 @@ export async function uploadImage(
     const { v2: cloudinary } = await import("cloudinary");
     const baseFolder = process.env.CLOUDINARY_FOLDER || "palmas-mall";
     const isVideo = file.type.startsWith("video/");
+    // Los PDF se guardan tal cual: `fetch_format: auto` los rasteriza a PNG de
+    // una sola página y se pierde el resto del documento.
+    const isPdf = file.type === "application/pdf";
     const result = await new Promise<UploadResult>((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
@@ -42,8 +45,9 @@ export async function uploadImage(
             // Solo las imágenes llevan transformación de entrada. Los videos
             // NO: Cloudinary rechaza transformar video grande de forma síncrona
             // ("too large to process synchronously"). Se transforman en delivery
-            // con f_auto,q_auto vía URL (ver src/lib/media.ts).
-            ...(isVideo ? {} : { transformation: [{ quality: "auto", fetch_format: "auto" }] }),
+            // con f_auto,q_auto vía URL (ver src/lib/media.ts). Los PDF tampoco:
+            // la transformación los aplanaría a una imagen de la primera página.
+            ...(isVideo || isPdf ? {} : { transformation: [{ quality: "auto", fetch_format: "auto" }] }),
           },
           (error, uploaded) => {
             if (error || !uploaded) {
