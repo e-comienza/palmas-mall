@@ -17,6 +17,11 @@ export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata("play-zone", "/play-zone");
 }
 
+/** ¿La URL es un embed (YouTube/Vimeo) en vez de un archivo de video? */
+function isEmbedUrl(url: string): boolean {
+  return url.includes("youtube") || url.includes("youtu.be") || url.includes("vimeo");
+}
+
 const HIGHLIGHTS = [
   { icon: Baby, title: "Pensado para los peques", text: "Un espacio seguro y a su medida para jugar sin preocupaciones." },
   { icon: Confetti, title: "Diversión todos los días", text: "El plan favorito de los niños mientras la familia disfruta el mall." },
@@ -48,8 +53,22 @@ export default async function PlayZonePage() {
 
       <Container className="py-10 sm:py-14">
         {videoUrl ? (
-          <div className="relative aspect-video overflow-hidden rounded-2xl bg-palm-950 shadow-card">
-            <Media src={videoUrl} alt={hero.heading || "PlayZone Palmas Mall"} fill mode="inline" className="object-cover" />
+          // El video de PlayZone se graba en vertical (9:16): marco angosto y
+          // centrado para que se vea completo, sin franjas negras a los lados.
+          <div className="mx-auto w-full max-w-[360px] sm:max-w-[400px]">
+            <div className="relative aspect-[9/16] overflow-hidden rounded-2xl bg-palm-950 shadow-card">
+              {isEmbedUrl(videoUrl) ? (
+                <iframe
+                  src={videoUrl}
+                  title={hero.heading || "PlayZone Palmas Mall"}
+                  className="size-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <Media src={videoUrl} alt={hero.heading || "PlayZone Palmas Mall"} fill mode="inline" className="object-cover" />
+              )}
+            </div>
           </div>
         ) : null}
 

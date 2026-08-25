@@ -202,7 +202,20 @@ export function BlockEditor({
             ) : null}
 
             {block.type === "VIDEO" ? (
-              <Input value={str(block, "url")} onChange={(e) => setData(i, "url", e.target.value)} placeholder="https://www.youtube.com/embed/… o URL de video" aria-label="URL del video" />
+              <>
+                <ImageUpload
+                  name={`__block-${i}-video`}
+                  defaultValue={str(block, "url")}
+                  folder="videos"
+                  aspect="aspect-video"
+                  allowUrl
+                  onChange={(v) => setData(i, "url", v)}
+                />
+                <p className="text-[13px] text-mist-500">
+                  Sube el archivo (MP4/WebM, máx. 100 MB) o pega una URL de YouTube en formato embed
+                  (https://www.youtube.com/embed/…). En PlayZone el video se muestra vertical (9:16).
+                </p>
+              </>
             ) : null}
 
             {block.type === "MEDIA_TEXT" ? (
