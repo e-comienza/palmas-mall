@@ -10,7 +10,8 @@
     "seed": "tsx prisma/seed.ts",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate deploy",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "db:status": "prisma migrate status"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -30,6 +31,7 @@
     "@tiptap/starter-kit": "^3.27.3",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "bcryptjs": "^3.0.3",
@@ -55,8 +57,5 @@
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
-  },
-  "devDependencies": {
-    "@types/nodemailer": "^8.0.1"
   }
 }
