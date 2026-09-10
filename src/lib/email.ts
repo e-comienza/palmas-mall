@@ -1,13 +1,22 @@
 /**
- * Envío de correo transaccional vía Resend (API REST, sin dependencia).
- * No-op silencioso si RESEND_API_KEY no está configurada, para que el flujo
+ * Envío de correo transaccional con dos drivers, elegidos por variables de entorno:
+ *
+ *   1. SMTP (nodemailer) — si SMTP_HOST está definida.
+ *      En el cPanel de Palmas Mall el correo vive en el mismo servidor que la app,
+ *      así que basta SMTP_HOST=localhost / SMTP_PORT=25 (sin TLS ni credenciales).
+ *      Desde fuera del servidor: SMTP_HOST=palmasmall.com, SMTP_PORT=587,
+ *      SMTP_USER y SMTP_PASS de una cuenta real del dominio.
+ *
+ *   2. Resend (API REST) — si no hay SMTP_HOST pero sí RESEND_API_KEY.
+ *
+ * Sin ninguna de las dos: no-op silencioso, para que el flujo que llama
  * (ej. guardar el mensaje de contacto) nunca falle por falta de email.
  *
- * Env requeridas para activar:
- *   RESEND_API_KEY   — API key de Resend
- *   EMAIL_FROM       — remitente verificado, ej. "Palmas Mall <no-reply@palmasmall.com>"
- *                      (sin dominio verificado, usar "onboarding@resend.dev" para pruebas)
+ * Remitente: EMAIL_FROM, ej. "Palmas Mall <no-reply@palmasmall.com>".
+ * Destinatarios del formulario: CONTACT_EMAIL_TO (varios separados por coma).
  */
+
+import nodemailer, { type Transporter } from "nodemailer";
 
 type SendEmailInput = {
   to: string | string[];
@@ -16,35 +25,84 @@ type SendEmailInput = {
   replyTo?: string;
 };
 
-export async function sendEmail({ to, subject, html, replyTo }: SendEmailInput): Promise<
-  { ok: true } | { ok: false; skipped?: boolean; error?: string }
-> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.warn("[email] RESEND_API_KEY no configurada — se omite el envío");
-    return { ok: false, skipped: true };
-  }
-  const from = process.env.EMAIL_FROM || "Palmas Mall <onboarding@resend.dev>";
+type SendEmailResult = { ok: true } | { ok: false; skipped?: boolean; error?: string };
 
+const DEFAULT_FROM = "Palmas Mall <no-reply@palmasmall.com>";
+
+/** Transporter cacheado: crear uno por envío abre una conexión SMTP de más. */
+let transporter: Transporter | null = null;
+
+function getTransporter(): Transporter | null {
+  const host = process.env.SMTP_HOST;
+  if (!host) return null;
+  if (transporter) return transporter;
+
+  const port = Number(process.env.SMTP_PORT || 587);
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+  // El exim local del cPanel escucha en 25 sin TLS ni auth; 465 es SMTPS.
+  const isLocal = host === "localhost" || host === "127.0.0.1";
+
+  transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: user && pass ? { user, pass } : undefined,
+    // El certificado del servidor local suele no coincidir con "localhost".
+    tls: isLocal ? { rejectUnauthorized: false } : undefined,
+  });
+  return transporter;
+}
+
+async function sendViaSmtp(input: SendEmailInput, transport: Transporter): Promise<SendEmailResult> {
+  try {
+    await transport.sendMail({
+      from: process.env.EMAIL_FROM || DEFAULT_FROM,
+      to: input.to,
+      subject: input.subject,
+      html: input.html,
+      replyTo: input.replyTo,
+    });
+    return { ok: true };
+  } catch (error) {
+    console.error("[email] SMTP falló", error);
+    return { ok: false, error: "smtp" };
+  }
+}
+
+async function sendViaResend(input: SendEmailInput, apiKey: string): Promise<SendEmailResult> {
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ from, to, subject, html, reply_to: replyTo }),
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: process.env.EMAIL_FROM || DEFAULT_FROM,
+        to: input.to,
+        subject: input.subject,
+        html: input.html,
+        reply_to: input.replyTo,
+      }),
     });
     if (!res.ok) {
-      const detail = await res.text();
-      console.error(`[email] Resend ${res.status}: ${detail}`);
+      console.error(`[email] Resend ${res.status}: ${await res.text()}`);
       return { ok: false, error: `Resend ${res.status}` };
     }
     return { ok: true };
   } catch (error) {
-    console.error("[email] error de red enviando correo", error);
+    console.error("[email] error de red enviando por Resend", error);
     return { ok: false, error: "network" };
   }
+}
+
+export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
+  const transport = getTransporter();
+  if (transport) return sendViaSmtp(input, transport);
+
+  const apiKey = process.env.RESEND_API_KEY;
+  if (apiKey) return sendViaResend(input, apiKey);
+
+  console.warn("[email] sin SMTP_HOST ni RESEND_API_KEY — se omite el envío");
+  return { ok: false, skipped: true };
 }
 
 function esc(s: string): string {
