@@ -3,6 +3,7 @@ import Image from "next/image";
 import { getNavigation, getSedes } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/settings";
 import { SocialIcons } from "./social-icons";
+import { safeUrl } from "@/lib/utils";
 
 export async function Footer() {
   const [settings, footerNav, sedes] = await Promise.all([
@@ -51,7 +52,7 @@ export async function Footer() {
               {footerNav.map((item) => (
                 <li key={item.id}>
                   <Link
-                    href={item.url}
+                    href={safeUrl(item.url)}
                     className="text-[15px] text-mist-200 transition-colors hover:text-white"
                   >
                     {item.label}

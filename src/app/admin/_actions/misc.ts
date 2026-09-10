@@ -5,6 +5,7 @@ import { z } from "zod";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { requireActionUser, type SessionUser } from "@/lib/permissions";
+import { safeUrl } from "@/lib/utils";
 import { logAudit } from "@/lib/audit";
 import type { FormState } from "@/components/admin/form-helpers";
 import { zodErrors, type ActionResult } from "./helpers";
@@ -57,9 +58,9 @@ export async function upsertPopup(_prev: FormState, formData: FormData): Promise
     eventIds: jsonStringArray(formData.get("eventIds")),
     title: parsed.data.title,
     body: (formData.get("body") as string) || "",
-    imageUrl: (formData.get("imageUrl") as string) || "",
+    imageUrl: safeUrl(formData.get("imageUrl") as string, ""),
     ctaLabel: (formData.get("ctaLabel") as string) || "",
-    ctaUrl: (formData.get("ctaUrl") as string) || "",
+    ctaUrl: safeUrl(formData.get("ctaUrl") as string, ""),
     placement: (formData.get("placement") as PopupPlacement) || "ALL",
     customPath: (formData.get("customPath") as string) || "",
     active: bool(formData.get("active")),
@@ -413,7 +414,9 @@ export async function updateSettings(_prev: FormState, formData: FormData): Prom
   const data: Record<string, string | boolean | number> = {};
   for (const field of fields) {
     const value = formData.get(field);
-    if (typeof value === "string") data[field] = value;
+    if (typeof value !== "string") continue;
+    // Los campos de URL acaban pintados en un `href`/`src`: filtrar esquema.
+    data[field] = field.endsWith("Url") ? safeUrl(value, "") : value;
   }
   data.globalBannerActive = bool(formData.get("globalBannerActive"));
   if (typeof data.mollyImageUrl === "string") data.mollyImageUrl = normalizeMollyUrl(data.mollyImageUrl);
@@ -469,8 +472,8 @@ export async function updateSede(_prev: FormState, formData: FormData): Promise<
         whatsapp: ((formData.get("whatsapp") as string) || "").replace(/[^\d]/g, ""),
         email: (formData.get("email") as string) || "",
         openingHours: (formData.get("openingHours") as string) || "",
-        wazeUrl: (formData.get("wazeUrl") as string) || "",
-        mapsUrl: (formData.get("mapsUrl") as string) || "",
+        wazeUrl: safeUrl(formData.get("wazeUrl") as string, ""),
+        mapsUrl: safeUrl(formData.get("mapsUrl") as string, ""),
       },
     });
     await logAudit(user, { action: "update", entity: "Sede", entityId: sede.id, entityName: sede.name });
@@ -510,7 +513,7 @@ export async function saveMenuItems(_prev: FormState, formData: FormData): Promi
       data: items.map((item, i) => ({
         menuId,
         label: item.label.trim(),
-        url: item.url.trim(),
+        url: safeUrl(item.url.trim(), "#"),
         order: i,
         visible: item.visible ?? true,
       })),
@@ -533,6 +536,16 @@ const userSchema = z.object({
   password: z.string().optional(),
 });
 
+// No se exporta: en un módulo "use server" solo pueden exportarse funciones async.
+const PASSWORD_RULE = "Mínimo 12 caracteres, con al menos una letra y un número";
+
+/** Devuelve el mensaje de error de la contraseña, o null si es aceptable. */
+function passwordProblem(password: string | undefined): string | null {
+  if (!password || password.length < 12) return PASSWORD_RULE;
+  if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) return PASSWORD_RULE;
+  return null;
+}
+
 export async function upsertUser(_prev: FormState, formData: FormData): Promise<FormState> {
   let user: SessionUser;
   try {
@@ -552,19 +565,12 @@ export async function upsertUser(_prev: FormState, formData: FormData): Promise<
   const id = (formData.get("id") as string) || undefined;
   const email = parsed.data.email.toLowerCase().trim();
 
-  if (!id && (!parsed.data.password || parsed.data.password.length < 8)) {
-    return {
-      ok: false,
-      error: "Revisa los campos marcados",
-      fieldErrors: { password: "Mínimo 8 caracteres" },
-    };
-  }
-  if (id && parsed.data.password && parsed.data.password.length < 8) {
-    return {
-      ok: false,
-      error: "Revisa los campos marcados",
-      fieldErrors: { password: "Mínimo 8 caracteres" },
-    };
+  // Al crear la contraseña es obligatoria; al editar, opcional (blanco = no cambiar).
+  if (!id || parsed.data.password) {
+    const problem = passwordProblem(parsed.data.password);
+    if (problem) {
+      return { ok: false, error: "Revisa los campos marcados", fieldErrors: { password: problem } };
+    }
   }
 
   try {

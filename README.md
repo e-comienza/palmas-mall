@@ -54,6 +54,12 @@ npx prisma migrate dev # crear una nueva migración en desarrollo
 
 El seed crea un **Super Admin** con las credenciales de `ADMIN_EMAIL` / `ADMIN_PASSWORD` del entorno. Entra en **`/admin/login`**, y desde **Admin → Usuarios** crea el resto del equipo (roles Admin y Editor).
 
+> `ADMIN_PASSWORD` es **obligatoria** y debe tener al menos 12 caracteres: el seed
+> falla si no está definida. No hay contraseña por defecto a propósito — una
+> contraseña escrita en el repositorio termina siendo la de producción.
+> Las contraseñas que se crean desde **Admin → Usuarios** piden mínimo 12
+> caracteres con al menos una letra y un número.
+
 **Roles:**
 
 | Permiso | Editor | Admin | Super Admin |

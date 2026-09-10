@@ -10,6 +10,8 @@ import { pageMetadata } from "@/lib/page-metadata";
 import { webPageJsonLd, JsonLdScript } from "@/lib/jsonld";
 import { PageFaqs } from "@/components/public/page-faqs";
 import { ExtraBlocks } from "@/components/public/block-renderer";
+import { safeUrl } from "@/lib/utils";
+import { sanitizeRichText } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +61,7 @@ export default async function PlayZonePage() {
             <div className="relative aspect-[9/16] overflow-hidden rounded-2xl bg-palm-950 shadow-card">
               {isEmbedUrl(videoUrl) ? (
                 <iframe
-                  src={videoUrl}
+                  src={safeUrl(videoUrl, "")}
                   title={hero.heading || "PlayZone Palmas Mall"}
                   className="size-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -79,7 +81,7 @@ export default async function PlayZonePage() {
                 {intro.heading}
               </h2>
             ) : null}
-            <div className="prose-pm text-mist-700" dangerouslySetInnerHTML={{ __html: intro.body }} />
+            <div className="prose-pm text-mist-700" dangerouslySetInnerHTML={{ __html: sanitizeRichText(intro.body) }} />
           </div>
         ) : null}
 

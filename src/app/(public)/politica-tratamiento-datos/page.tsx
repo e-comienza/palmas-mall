@@ -6,6 +6,7 @@ import { getSiteSettings } from "@/lib/settings";
 import { pageMetadata } from "@/lib/page-metadata";
 import { heroData, richTextData } from "@/lib/blocks";
 import { ExtraBlocks } from "@/components/public/block-renderer";
+import { sanitizeRichText } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,7 @@ export default async function PoliticaPage() {
       />
       <Container className="max-w-3xl py-10 sm:py-14">
         {customBody ? (
-          <div className="prose-pm text-mist-700" dangerouslySetInnerHTML={{ __html: customBody }} />
+          <div className="prose-pm text-mist-700" dangerouslySetInnerHTML={{ __html: sanitizeRichText(customBody) }} />
         ) : (
           <div className="prose-pm text-mist-700">
             <p>

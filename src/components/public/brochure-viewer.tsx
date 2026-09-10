@@ -9,7 +9,7 @@ import {
   DownloadSimple,
   X,
 } from "@phosphor-icons/react";
-import { cn } from "@/lib/utils";
+import { cn, safeUrl } from "@/lib/utils";
 
 export type BrochurePage = { src: string; thumb: string; label: string };
 
@@ -199,7 +199,7 @@ export function BrochureViewer({
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <a
-          href={pdfUrl}
+          href={safeUrl(pdfUrl)}
           target="_blank"
           rel="noopener noreferrer"
           className="pressable inline-flex h-12 items-center gap-2 rounded-full bg-palm-700 px-7 text-sm font-semibold text-white transition-colors hover:bg-palm-800"

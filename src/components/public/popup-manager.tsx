@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { X, CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { safeUrl } from "@/lib/utils";
 
 export type PopupEventSlide = {
   id: string;
@@ -228,7 +229,7 @@ export function PopupManager({ popups }: { popups: PopupData[] }) {
                 ) : null}
                 {active.ctaLabel && active.ctaUrl ? (
                   <Link
-                    href={active.ctaUrl}
+                    href={safeUrl(active.ctaUrl)}
                     onClick={close}
                     className="pressable mt-4 inline-flex h-10 items-center justify-center rounded-full bg-palm-700 px-5 text-sm font-semibold text-white transition-colors hover:bg-palm-800"
                   >

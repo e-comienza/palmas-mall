@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Local } from "@prisma/client";
+import { safeUrl } from "@/lib/utils";
 import {
   Phone,
   WhatsappLogo,
@@ -82,13 +83,13 @@ export function LocalActionButtons({ local }: { local: Local }) {
     const icon = <action.Icon size={variant === "primary" ? 19 : 17} weight={action.key === "whatsapp" ? "fill" : "regular"} />;
     if (action.external) {
       return (
-        <a key={action.key} href={action.href} target="_blank" rel="noopener noreferrer" className={cls}>
+        <a key={action.key} href={safeUrl(action.href)} target="_blank" rel="noopener noreferrer" className={cls}>
           {icon} {action.label}
         </a>
       );
     }
     return (
-      <Link key={action.key} href={action.href} className={cls}>
+      <Link key={action.key} href={safeUrl(action.href)} className={cls}>
         {icon} {action.label}
       </Link>
     );

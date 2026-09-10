@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { X } from "@phosphor-icons/react";
 import { normalizeMollyUrl, isAnimatedImage } from "@/lib/molly-image";
+import { safeUrl } from "@/lib/utils";
 
 export type MollyConfig = {
   enabled: boolean;
@@ -133,7 +134,7 @@ export function Molly({ config }: { config: MollyConfig }) {
                 <p className="mt-1 text-sm leading-relaxed text-mist-700">{config.message}</p>
                 {config.ctaLabel && config.ctaUrl ? (
                   <Link
-                    href={config.ctaUrl}
+                    href={safeUrl(config.ctaUrl)}
                     onClick={dismiss}
                     className="pressable mt-3 inline-flex h-9 items-center rounded-full bg-palm-700 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-palm-800"
                   >

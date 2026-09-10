@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { Media } from "./media";
 import type { MediaTextData } from "@/lib/blocks";
+import { sanitizeRichText } from "@/lib/sanitize";
+import { safeUrl } from "@/lib/utils";
 
 /**
  * Sección "imagen + texto + botones" editable desde el admin (bloque MEDIA_TEXT).
@@ -79,7 +81,7 @@ export function MediaTextSection({
         {data.body ? (
           <div
             className="prose-pm mt-5 text-[15px] leading-relaxed text-mist-700 sm:text-base"
-            dangerouslySetInnerHTML={{ __html: data.body }}
+            dangerouslySetInnerHTML={{ __html: sanitizeRichText(data.body) }}
           />
         ) : null}
         {buttons.length ? (
@@ -99,11 +101,11 @@ export function MediaTextSection({
                 </>
               );
               return external ? (
-                <a key={i} href={b.url} target="_blank" rel="noopener noreferrer" className={className}>
+                <a key={i} href={safeUrl(b.url)} target="_blank" rel="noopener noreferrer" className={className}>
                   {content}
                 </a>
               ) : (
-                <Link key={i} href={b.url ?? "#"} className={className}>
+                <Link key={i} href={safeUrl(b.url)} className={className}>
                   {content}
                 </Link>
               );

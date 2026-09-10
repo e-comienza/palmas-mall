@@ -62,3 +62,30 @@ export function truncate(text: string, length: number): string {
 export function stripHtml(html: string): string {
   return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
+
+/**
+ * Esquemas de URL admitidos en un `href` que viene de la base de datos.
+ * Sin este filtro, un `javascript:…` guardado desde el admin se convierte en
+ * XSS en cuanto un visitante hace clic en el enlace.
+ */
+const SAFE_URL_SCHEMES = ["http:", "https:", "mailto:", "tel:"];
+
+/**
+ * Devuelve la URL si es segura, o `fallback` si no lo es.
+ * Acepta rutas relativas ("/directorio", "#seccion", "?q=x").
+ */
+export function safeUrl(url: string | null | undefined, fallback = "#"): string {
+  if (!url) return fallback;
+  const trimmed = url.trim();
+  if (!trimmed) return fallback;
+  // Rutas internas: no llevan esquema, no hay nada que validar.
+  if (/^[/#?]/.test(trimmed)) return trimmed;
+  // Sin esquema explícito (ej. "palmasmall.com") tampoco es ejecutable.
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return trimmed;
+  try {
+    const parsed = new URL(trimmed);
+    return SAFE_URL_SCHEMES.includes(parsed.protocol.toLowerCase()) ? trimmed : fallback;
+  } catch {
+    return fallback;
+  }
+}

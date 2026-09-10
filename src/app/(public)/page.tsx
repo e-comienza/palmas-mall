@@ -38,7 +38,7 @@ import {
   faqJsonLd,
   JsonLdScript,
 } from "@/lib/jsonld";
-import { siteUrl } from "@/lib/utils";
+import { siteUrl, safeUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -192,13 +192,13 @@ export default async function HomePage() {
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Link
-                href={hero.ctaPrimaryUrl || "/directorio"}
+                href={safeUrl(hero.ctaPrimaryUrl || "/directorio", "/directorio")}
                 className="pressable inline-flex h-12 items-center rounded-full bg-white px-7 text-base font-semibold text-palm-900 transition-colors hover:bg-mist-100"
               >
                 {hero.ctaPrimaryLabel || "Explorar locales"}
               </Link>
               <Link
-                href={hero.ctaSecondaryUrl || "/como-llegar"}
+                href={safeUrl(hero.ctaSecondaryUrl || "/como-llegar", "/como-llegar")}
                 className="pressable inline-flex h-12 items-center gap-2 rounded-full border border-white/40 px-7 text-base font-semibold text-white transition-colors hover:border-white/80 hover:bg-white/10"
               >
                 <MapPin size={18} /> {hero.ctaSecondaryLabel || "Cómo llegar"}

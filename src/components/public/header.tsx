@@ -6,7 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { List, X, MapPin, EnvelopeSimple, InstagramLogo, TiktokLogo, FacebookLogo } from "@phosphor-icons/react";
-import { cn } from "@/lib/utils";
+import { cn, safeUrl } from "@/lib/utils";
 
 type NavItem = { label: string; url: string };
 
@@ -100,7 +100,7 @@ export function Header({
             {navItems.map((item) => (
               <Link
                 key={item.url}
-                href={item.url}
+                href={safeUrl(item.url)}
                 className={cn(
                   "relative rounded-full px-3.5 py-2 text-sm font-semibold transition-colors duration-200",
                   pathname === item.url
@@ -158,7 +158,7 @@ export function Header({
                   transition={{ delay: 0.06 + i * 0.05, duration: 0.32, ease: [0.23, 1, 0.32, 1] }}
                 >
                   <Link
-                    href={item.url}
+                    href={safeUrl(item.url)}
                     onClick={close}
                     className={cn(
                       "group flex items-center justify-between border-b border-mist-100 py-4 font-display text-[26px] font-bold tracking-[-0.01em] transition-colors",
@@ -201,17 +201,17 @@ export function Header({
 
             <div className="mt-auto flex items-center gap-3 pt-10">
               {instagramUrl && (
-                <a href={instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="pressable flex size-11 items-center justify-center rounded-full bg-mist-100 text-palm-800 transition-colors hover:bg-palm-100">
+                <a href={safeUrl(instagramUrl)} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="pressable flex size-11 items-center justify-center rounded-full bg-mist-100 text-palm-800 transition-colors hover:bg-palm-100">
                   <InstagramLogo size={22} />
                 </a>
               )}
               {tiktokUrl && (
-                <a href={tiktokUrl} target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="pressable flex size-11 items-center justify-center rounded-full bg-mist-100 text-palm-800 transition-colors hover:bg-palm-100">
+                <a href={safeUrl(tiktokUrl)} target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="pressable flex size-11 items-center justify-center rounded-full bg-mist-100 text-palm-800 transition-colors hover:bg-palm-100">
                   <TiktokLogo size={22} />
                 </a>
               )}
               {facebookUrl && (
-                <a href={facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="pressable flex size-11 items-center justify-center rounded-full bg-mist-100 text-palm-800 transition-colors hover:bg-palm-100">
+                <a href={safeUrl(facebookUrl)} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="pressable flex size-11 items-center justify-center rounded-full bg-mist-100 text-palm-800 transition-colors hover:bg-palm-100">
                   <FacebookLogo size={22} />
                 </a>
               )}
