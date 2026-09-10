@@ -89,7 +89,15 @@ async function main() {
 
   // ── Usuario Super Admin ─────────────────────────────────────
   const adminEmail = (process.env.ADMIN_EMAIL || "admin@palmasmall.com").toLowerCase();
-  const adminPassword = process.env.ADMIN_PASSWORD || "PalmasMall2026!";
+  // Sin contraseña por defecto: una contraseña en el repositorio acaba siendo
+  // la contraseña real del SUPER_ADMIN en producción.
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword || adminPassword.length < 12) {
+    throw new Error(
+      "ADMIN_PASSWORD no está definida (o tiene menos de 12 caracteres). " +
+        "Defínela antes de sembrar la base de datos: ADMIN_PASSWORD=\"…\" npm run db:seed",
+    );
+  }
   const passwordHash = await hash(adminPassword, 12);
   await prisma.user.upsert({
     where: { email: adminEmail },

@@ -44,7 +44,11 @@ export function UserForm({ user, onDone }: { user?: EditableUser; onDone?: () =>
         label={editing ? "Contraseña" : "Contraseña *"}
         htmlFor="u-password"
         error={err("password")}
-        hint={editing ? "Déjala en blanco para no cambiarla" : "Mínimo 8 caracteres"}
+        hint={
+          editing
+            ? "Déjala en blanco para no cambiarla"
+            : "Mínimo 12 caracteres, con al menos una letra y un número"
+        }
       >
         <Input
           id="u-password"

@@ -4,6 +4,11 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/settings";
 import { sendEmail, contactEmailHtml } from "@/lib/email";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
+
+/** El formulario es público: sin tope, inunda la tabla y dispara emails. */
+const CONTACT_LIMIT = 3;
+const CONTACT_WINDOW_MS = 10 * 60 * 1000; // 10 min
 
 const contactSchema = z.object({
   name: z.string().min(2, "Escribe tu nombre").max(80),
@@ -28,6 +33,16 @@ export async function submitContact(
   _prev: ContactState,
   formData: FormData,
 ): Promise<ContactState> {
+  const ip = await clientIp();
+  const limited = rateLimit(`contact:${ip}`, CONTACT_LIMIT, CONTACT_WINDOW_MS);
+  if (!limited.ok) {
+    const minutes = Math.max(1, Math.ceil(limited.retryAfterSeconds / 60));
+    return {
+      ok: false,
+      error: `Ya enviaste varios mensajes. Vuelve a intentarlo en ${minutes} minuto${minutes === 1 ? "" : "s"}.`,
+    };
+  }
+
   const raw = Object.fromEntries(formData.entries());
   const parsed = contactSchema.safeParse(raw);
 
