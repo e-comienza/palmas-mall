@@ -45,3 +45,6 @@ next-env.d.ts
 
 # permitir la plantilla de entorno
 !.env.example
+
+# Worktrees temporales de Claude Code
+.claude/worktrees/
