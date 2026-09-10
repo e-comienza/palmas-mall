@@ -43,6 +43,10 @@ next-env.d.ts
 # uploads locales de desarrollo
 /public/uploads
 
+# reglas para agentes que genera el postinstall de next
+/AGENTS.md
+/CLAUDE.md
+
 # permitir la plantilla de entorno
 !.env.example
 
