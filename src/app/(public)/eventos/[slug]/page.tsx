@@ -19,6 +19,7 @@ import { eventJsonLd, faqJsonLd, JsonLdScript } from "@/lib/jsonld";
 import { siteUrl } from "@/lib/utils";
 import { eventDateLabel, eventIsPast } from "@/lib/events";
 import { EventCard } from "@/components/public/cards";
+import { sanitizeRichText } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
 
@@ -96,7 +97,7 @@ export default async function EventoPage({ params }: Props) {
             {event.longDescription ? (
               <div
                 className="prose-pm mt-8 text-mist-700"
-                dangerouslySetInnerHTML={{ __html: event.longDescription }}
+                dangerouslySetInnerHTML={{ __html: sanitizeRichText(event.longDescription) }}
               />
             ) : null}
 

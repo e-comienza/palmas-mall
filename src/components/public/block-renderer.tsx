@@ -16,6 +16,8 @@ import {
   getPublishedPosts,
 } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/settings";
+import { sanitizeRichText } from "@/lib/sanitize";
+import { safeUrl } from "@/lib/utils";
 
 type BlockData = Record<string, unknown>;
 
@@ -86,7 +88,7 @@ export async function BlockRenderer({
                 ) : null}
                 {str(data, "ctaPrimaryLabel") && str(data, "ctaPrimaryUrl") ? (
                   <Link
-                    href={str(data, "ctaPrimaryUrl")}
+                    href={safeUrl(str(data, "ctaPrimaryUrl"))}
                     className="pressable mt-7 inline-flex h-12 items-center rounded-full bg-white px-7 text-base font-semibold text-palm-900 hover:bg-mist-100"
                   >
                     {str(data, "ctaPrimaryLabel")}
@@ -104,7 +106,7 @@ export async function BlockRenderer({
                   {str(data, "heading")}
                 </h2>
               ) : null}
-              <div className="prose-pm text-mist-700" dangerouslySetInnerHTML={{ __html: str(data, "body") }} />
+              <div className="prose-pm text-mist-700" dangerouslySetInnerHTML={{ __html: sanitizeRichText(str(data, "body")) }} />
             </Container>
           );
 
@@ -141,7 +143,7 @@ export async function BlockRenderer({
               </div>
               {str(data, "ctaLabel") && str(data, "ctaUrl") ? (
                 <Link
-                  href={str(data, "ctaUrl")}
+                  href={safeUrl(str(data, "ctaUrl"))}
                   className="mt-6 inline-flex items-center gap-1.5 font-semibold text-palm-700 transition-colors hover:text-palm-900"
                 >
                   {str(data, "ctaLabel")} <ArrowRight size={16} weight="bold" />
@@ -165,7 +167,7 @@ export async function BlockRenderer({
                 ) : null}
                 {str(data, "ctaLabel") && str(data, "ctaUrl") ? (
                   <Link
-                    href={str(data, "ctaUrl")}
+                    href={safeUrl(str(data, "ctaUrl"))}
                     className="pressable mt-6 inline-flex h-12 items-center rounded-full bg-white px-7 text-base font-semibold text-palm-900 hover:bg-mist-100"
                   >
                     {str(data, "ctaLabel")}
@@ -240,10 +242,10 @@ export async function BlockRenderer({
                 </h2>
                 <p className="mt-2 text-[15px] text-mist-600">{settings.address}</p>
                 <div className="mt-5 flex flex-wrap gap-3">
-                  <a href={settings.wazeUrl} target="_blank" rel="noopener noreferrer" className="pressable inline-flex h-11 items-center rounded-full bg-palm-700 px-6 text-sm font-semibold text-white hover:bg-palm-800">
+                  <a href={safeUrl(settings.wazeUrl)} target="_blank" rel="noopener noreferrer" className="pressable inline-flex h-11 items-center rounded-full bg-palm-700 px-6 text-sm font-semibold text-white hover:bg-palm-800">
                     Abrir en Waze
                   </a>
-                  <a href={settings.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="pressable inline-flex h-11 items-center rounded-full border border-palm-700/30 bg-white px-6 text-sm font-semibold text-palm-800 hover:bg-palm-50">
+                  <a href={safeUrl(settings.googleMapsUrl)} target="_blank" rel="noopener noreferrer" className="pressable inline-flex h-11 items-center rounded-full border border-palm-700/30 bg-white px-6 text-sm font-semibold text-palm-800 hover:bg-palm-50">
                     Google Maps
                   </a>
                 </div>
@@ -290,7 +292,7 @@ export async function BlockRenderer({
                   item.img ? (
                     <Link
                       key={i}
-                      href={item.href || "#"}
+                      href={safeUrl(item.href)}
                       className="group relative block h-56 overflow-hidden rounded-2xl"
                     >
                       <Image
@@ -358,7 +360,7 @@ export async function BlockRenderer({
               <div className="relative aspect-video overflow-hidden rounded-2xl bg-palm-950">
                 {url.includes("youtube") || url.includes("youtu.be") || url.includes("vimeo") ? (
                   <iframe
-                    src={url}
+                    src={safeUrl(url, "")}
                     title={str(data, "heading") || "Video"}
                     className="size-full"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

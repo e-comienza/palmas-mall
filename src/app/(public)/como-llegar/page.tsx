@@ -12,6 +12,7 @@ import { webPageJsonLd } from "@/lib/jsonld";
 import { ExtraBlocks } from "@/components/public/block-renderer";
 import { MediaTextSection } from "@/components/public/media-text-section";
 import { BlockIcon } from "@/components/public/block-icons";
+import { safeUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -102,7 +103,7 @@ export default async function ComoLlegarPage() {
               <div className="mt-6 flex flex-wrap gap-3">
                 {sede.wazeUrl ? (
                   <a
-                    href={sede.wazeUrl}
+                    href={safeUrl(sede.wazeUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="pressable inline-flex h-11 items-center rounded-full bg-palm-700 px-6 text-sm font-semibold text-white transition-colors hover:bg-palm-800"
@@ -112,7 +113,7 @@ export default async function ComoLlegarPage() {
                 ) : null}
                 {sede.mapsUrl ? (
                   <a
-                    href={sede.mapsUrl}
+                    href={safeUrl(sede.mapsUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="pressable inline-flex h-11 items-center rounded-full border border-palm-700/30 bg-white px-6 text-sm font-semibold text-palm-800 transition-colors hover:bg-palm-50"

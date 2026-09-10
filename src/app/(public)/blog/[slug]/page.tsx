@@ -9,6 +9,7 @@ import { getPostBySlug, getPublishedPosts } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/settings";
 import { blogPostJsonLd, JsonLdScript } from "@/lib/jsonld";
 import { formatDateEs, siteUrl } from "@/lib/utils";
+import { sanitizeRichText } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
 
@@ -86,7 +87,7 @@ export default async function BlogPostPage({ params }: Props) {
         ) : null}
         <article
           className="prose-pm text-mist-700"
-          dangerouslySetInnerHTML={{ __html: post.content }}
+          dangerouslySetInnerHTML={{ __html: sanitizeRichText(post.content) }}
         />
       </Container>
 

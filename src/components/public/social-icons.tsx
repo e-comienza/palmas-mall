@@ -6,7 +6,7 @@ import {
   FacebookLogo,
   XLogo,
 } from "@phosphor-icons/react";
-import { cn } from "@/lib/utils";
+import { cn, safeUrl } from "@/lib/utils";
 
 export function SocialIcons({
   instagramUrl,
@@ -37,7 +37,7 @@ export function SocialIcons({
   return (
     <div className="flex items-center gap-3">
       {links.map(({ url, label, Icon }) => (
-        <a key={label} href={url} target="_blank" rel="noopener noreferrer" aria-label={label} className={cls}>
+        <a key={label} href={safeUrl(url)} target="_blank" rel="noopener noreferrer" aria-label={label} className={cls}>
           <Icon size={22} />
         </a>
       ))}

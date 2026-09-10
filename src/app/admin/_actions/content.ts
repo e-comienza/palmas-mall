@@ -5,7 +5,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireActionUser, can, type SessionUser } from "@/lib/permissions";
 import { logAudit } from "@/lib/audit";
-import { slugify } from "@/lib/utils";
+import { slugify, safeUrl } from "@/lib/utils";
+import { sanitizeRichText } from "@/lib/sanitize";
 import type { FormState } from "@/components/admin/form-helpers";
 import { zodErrors } from "./helpers";
 import { ContentStatus } from "@prisma/client";
@@ -31,6 +32,28 @@ function commaList(v: FormDataEntryValue | null): string[] {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+const URL_KEY = /(^|[a-z])(url|href|link)$/i;
+
+/**
+ * Los bloques llegan como JSON libre desde el editor del admin y se guardan
+ * tal cual en la columna `data`. Antes de persistirlos:
+ *   - `body` se sanea porque se renderiza con `dangerouslySetInnerHTML`;
+ *   - cualquier clave de URL se filtra por esquema (fuera `javascript:`).
+ * El resto de strings los pinta React como texto, así que van escapados.
+ */
+function sanitizeBlockData(value: unknown, key = ""): unknown {
+  if (Array.isArray(value)) return value.map((v) => sanitizeBlockData(v, key));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, sanitizeBlockData(v, k)]),
+    );
+  }
+  if (typeof value !== "string") return value;
+  if (key === "body") return sanitizeRichText(value);
+  if (URL_KEY.test(key)) return safeUrl(value, "");
+  return value;
 }
 
 /** Los editores no pueden cambiar el estado de publicación. */
@@ -116,7 +139,7 @@ export async function upsertLocal(_prev: FormState, formData: FormData): Promise
     coverUrl: (formData.get("coverUrl") as string) || "",
     gallery: json<string[]>(formData.get("gallery"), []),
     shortDescription: parsed.data.shortDescription,
-    longDescription: (formData.get("longDescription") as string) || "",
+    longDescription: sanitizeRichText(formData.get("longDescription") as string),
     floor: (formData.get("floor") as string) || "",
     unitNumber: (formData.get("unitNumber") as string) || "",
     openingHours: json(formData.get("openingHours"), []),
@@ -195,7 +218,7 @@ export async function upsertEvent(_prev: FormState, formData: FormData): Promise
     title: parsed.data.title,
     slug,
     shortDescription: parsed.data.shortDescription,
-    longDescription: (formData.get("longDescription") as string) || "",
+    longDescription: sanitizeRichText(formData.get("longDescription") as string),
     startsAt: parsed.data.startsAt ? new Date(parsed.data.startsAt) : null,
     endsAt: endsAtRaw ? new Date(endsAtRaw) : null,
     dateLabel: (formData.get("dateLabel") as string) || "",
@@ -269,7 +292,7 @@ export async function upsertPost(_prev: FormState, formData: FormData): Promise<
     category: (formData.get("category") as string) || "Noticias",
     coverUrl: (formData.get("coverUrl") as string) || "",
     excerpt: parsed.data.excerpt,
-    content: (formData.get("content") as string) || "",
+    content: sanitizeRichText(formData.get("content") as string),
     tags: commaList(formData.get("tags")),
     featured: bool(formData.get("featured")),
     isPlaceholder: bool(formData.get("isPlaceholder")),
@@ -363,7 +386,7 @@ export async function upsertPage(_prev: FormState, formData: FormData): Promise<
               type: b.type as any,
               /* eslint-enable @typescript-eslint/no-explicit-any */
               order: i,
-              data: (b.data ?? {}) as object,
+              data: sanitizeBlockData(b.data ?? {}) as object,
               visible: b.visible ?? true,
             })),
           });
