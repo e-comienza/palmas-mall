@@ -3,12 +3,16 @@
 
 generator client {
   provider = "prisma-client-js"
-  // "native" es para desarrollo local (macOS). Los targets rhel-* son para el
-  // servidor de producción (CloudLinux 8 / RHEL 8): el cliente se genera aquí y
-  // se sube ya generado, porque el CLI de Prisma no puede correr allá — instancia
-  // su motor de esquema como WebAssembly y los límites LVE lo rechazan con
-  // "WebAssembly.Instance(): Out of memory".
-  binaryTargets = ["native", "rhel-openssl-1.1.x", "rhel-openssl-3.0.x"]
+  // "native" es para desarrollo local (macOS). "debian-openssl-1.1.x" es el
+  // runtime que Prisma detecta en el cPanel de producción: aunque el servidor es
+  // CloudLinux 8, su detección de plataforma lo resuelve como Debian, no como
+  // RHEL (verificado por el error de arranque, que pedía ese target exacto).
+  //
+  // El cliente se genera aquí y se sube ya generado, porque el CLI de Prisma no
+  // puede correr en ese servidor: instancia su motor de esquema como WebAssembly
+  // y los límites LVE de CloudLinux lo rechazan con
+  // "RangeError: WebAssembly.Instance(): Out of memory".
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
 }
 
 datasource db {
