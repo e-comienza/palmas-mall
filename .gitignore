@@ -52,3 +52,6 @@ next-env.d.ts
 
 # Worktrees temporales de Claude Code
 .claude/worktrees/
+
+# Log de diagnóstico que deja scripts/run-quiet.mjs
+run-quiet.log

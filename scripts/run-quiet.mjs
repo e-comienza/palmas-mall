@@ -11,6 +11,7 @@
 
 import { spawn } from "node:child_process";
 import { join, delimiter } from "node:path";
+import { writeFileSync } from "node:fs";
 
 const LARGO_MAXIMO = 400; // una línea más larga que esto es código minificado, no un mensaje
 
@@ -46,5 +47,27 @@ hijo.on("close", (codigo) => {
   const texto = lineas.join("\n").trim();
   console.log(texto || "(sin salida legible)");
   if (codigo !== 0) console.log(`\n[run-quiet] el comando terminó con código ${codigo}`);
+
+  // El panel de cPanel a veces recorta la salida y solo deja la cola del error de
+  // npm. Dejar un archivo permite leerla completa desde el File Manager.
+  try {
+    writeFileSync(
+      join(process.cwd(), "run-quiet.log"),
+      [
+        `comando : ${comando.join(" ")}`,
+        `cwd     : ${process.cwd()}`,
+        `codigo  : ${codigo}`,
+        "",
+        "--- salida legible ---",
+        texto || "(vacia)",
+        "",
+        "--- ultimos 2000 caracteres en crudo (por si el mensaje va dentro de una linea larga) ---",
+        salida.slice(-2000),
+      ].join("\n"),
+    );
+  } catch {
+    // Si no se puede escribir, la salida por consola ya se imprimió.
+  }
+
   process.exit(codigo ?? 0);
 });
