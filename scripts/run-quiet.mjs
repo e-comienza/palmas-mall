@@ -10,6 +10,7 @@
  */
 
 import { spawn } from "node:child_process";
+import { join, delimiter } from "node:path";
 
 const LARGO_MAXIMO = 400; // una línea más larga que esto es código minificado, no un mensaje
 
@@ -19,7 +20,14 @@ if (comando.length === 0) {
   process.exit(2);
 }
 
-const hijo = spawn(comando[0], comando.slice(1), { shell: true });
+// Tras el `cd` que hacen los scripts de package.json, el cwd es la raíz del
+// proyecto. Anteponer su node_modules/.bin al PATH hace que `prisma` y demás
+// binarios se resuelvan sin depender del PATH que arme npm, que en cPanel
+// apunta al directorio del entorno virtual.
+const binLocal = join(process.cwd(), "node_modules", ".bin");
+const entorno = { ...process.env, PATH: `${binLocal}${delimiter}${process.env.PATH || ""}` };
+
+const hijo = spawn(comando[0], comando.slice(1), { shell: true, env: entorno });
 
 let salida = "";
 const acumular = (trozo) => {

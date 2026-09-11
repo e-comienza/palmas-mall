@@ -4,16 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "cd \"$(node -p \"require('path').dirname(require('fs').realpathSync(process.env.npm_package_json || 'package.json'))\")\" && next build",
     "start": "next start",
     "lint": "eslint .",
     "seed": "tsx prisma/seed.ts",
-    "postinstall": "node scripts/run-quiet.mjs prisma generate",
-    "db:migrate": "node scripts/run-quiet.mjs prisma migrate deploy",
+    "postinstall": "cd \"$(node -p \"require('path').dirname(require('fs').realpathSync(process.env.npm_package_json || 'package.json'))\")\" && node scripts/run-quiet.mjs prisma generate",
+    "db:migrate": "cd \"$(node -p \"require('path').dirname(require('fs').realpathSync(process.env.npm_package_json || 'package.json'))\")\" && node scripts/run-quiet.mjs prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
-    "db:status": "node scripts/run-quiet.mjs prisma migrate status",
-    "db:check": "node scripts/db-check.mjs",
-    "db:generate": "node scripts/run-quiet.mjs prisma generate"
+    "db:status": "cd \"$(node -p \"require('path').dirname(require('fs').realpathSync(process.env.npm_package_json || 'package.json'))\")\" && node scripts/run-quiet.mjs prisma migrate status",
+    "db:check": "cd \"$(node -p \"require('path').dirname(require('fs').realpathSync(process.env.npm_package_json || 'package.json'))\")\" && node scripts/db-check.mjs",
+    "db:generate": "cd \"$(node -p \"require('path').dirname(require('fs').realpathSync(process.env.npm_package_json || 'package.json'))\")\" && node scripts/run-quiet.mjs prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
