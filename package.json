@@ -11,7 +11,8 @@
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
-    "db:status": "prisma migrate status"
+    "db:status": "prisma migrate status",
+    "db:check": "node scripts/db-check.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
