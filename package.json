@@ -8,11 +8,12 @@
     "start": "next start",
     "lint": "eslint .",
     "seed": "tsx prisma/seed.ts",
-    "postinstall": "prisma generate",
-    "db:migrate": "prisma migrate deploy",
+    "postinstall": "node scripts/run-quiet.mjs prisma generate",
+    "db:migrate": "node scripts/run-quiet.mjs prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
-    "db:status": "prisma migrate status",
-    "db:check": "node scripts/db-check.mjs"
+    "db:status": "node scripts/run-quiet.mjs prisma migrate status",
+    "db:check": "node scripts/db-check.mjs",
+    "db:generate": "node scripts/run-quiet.mjs prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
