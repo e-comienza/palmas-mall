@@ -55,3 +55,6 @@ next-env.d.ts
 
 # Log de diagnóstico que deja scripts/run-quiet.mjs
 run-quiet.log
+
+# Motor nativo de Prisma que se sube al servidor, no va en el repo
+prisma-engine/
