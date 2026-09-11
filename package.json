@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "seed": "tsx prisma/seed.ts",
-    "postinstall": "cd \"$(node -p \"require('path').dirname(require('fs').realpathSync(process.env.npm_package_json || 'package.json'))\")\" && node scripts/run-quiet.mjs prisma generate",
+    "postinstall": "cd \"$(node -p \"require('path').dirname(require('fs').realpathSync(process.env.npm_package_json || 'package.json'))\")\" && node scripts/run-quiet.mjs --opcional prisma generate",
     "db:migrate": "cd \"$(node -p \"require('path').dirname(require('fs').realpathSync(process.env.npm_package_json || 'package.json'))\")\" && node scripts/run-quiet.mjs prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:status": "cd \"$(node -p \"require('path').dirname(require('fs').realpathSync(process.env.npm_package_json || 'package.json'))\")\" && node scripts/run-quiet.mjs prisma migrate status",

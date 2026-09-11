@@ -3,6 +3,12 @@
 
 generator client {
   provider = "prisma-client-js"
+  // "native" es para desarrollo local (macOS). Los targets rhel-* son para el
+  // servidor de producción (CloudLinux 8 / RHEL 8): el cliente se genera aquí y
+  // se sube ya generado, porque el CLI de Prisma no puede correr allá — instancia
+  // su motor de esquema como WebAssembly y los límites LVE lo rechazan con
+  // "WebAssembly.Instance(): Out of memory".
+  binaryTargets = ["native", "rhel-openssl-1.1.x", "rhel-openssl-3.0.x"]
 }
 
 datasource db {

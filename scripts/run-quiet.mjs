@@ -15,7 +15,10 @@ import { writeFileSync } from "node:fs";
 
 const LARGO_MAXIMO = 400; // una línea más larga que esto es código minificado, no un mensaje
 
-const comando = process.argv.slice(2);
+const argumentos = process.argv.slice(2);
+// --opcional: informar el fallo pero salir con 0, para que npm install no se caiga.
+const esOpcional = argumentos[0] === "--opcional";
+const comando = esOpcional ? argumentos.slice(1) : argumentos;
 if (comando.length === 0) {
   console.error("uso: node scripts/run-quiet.mjs <comando...>");
   process.exit(2);
@@ -69,5 +72,9 @@ hijo.on("close", (codigo) => {
     // Si no se puede escribir, la salida por consola ya se imprimió.
   }
 
+  if (codigo !== 0 && esOpcional) {
+    console.log("[run-quiet] marcado como opcional, se continúa igual");
+    process.exit(0);
+  }
   process.exit(codigo ?? 0);
 });
