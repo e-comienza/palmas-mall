@@ -1,5 +1,3 @@
-import type { NextConfig } from "next";
-
 const isDev = process.env.NODE_ENV !== "production";
 
 /**
@@ -13,7 +11,8 @@ const isDev = process.env.NODE_ENV !== "production";
  * profundidad: bloquea cargar scripts de otros orígenes, `eval`, plugins,
  * formularios hacia fuera y el enmarcado del sitio.
  */
-const CSP_DIRECTIVES: Record<string, string[]> = {
+/** @type {Record<string, string[]>} */
+const CSP_DIRECTIVES = {
   "default-src": ["'self'"],
   "base-uri": ["'self'"],
   "object-src": ["'none'"],
@@ -63,9 +62,10 @@ const securityHeaders = [
     : [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" }]),
 ];
 
-const nextConfig: NextConfig = {
+/** @type {import("next").NextConfig} */
+const nextConfig = {
   turbopack: {
-    root: __dirname,
+    root: import.meta.dirname,
   },
   images: {
     remotePatterns: [
