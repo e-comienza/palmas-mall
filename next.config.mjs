@@ -18,7 +18,13 @@ const CSP_DIRECTIVES = {
   "object-src": ["'none'"],
   "frame-ancestors": ["'none'"],
   "form-action": ["'self'"],
-  "script-src": ["'self'", "'unsafe-inline'", ...(isDev ? ["'unsafe-eval'"] : [])],
+  // googletagmanager.com sirve el gtag.js de Google Analytics.
+  "script-src": [
+    "'self'",
+    "'unsafe-inline'",
+    "https://www.googletagmanager.com",
+    ...(isDev ? ["'unsafe-eval'"] : []),
+  ],
   // Tailwind y next/font emiten estilos inline.
   "style-src": ["'self'", "'unsafe-inline'"],
   "font-src": ["'self'", "data:"],
@@ -30,6 +36,9 @@ const CSP_DIRECTIVES = {
     "https://palmasmall.com",
     "https://images.unsplash.com",
     "https://*.giphy.com",
+    // Google Analytics envía algunos eventos como pixel.
+    "https://*.google-analytics.com",
+    "https://*.googletagmanager.com",
   ],
   "media-src": ["'self'", "blob:", "https://res.cloudinary.com"],
   // Embeds de video del admin (bloques VIDEO y el hero de PlayZone).
@@ -39,7 +48,15 @@ const CSP_DIRECTIVES = {
     "https://www.youtube-nocookie.com",
     "https://player.vimeo.com",
   ],
-  "connect-src": ["'self'", "https://res.cloudinary.com", ...(isDev ? ["ws:"] : [])],
+  "connect-src": [
+    "'self'",
+    "https://res.cloudinary.com",
+    // Envío de mediciones de Google Analytics.
+    "https://*.google-analytics.com",
+    "https://*.analytics.google.com",
+    "https://*.googletagmanager.com",
+    ...(isDev ? ["ws:"] : []),
+  ],
   "worker-src": ["'self'", "blob:"],
   "manifest-src": ["'self'"],
 };

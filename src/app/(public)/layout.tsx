@@ -3,6 +3,7 @@ import { Header } from "@/components/public/header";
 import { Footer } from "@/components/public/footer";
 import { WhatsappFloat } from "@/components/public/whatsapp-float";
 import { Molly } from "@/components/public/molly";
+import { GoogleAnalytics } from "@/components/public/google-analytics";
 import { PopupManager, type PopupData } from "@/components/public/popup-manager";
 import { getNavigation, getActivePopups, getEventsByIds } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/settings";
@@ -92,6 +93,7 @@ export default async function PublicLayout({
         }}
       />
       <PopupManager popups={popupData} />
+      <GoogleAnalytics />
       {/* Skip link accesible */}
       <Link
         href="#contenido"
