@@ -106,6 +106,25 @@ const nextConfig = {
       // Renombre público /locales -> /directorio (preserva SEO de las URLs viejas)
       { source: "/locales", destination: "/directorio", permanent: true },
       { source: "/locales/:slug", destination: "/directorio/:slug", permanent: true },
+
+      // El WordPress viejo quedó archivado en new.palmasmall.com, pero dentro de
+      // su contenido las imágenes están escritas con URL absoluta a este dominio
+      // (WP_HOME y WP_SITEURL no reescriben lo que está guardado en la base de
+      // datos). Esas peticiones llegan aquí, no a WordPress, así que se rebotan
+      // al subdominio, que es quien tiene los archivos.
+      //
+      // Temporal (307) a propósito: si algún día se retira el archivo, se borran
+      // estas reglas y ningún buscador se quedó con la redirección memorizada.
+      {
+        source: "/wp-content/:path*",
+        destination: "https://new.palmasmall.com/wp-content/:path*",
+        permanent: false,
+      },
+      {
+        source: "/wp-includes/:path*",
+        destination: "https://new.palmasmall.com/wp-includes/:path*",
+        permanent: false,
+      },
     ];
   },
 };
