@@ -107,6 +107,29 @@ const nextConfig = {
       { source: "/locales", destination: "/directorio", permanent: true },
       { source: "/locales/:slug", destination: "/directorio/:slug", permanent: true },
 
+      // URLs del WordPress viejo que Google todavía tiene indexadas
+      // (inventario en content/source-audit.md). Los locales que cambiaron de
+      // slug van antes del comodín, que asume el mismo slug.
+      { source: "/locales_cali/takamar-sushi", destination: "/directorio/takamar", permanent: true },
+      { source: "/locales_cali/crepes-waffles", destination: "/directorio/crepes-and-waffles-to-go", permanent: true },
+      { source: "/locales_cali/morea-proximamente", destination: "/directorio/morea", permanent: true },
+      { source: "/locales_cali", destination: "/directorio", permanent: true },
+      { source: "/locales_cali/:slug", destination: "/directorio/:slug", permanent: true },
+      { source: "/centro-comercial-cali", destination: "/", permanent: true },
+      { source: "/contactanos", destination: "/contacto", permanent: true },
+      { source: "/politica-de-privacidad", destination: "/politica-tratamiento-datos", permanent: true },
+      { source: "/cali/:cat(food-drinks|gourmet|food-hall)", destination: "/food-drinks", permanent: true },
+      { source: "/cali/:cat(shop-more|shop|more)", destination: "/shop-more", permanent: true },
+      // Barranquilla ya no existe; sus categorías y los posts de esa sede van al inicio.
+      { source: "/barranquilla/:path*", destination: "/", permanent: true },
+      { source: "/category/:path*", destination: "/blog", permanent: true },
+      { source: "/futbol", destination: "/eventos", permanent: true },
+      {
+        source: "/te-esperamos-este-y-todos-los-viernes-de-febrero-cocteles-2x1-y-muchos-mas",
+        destination: "/eventos",
+        permanent: true,
+      },
+
       // El WordPress viejo quedó archivado en new.palmasmall.com, pero dentro de
       // su contenido las imágenes están escritas con URL absoluta a este dominio
       // (WP_HOME y WP_SITEURL no reescriben lo que está guardado en la base de
